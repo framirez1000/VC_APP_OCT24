@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{0836a1c1-c8c7-4e07-927f-df7f17e1030f}</ProjectGuid>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>ListTest_CLI_Project</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>GECA_VC</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\..\..\AppData\Local\0_gsi_executables</OutDir>
+    <IncludePath>C:\EPICS\base-3.16.2\include\os\WIN32;C:\EPICS\base-3.16.2\include\os;C:\EPICS\base-3.16.2\include;C:\EPICS\base-3.16.2\include\compiler\msvc;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\EPICS\base-3.16.2\lib\windows-x64;C:\EPICS\base-3.16.2\lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>C:\EPICS\base-3.16.2\bin\windows-x64;$(ExecutablePath)</ExecutablePath>
+    <SourcePath>C:\EPICS\base-3.16.2\src\ca\client;$(SourcePath)</SourcePath>
+    <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <ExecutablePath>C:\EPICS\base-3.16.2\bin\windows-x64;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\EPICS\base-3.16.2\include;C:\EPICS\base-3.16.2\include\compiler\msvc;C:\EPICS\base-3.16.2\include\os;C:\EPICS\base-3.16.2\include\os\WIN32;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\EPICS\base-3.16.2\bin\windows-x64;C:\EPICS\base-3.16.2\lib;C:\EPICS\base-3.16.2\lib\windows-x64;$(LibraryPath)</LibraryPath>
+    <SourcePath>C:\EPICS\base-3.16.2\src\ca\client;$(SourcePath)</SourcePath>
+    <ReferencePath>C:\Epics_VC_exec;$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>main</EntryPointSymbol>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>C:\EPICS\base-3.16.2\lib\windows-x64\ca.lib;C:\EPICS\base-3.16.2\lib\windows-x64\Com.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>main</EntryPointSymbol>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>main</EntryPointSymbol>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>C:\EPICS\base-3.16.2\lib\windows-x64\ca.lib;C:\EPICS\base-3.16.2\lib\windows-x64\Com.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>main</EntryPointSymbol>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CaInterfaceClass.h" />
+    <ClInclude Include="Channel.h" />
+    <ClInclude Include="CnfChnl.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="Crate.h" />
+    <ClInclude Include="DeviceCommonInfo.h" />
+    <ClInclude Include="GlobalSettingsForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="GroupCnfSltn.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="GroupNaming.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="LogSltnForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="MainHeader.h" />
+    <ClInclude Include="MainForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="GlobalsHeader.h" />
+    <ClInclude Include="Module.h" />
+    <ClInclude Include="MyForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="ChnlViewForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="ChnlSltnVForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="SetStateByGroup.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="ProgressDialog.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="ProgressDialogTask.h" />
+    <ClInclude Include="SaveDataToFile.h" />
+    <ClInclude Include="SearchListPredicate.h" />
+    <ClInclude Include="SetSltnViewForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="SlctChnlClass.h" />
+    <ClInclude Include="SltnChnlForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="ThreadCAClass.h" />
+    <ClInclude Include="XML_ViewSettingsConf_Class.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="CaInterfaceClass.cpp" />
+    <ClCompile Include="Channel.cpp" />
+    <ClCompile Include="CnfChnl.cpp" />
+    <ClCompile Include="CppCLR_WinformsProjekt.cpp" />
+    <ClCompile Include="Crate.cpp" />
+    <ClCompile Include="DeviceCommonInfo.cpp" />
+    <ClCompile Include="GlobalSettingsForm.cpp" />
+    <ClCompile Include="GroupCnfSltn.cpp" />
+    <ClCompile Include="GroupNaming.cpp" />
+    <ClCompile Include="LogSltnForm.cpp" />
+    <ClCompile Include="MainForm.cpp" />
+    <ClCompile Include="Module.cpp" />
+    <ClCompile Include="MyForm.cpp" />
+    <ClCompile Include="ChnlViewForm.cpp" />
+    <ClCompile Include="ChnlSltnVForm.cpp" />
+    <ClCompile Include="SetStateByGroup.cpp" />
+    <ClCompile Include="ProgressDialog.cpp" />
+    <ClCompile Include="ProgressDialogTask.cpp" />
+    <ClCompile Include="SaveDataToFile.cpp" />
+    <ClCompile Include="SetSltnViewForm.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="SlctChnlClass.cpp" />
+    <ClCompile Include="SltnChnlForm.cpp" />
+    <ClCompile Include="ThreadCAClass.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Control.Draggable">
+      <HintPath>..\Control.Draggable.dll</HintPath>
+    </Reference>
+    <Reference Include="MathParser.org-mXparser">
+      <HintPath>..\x64\MathParser.org-mXparser.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ChnlSltnVForm.resx">
+      <DependentUpon>ChnlSltnVForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CnfChnl.resx">
+      <DependentUpon>CnfChnl.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GlobalSettingsForm.resx">
+      <DependentUpon>GlobalSettingsForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GroupCnfSltn.resx">
+      <DependentUpon>GroupCnfSltn.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GroupNaming.resx">
+      <DependentUpon>GroupNaming.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LogSltnForm.resx">
+      <DependentUpon>LogSltnForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyForm.resx">
+      <DependentUpon>MyForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChnlViewForm.resx">
+      <DependentUpon>ChnlViewForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetStateByGroup.resx">
+      <DependentUpon>SetStateByGroup.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProgressDialog.resx">
+      <DependentUpon>ProgressDialog.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetSltnViewForm.resx">
+      <DependentUpon>SetSltnViewForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SltnChnlForm.resx">
+      <DependentUpon>SltnChnlForm.h</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

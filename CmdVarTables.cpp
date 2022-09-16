@@ -1,0 +1,47 @@
+
+#pragma once
+#include "CaInterfaceClass.h"
+
+ChannelsMembersT chnlValues2 = { 0, 0.5, 0.6,0,0,0,0,0,0,
+									0, 0.5, 0.6,0,0,0,0,0,0,
+									0, 0.5, 0.6,0,0,0,0,0,0,
+									0, 0.5, 0.6,0,0,0,0,0,0,0 };
+CmdsT ChnlConfCmds2[MAX_CONF_CMDS_NMBR] = {
+	{":Status", NULL, DBR_LONG, &(chnlValues2.Status)},
+	{":VoltageMeasure", NULL, DBR_DOUBLE,  &(chnlValues2.voltMeasure)},
+	{":CurrentMeasure", NULL, DBR_DOUBLE, &(chnlValues2.crrntMeasure)},
+	{":VoltageNominal", NULL, DBR_DOUBLE, &(chnlValues2.voltNominal)},
+	{":CurrentNominal", NULL, DBR_DOUBLE, &(chnlValues2.crrntNominal)},
+	{":TemperatureExternal", NULL, DBR_DOUBLE, NULL},
+	{":Control:setOn", NULL, DBR_ENUM, NULL},
+	{":VoltageSet", NULL, DBR_DOUBLE, NULL},
+	{":CurrentSet", NULL, DBR_DOUBLE, NULL},
+	{":VoltageBounds", NULL, DBR_DOUBLE, NULL},
+	{":CurrentBounds", NULL, DBR_DOUBLE, NULL},
+	{":VctCoefficient", NULL, DBR_DOUBLE, NULL},
+	{":DelayedTripTime", NULL, DBR_DOUBLE, NULL},
+	{":InputError", NULL, DBR_ENUM, NULL},
+	{":isOn", NULL, DBR_ENUM, NULL},
+	{":isVoltageRamp", NULL, DBR_ENUM, NULL},
+	{":isEmergency", NULL, DBR_ENUM, NULL},
+	{":isCC", NULL, DBR_ENUM, NULL},
+	{":isCV", NULL, DBR_ENUM, NULL},
+	{":isCurrentBound", NULL, DBR_ENUM, NULL},
+	{":isVoltageBound", NULL, DBR_ENUM, NULL},
+	{":isExternalInhibit", NULL, DBR_ENUM, NULL},
+	{":isTrip", NULL, DBR_ENUM, NULL},
+	{":isCurrentLimit", NULL, DBR_ENUM, NULL},
+	{":isVoltageLimit", NULL, DBR_ENUM, NULL},
+	{":EventInputError", NULL, DBR_ENUM, NULL},
+	{":EOn2Off", NULL, DBR_ENUM, NULL},
+	{":EventEndOfRamp", NULL, DBR_ENUM, NULL},
+	{":EventEmergency", NULL, DBR_ENUM, NULL},
+	{":ECC", NULL, DBR_ENUM, NULL},
+	{":ECV", NULL, DBR_ENUM, NULL},
+	{":ECurrentBounds", NULL, DBR_ENUM, NULL},
+	{":EVVoltageBounds", NULL, DBR_ENUM, NULL},
+	{":EventExternalInhibit", NULL, DBR_ENUM, NULL},
+	{":EventTrip", NULL, DBR_ENUM, NULL},
+	{":EventCurrentLimit", NULL, DBR_ENUM, NULL},
+	{":EventVoltageLimit", NULL, DBR_ENUM, NULL}
+};

@@ -1,0 +1,533 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="txtBx1_StateChnlView.Enabled" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="txtBx1_StateChnlView.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Microsoft Sans Serif, 3.75pt</value>
+  </data>
+  <data name="txtBx1_StateChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>5, 4</value>
+  </data>
+  <data name="txtBx1_StateChnlView.MaximumSize" type="System.Drawing.Size, System.Drawing">
+    <value>18, 18</value>
+  </data>
+  <data name="txtBx1_StateChnlView.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>10, 10</value>
+  </data>
+  <data name="txtBx1_StateChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>13, 13</value>
+  </data>
+  <data name="txtBx1_StateChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;txtBx1_StateChnlView.Name" xml:space="preserve">
+    <value>txtBx1_StateChnlView</value>
+  </data>
+  <data name="&gt;&gt;txtBx1_StateChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;txtBx1_StateChnlView.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;txtBx1_StateChnlView.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="txtBx2_CurrtSPChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>61, 45</value>
+  </data>
+  <data name="txtBx2_CurrtSPChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>70, 20</value>
+  </data>
+  <data name="txtBx2_CurrtSPChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="txtBx2_CurrtSPChnlView.Text" xml:space="preserve">
+    <value>XXXX.YY</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="txtBx2_CurrtSPChnlView.TextAlign" type="System.Windows.Forms.HorizontalAlignment, System.Windows.Forms">
+    <value>Center</value>
+  </data>
+  <data name="&gt;&gt;txtBx2_CurrtSPChnlView.Name" xml:space="preserve">
+    <value>txtBx2_CurrtSPChnlView</value>
+  </data>
+  <data name="&gt;&gt;txtBx2_CurrtSPChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;txtBx2_CurrtSPChnlView.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;txtBx2_CurrtSPChnlView.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="txtBx1_VoltSPChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>61, 23</value>
+  </data>
+  <data name="txtBx1_VoltSPChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>70, 20</value>
+  </data>
+  <data name="txtBx1_VoltSPChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="txtBx1_VoltSPChnlView.Text" xml:space="preserve">
+    <value>XXXX.YY</value>
+  </data>
+  <data name="txtBx1_VoltSPChnlView.TextAlign" type="System.Windows.Forms.HorizontalAlignment, System.Windows.Forms">
+    <value>Center</value>
+  </data>
+  <data name="&gt;&gt;txtBx1_VoltSPChnlView.Name" xml:space="preserve">
+    <value>txtBx1_VoltSPChnlView</value>
+  </data>
+  <data name="&gt;&gt;txtBx1_VoltSPChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;txtBx1_VoltSPChnlView.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;txtBx1_VoltSPChnlView.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="lbl_GroupName.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Microsoft Sans Serif, 6pt</value>
+  </data>
+  <data name="lbl_GroupName.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="lbl_GroupName.Location" type="System.Drawing.Point, System.Drawing">
+    <value>144, 5</value>
+  </data>
+  <data name="lbl_GroupName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>46, 12</value>
+  </data>
+  <data name="lbl_GroupName.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="lbl_GroupName.Text" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="&gt;&gt;lbl_GroupName.Name" xml:space="preserve">
+    <value>lbl_GroupName</value>
+  </data>
+  <data name="&gt;&gt;lbl_GroupName.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbl_GroupName.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;lbl_GroupName.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="lbl6_NomCurrtChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>130, 48</value>
+  </data>
+  <data name="lbl6_NomCurrtChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>60, 13</value>
+  </data>
+  <data name="lbl6_NomCurrtChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="lbl6_NomCurrtChnlView.Text" xml:space="preserve">
+    <value>0.0</value>
+  </data>
+  <data name="lbl6_NomCurrtChnlView.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lbl6_NomCurrtChnlView.Name" xml:space="preserve">
+    <value>lbl6_NomCurrtChnlView</value>
+  </data>
+  <data name="&gt;&gt;lbl6_NomCurrtChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbl6_NomCurrtChnlView.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;lbl6_NomCurrtChnlView.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="lbl4_NomVoltChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>131, 26</value>
+  </data>
+  <data name="lbl4_NomVoltChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>59, 14</value>
+  </data>
+  <data name="lbl4_NomVoltChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="lbl4_NomVoltChnlView.Text" xml:space="preserve">
+    <value>0.0</value>
+  </data>
+  <data name="lbl4_NomVoltChnlView.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lbl4_NomVoltChnlView.Name" xml:space="preserve">
+    <value>lbl4_NomVoltChnlView</value>
+  </data>
+  <data name="&gt;&gt;lbl4_NomVoltChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbl4_NomVoltChnlView.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;lbl4_NomVoltChnlView.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="lbl5_Current.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lbl5_Current.Location" type="System.Drawing.Point, System.Drawing">
+    <value>5, 48</value>
+  </data>
+  <data name="lbl5_Current.Size" type="System.Drawing.Size, System.Drawing">
+    <value>57, 13</value>
+  </data>
+  <data name="lbl5_Current.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="lbl5_Current.Text" xml:space="preserve">
+    <value>Current (A)</value>
+  </data>
+  <data name="lbl5_Current.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lbl5_Current.Name" xml:space="preserve">
+    <value>lbl5_Current</value>
+  </data>
+  <data name="&gt;&gt;lbl5_Current.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbl5_Current.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;lbl5_Current.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="lbl3_VltChnlView.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lbl3_VltChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>5, 27</value>
+  </data>
+  <data name="lbl3_VltChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>59, 13</value>
+  </data>
+  <data name="lbl3_VltChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="lbl3_VltChnlView.Text" xml:space="preserve">
+    <value>Voltage (V)</value>
+  </data>
+  <data name="lbl3_VltChnlView.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lbl3_VltChnlView.Name" xml:space="preserve">
+    <value>lbl3_VltChnlView</value>
+  </data>
+  <data name="&gt;&gt;lbl3_VltChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbl3_VltChnlView.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;lbl3_VltChnlView.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="lbl2_NameChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>33, 4</value>
+  </data>
+  <data name="lbl2_NameChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>97, 13</value>
+  </data>
+  <data name="lbl2_NameChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="lbl2_NameChnlView.Text" xml:space="preserve">
+    <value>Chnl_ Name_set....</value>
+  </data>
+  <data name="lbl2_NameChnlView.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lbl2_NameChnlView.Name" xml:space="preserve">
+    <value>lbl2_NameChnlView</value>
+  </data>
+  <data name="&gt;&gt;lbl2_NameChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbl2_NameChnlView.Parent" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;lbl2_NameChnlView.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="panel1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>1, 19</value>
+  </data>
+  <data name="panel1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>194, 70</value>
+  </data>
+  <data name="panel1.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;panel1.Name" xml:space="preserve">
+    <value>panel1</value>
+  </data>
+  <data name="&gt;&gt;panel1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;panel1.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;panel1.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="lbl1_StatusChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>57, 3</value>
+  </data>
+  <data name="lbl1_StatusChnlView.MaximumSize" type="System.Drawing.Size, System.Drawing">
+    <value>100, 100</value>
+  </data>
+  <data name="lbl1_StatusChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>81, 13</value>
+  </data>
+  <data name="lbl1_StatusChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="lbl1_StatusChnlView.Text" xml:space="preserve">
+    <value>ON/OFF Status</value>
+  </data>
+  <data name="lbl1_StatusChnlView.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lbl1_StatusChnlView.Name" xml:space="preserve">
+    <value>lbl1_StatusChnlView</value>
+  </data>
+  <data name="&gt;&gt;lbl1_StatusChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbl1_StatusChnlView.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;lbl1_StatusChnlView.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="btn2_CfgChnlView.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Microsoft Sans Serif, 6pt</value>
+  </data>
+  <data name="btn2_CfgChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>165, 1</value>
+  </data>
+  <data name="btn2_CfgChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>29, 16</value>
+  </data>
+  <data name="btn2_CfgChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="btn2_CfgChnlView.Text" xml:space="preserve">
+    <value>Cfg</value>
+  </data>
+  <data name="btn2_CfgChnlView.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;btn2_CfgChnlView.Name" xml:space="preserve">
+    <value>btn2_CfgChnlView</value>
+  </data>
+  <data name="&gt;&gt;btn2_CfgChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn2_CfgChnlView.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btn2_CfgChnlView.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="btn1_ChnlView.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAA0pJREFUOE+F
+        kulPk1kUxl/iB6Mm+nn8AzTjaCZmXBAiUAgFi8W01AZaSisgUEUoS1laUdlG0LY2smiDDoqgDA0ILmza
+        YqeJrWKUsaOJzmCCcasaXHIrdog8npbywS/6Jr+ce87Jc5b7Xu573+CIfTGAn/+fnRWq8iukitwSF53/
+        ptj0sdY/IMnYc5sTpauX8cWqZQUVNUvm5r78REmh3emujRKk9brHJxzkv7p7/yESxCqMOd3kApeH7YhM
+        kCCSL/EECnj5IuVMzZFmRrlPfr9/bndhJfR1JszOfsHT516I5XnQVNbhv6kXGHW4kSjOmNgSK7wSsy3F
+        xCWn5TAqgsdPpvCR+WBoOgWeUA6ne8L3z6NJrzJX82F9RPzrkx1Wxb2Hk8mWM1ZpeKxwZWhLjuMlSdm5
+        7gE8976FzXnLGbtd3mlsPXvh5Zvp1TTR0npjy4qYJNny+w8eh4UknFJdFibYmblIkq4O4xJTVMzmcAV3
+        +/zZ78wvqz6XXVBpZT7fKIXslLNHCVLtLac6A/cRpMFscUQLUu+Q9jS3Q5YbXIG646NvBpNTz6DI00Kl
+        1uLfJ0/BZvzo7LmE8DgRrdeG6fcMr96+g/ZAAxJTlB4uaecutilagIj4ZJha23Hxqh2Ws1Zs2LoNQqkK
+        HSTuHxqDurgKq36NhKa8Gn1XbGg/3486wwkPp8grY7q6JpQcOIoi/VGyRlTUmFFRa4ZG30i+AaUHTdDV
+        N0F7yBSKGVFebYa+vtnDZe7TsXpzOywd/Riy3cTQmItwY/iGG9f+Gg/a+ZgLI45bGLS5YG7rRrWhDbWm
+        0x5OnlPKNPsNKKoyoJw66w43B9HWHkcfjd7Q1I7K3+djusMtNEkzig8aUag/EsDDSTMLmSpfjxqjBVba
+        rXtgdJ7+UQzab6L36hj+HLgWpOfSdZzvG4FmfyMy9uqQWVBFL1Gxh6Uo80GFkE63r1CXhdBCllMMeSBG
+        zOe0oIkhUe1bwMMl0DvgJctphUb0XLahq28YXb3D6CQW7AJd1D1g03NL6LXKwBfTb4yIF7HwuB3gizKQ
+        mlWItCwNZNkBikL227N8dxHiSLyFNKT1cOs287zEzC8bo9ma37ayNRuifsjaTTGMNFi3mXf7K4S7Yx1E
+        gQiKAAAAAElFTkSuQmCC
+</value>
+  </data>
+  <data name="btn1_ChnlView.Location" type="System.Drawing.Point, System.Drawing">
+    <value>1, 2</value>
+  </data>
+  <data name="btn1_ChnlView.Size" type="System.Drawing.Size, System.Drawing">
+    <value>24, 16</value>
+  </data>
+  <data name="btn1_ChnlView.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="btn1_ChnlView.Text" xml:space="preserve">
+    <value>button1</value>
+  </data>
+  <data name="&gt;&gt;btn1_ChnlView.Name" xml:space="preserve">
+    <value>btn1_ChnlView</value>
+  </data>
+  <data name="&gt;&gt;btn1_ChnlView.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn1_ChnlView.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btn1_ChnlView.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
+    <value>96, 96</value>
+  </data>
+  <data name="$this.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
+    <value>196, 91</value>
+  </data>
+  <data name="$this.Location" type="System.Drawing.Point, System.Drawing">
+    <value>24, 24</value>
+  </data>
+  <data name="$this.StartPosition" type="System.Windows.Forms.FormStartPosition, System.Windows.Forms">
+    <value>Manual</value>
+  </data>
+  <data name="$this.Text" xml:space="preserve">
+    <value>ChnlViewForm</value>
+  </data>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>ChnlViewForm</value>
+  </data>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+</root>

@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien\VC_ClassesHeaders">
+      <UniqueIdentifier>{45b7486d-3b19-4612-bae6-f85213df0860}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\VC_Sources">
+      <UniqueIdentifier>{30be90ee-0fd4-4ff8-badd-c519fb241d19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\CommHeaders">
+      <UniqueIdentifier>{8922c5a2-5054-4d4c-ae0d-00e5fef4de58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\CommSources">
+      <UniqueIdentifier>{ff670053-66a8-4fea-9ab4-743caa6e1ee5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\GUI_Sources">
+      <UniqueIdentifier>{80fae46f-408d-4a0e-8e69-dd758991e363}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>Ressourcendateien</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Resource.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="MyForm.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Channel.h">
+      <Filter>Headerdateien\VC_ClassesHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Crate.h">
+      <Filter>Headerdateien\VC_ClassesHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceCommonInfo.h">
+      <Filter>Headerdateien\VC_ClassesHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
+      <Filter>Headerdateien\VC_ClassesHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalsHeader.h">
+      <Filter>Headerdateien\VC_ClassesHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="CaInterfaceClass.h">
+      <Filter>Headerdateien\CommHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadCAClass.h">
+      <Filter>Headerdateien\VC_ClassesHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ChnlViewForm.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="MainForm.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="ChnlSltnVForm.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="SetSltnViewForm.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="CnfChnl.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="SltnChnlForm.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressDialog.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="SlctChnlClass.h">
+      <Filter>Headerdateien\VC_ClassesHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="MainHeader.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveDataToFile.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSltnForm.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="XML_ViewSettingsConf_Class.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GroupCnfSltn.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchListPredicate.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressDialogTask.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalSettingsForm.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="SetStateByGroup.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GroupNaming.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AssemblyInfo.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Channel.cpp">
+      <Filter>Quelldateien\VC_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Crate.cpp">
+      <Filter>Quelldateien\VC_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Module.cpp">
+      <Filter>Quelldateien\VC_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceCommonInfo.cpp">
+      <Filter>Quelldateien\VC_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="CaInterfaceClass.cpp">
+      <Filter>Quelldateien\CommSources</Filter>
+    </ClCompile>
+    <ClCompile Include="MyForm.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="CppCLR_WinformsProjekt.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadCAClass.cpp">
+      <Filter>Quelldateien\VC_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ChnlViewForm.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ChnlSltnVForm.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="MainForm.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SetSltnViewForm.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="CnfChnl.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressDialog.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SltnChnlForm.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SlctChnlClass.cpp">
+      <Filter>Quelldateien\VC_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalSettingsForm.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupCnfSltn.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupNaming.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="LogSltnForm.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveDataToFile.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SetStateByGroup.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressDialogTask.cpp">
+      <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico">
+      <Filter>Ressourcendateien</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
