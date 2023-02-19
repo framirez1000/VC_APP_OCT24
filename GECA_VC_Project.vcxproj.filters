@@ -119,6 +119,9 @@
     <ClInclude Include="GroupNaming.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="CommsShMemPipesClass.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">

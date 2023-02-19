@@ -47,7 +47,8 @@ namespace ListTest_CLI_Project {
 		Color m_bckColor;
 		SingletonCmmdClass^ m_cmdMsg;
 		List<Crate^>^ m_ptrMainCrateList;
-		
+		FreqCmdsMapTable_T^ myPtrFreqCmds = nullptr;
+
 	public: System::Windows::Forms::Label^ lbl_GroupName;
 	public:
 		ChnlViewForm(void)
@@ -58,7 +59,7 @@ namespace ListTest_CLI_Project {
 			//TODO: Add the constructor code here
 			//
 		}
-		ChnlViewForm(CratesT^ pMainDataStruct, cliext::vector <ChnlViewForm^>^ pMainViewList, List<String^>^ pGroupNames, List<String^>^ pChnlNames)
+		ChnlViewForm(CratesT^ pMainDataStruct, cliext::vector <ChnlViewForm^>^ pMainViewList, List<String^>^ pGroupNames, List<String^>^ pChnlNames, FreqCmdsMapTable_T^ pFreqCmds)
 		{
 			ChnlCnf = gcnew XML_Classes::Channel();
 			m_cmdMsg = SingletonCmmdClass::Instance;
@@ -67,10 +68,10 @@ namespace ListTest_CLI_Project {
 			m_pGroupNames = pGroupNames;
 			m_pChnlViewNames = pChnlNames;
 			ChnlsViewList = pMainViewList;
+			myPtrFreqCmds = gcnew FreqCmdsMapTable_T;
+			myPtrFreqCmds = pFreqCmds;
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
+			
 		}
 
 	protected:
@@ -255,132 +256,14 @@ namespace ListTest_CLI_Project {
 public: Double GetFormulaEvaluation(String^ formula, String^ target);
 //public: System::Boolean ValidateSP(String^ spValue, String^ nomVltg, double lowLimitFactor, double highLimitFactor);
 public: System::Void GetformEvalAtRamp(String^ formula);
-//
-// Open Chnl Conf settings Form (Ramp & set points Limits)
-private: System::Void Btn2_CfgChnlView_Click(System::Object^ sender, System::EventArgs^ e) {
-	CnfChnl^ cnfChannel = gcnew CnfChnl(m_mainDataStruct, m_pGroupNames, m_pChnlViewNames);
-	
-	cnfChannel->CrateDir = this->ChnlCnf->CrateDir;
-	cnfChannel->ChnlName = this->ChnlCnf->ChannelName;
-	cnfChannel->ModDir = this->ChnlCnf->ModDir;
-	cnfChannel->ChnlDir = this->ChnlCnf->ChnlDir;
-	cnfChannel->VoltSP_Limit = this->ChnlCnf->LimitVoltage;
-	cnfChannel->CrrntSP_Limit = this->ChnlCnf->LimitCurrent;
-	cnfChannel->lbl1_CnfChnl->Text = this->ChnlCnf->ViewName;
-	cnfChannel->Group = this->ChnlCnf->Group;
-	cnfChannel->UseVoltageFormula = this->ChnlCnf->UseVoltageFormula;
-	cnfChannel->UseCurrentFormula = this->ChnlCnf->UseCurrentFormula;
-	
-	if (this->ChnlCnf->UseVoltageFormula) {
-		cnfChannel->formula = this->ChnlCnf->VoltageFormula;
-	}
-	if (this->ChnlCnf->UseCurrentFormula) {
-		cnfChannel->iformula = this->ChnlCnf->CurrentFormula;
-	}
 
-	cnfChannel->NameIndex = this->formulaChnlIndex;
-	if (this->ChnlCnf->Group != nullptr) {
-		cnfChannel->cmbBx1_SwtGrp->SelectedIndex = cnfChannel->cmbBx1_SwtGrp->FindStringExact(this->ChnlCnf->Group);
-		cnfChannel->cmbBx1_SwtGrp ->Text = this->ChnlCnf->Group;
-	}
+	//
+	// Validate user direct inputs for Voltage and current Set Points
+	private: System::Void ValidateSetPointInputs();
+	//
+	// Open Chnl Conf settings Form (Ramp & set points Limits)
+	private: System::Void Btn2_CfgChnlView_Click(System::Object^ sender, System::EventArgs^ e);
 
-	if (cnfChannel->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
-		// Open the form that gets user inputs for voltage/current Ramp Set Points/formulas
-		if ((m_ptrMainCrateList->Count > 0) && (m_mainDataStruct->GetChnlConnectedStatus(this->ChnlCnf->ChannelName))){
-			this->txtBx1_VoltSPChnlView->Text = m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName);
-			Double val;
-			Double::TryParse(this->txtBx1_VoltSPChnlView->Text, val);
-			this->vSetPoint = val;
-			
-			// Evaluate Voltage Formula
-			if (cnfChannel->chkBx1_UseFormuVltg->Checked) {
-				if ((cnfChannel->formula != nullptr) && (cnfChannel->formula != "")) {
-					// Evaluate expression/formula from the user input
-					this->ChnlCnf->UseVoltageFormula = true;
-					this->ChnlCnf->VoltageFormula = cnfChannel->formula;
-					GetformEvalAtRamp(cnfChannel->formula);
-					if (cnfChannel->NameIndex >= 0) { /////??????
-						vSetPoint = GetFormulaEvaluation(cnfChannel->formula, "Voltage");
-						if (GlobalFuncValidateSP(vSetPoint.ToString(),
-							m_mainDataStruct->GetChnlNomVolt(this->ChnlCnf->ChannelName), 0.0, 1.0)) {
-							m_cmdMsg->GlobalAddSendCmds(this->ChnlCnf->ChannelName + ":VoltageSet",
-								vSetPoint.ToString(), CHANNEL_CMD, 3, true);
-						}
-						else m_cmdMsg->StatusBarMsgIndex = 15;
-					}
-				}
-			}
-			this->txtBx1_VoltSPChnlView->Enabled = !this->ChnlCnf->UseVoltageFormula;
-			
-			// For current formula
-			this->txtBx2_CurrtSPChnlView->Text = m_mainDataStruct->GetChnlCrrntSet(this->ChnlCnf->ChannelName);
-			Double::TryParse(this->txtBx2_CurrtSPChnlView->Text, val);
-			this->cSetPoint = val;
-			if (cnfChannel->chkBx2_UseCrrtFrm->Checked) {
-				if ((cnfChannel->iformula != nullptr) && (cnfChannel->iformula != "")) {
-					// Evaluate expression/formula from the user input
-					this->ChnlCnf->UseCurrentFormula = true;
-					this->ChnlCnf->CurrentFormula = cnfChannel->iformula;
-					//GetformEvalAtRamp(cnfChannel->iformula);
-					if (cnfChannel->NameIndex >= 0) { /////??????
-						cSetPoint = GetFormulaEvaluation(cnfChannel->iformula, "Current");
-						if (GlobalFuncValidateSP(cSetPoint.ToString(),
-							m_mainDataStruct->GetChnlNomCrrnt(this->ChnlCnf->ChannelName), 0.0, 1.0)) {
-							m_cmdMsg->GlobalAddSendCmds(this->ChnlCnf->ChannelName + ":CurrentSet",
-								cSetPoint.ToString(), CHANNEL_CMD, 3, true);
-						}
-						else m_cmdMsg->StatusBarMsgIndex = 15;
-					}
-				}
-			}
-			this->txtBx2_CurrtSPChnlView->Enabled = !this->ChnlCnf->UseCurrentFormula;
-
-		}
-		// If Channel name changed update view and NamesList (ToDo)
-		if (!String::IsNullOrEmpty(cnfChannel->txtBx1_NewChnlName->Text)){
-			// Search ChnlName in NamesList and change both (SetPoint name and currentValueName _U)
-			int index = m_pChnlViewNames->IndexOf(this->ChnlCnf->ViewName);
-			if (index != -1) {
-				m_pChnlViewNames[index] = cnfChannel->txtBx1_NewChnlName->Text + "_";
-				m_pChnlViewNames[index+1] = cnfChannel->txtBx1_NewChnlName->Text + "_U";
-			}
-			this->ChnlCnf->ViewName = cnfChannel->txtBx1_NewChnlName->Text;
-			this->lbl2_NameChnlView->Text = cnfChannel->txtBx1_NewChnlName->Text;
-		}
-		Object^ selectedItem = cnfChannel->cmbBx1_SwtGrp->SelectedItem;
-		if (cnfChannel->cmbBx1_SwtGrp->SelectedItem != nullptr) {
-			this->ChnlCnf->Group = selectedItem->ToString();
-			this->lbl_GroupName->Text = selectedItem->ToString();
-		}
-		// If SP limits changed
-		if (cnfChannel->VoltSP_Limit != this->ChnlCnf->LimitVoltage)
-			this->ChnlCnf->LimitVoltage = cnfChannel->VoltSP_Limit;
-		if (cnfChannel->CrrntSP_Limit != this->ChnlCnf->LimitCurrent)
-			this->ChnlCnf->LimitCurrent = cnfChannel->CrrntSP_Limit;
-	}
-	if (m_cmdMsg->cmdExecuted && m_cmdMsg->HrwConntd && (this->ChnlCnf->ChnlType != 0)) {
-		this->txtBx1_VoltSPChnlView->Text = m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName);
-		this->vSetPoint = System::Convert::ToDouble(this->txtBx1_VoltSPChnlView->Text);
-		this->txtBx2_CurrtSPChnlView->Text = m_mainDataStruct->GetChnlCrrntSet(this->ChnlCnf->ChannelName);
-		this->vSetPoint = System::Convert::ToDouble(this->txtBx2_CurrtSPChnlView->Text);
-		this->ChnlCnf->VoltageRise = m_mainDataStruct->GetChnlVoltRamp(this->ChnlCnf->ChannelName);
-		this->ChnlCnf->VoltageFall = m_mainDataStruct->GetChnlVoltRamp(this->ChnlCnf->ChannelName);
-		this->ChnlCnf->CurrentRise = m_mainDataStruct->GetChnlCrrntRamp(this->ChnlCnf->ChannelName);
-		this->ChnlCnf->CurrentFall = m_mainDataStruct->GetChnlCrrntRamp(this->ChnlCnf->ChannelName);
-	}
-	this->ChnlCnf->UseVoltageFormula = cnfChannel->UseVoltageFormula;
-	this->txtBx1_VoltSPChnlView->Enabled = true;
-	if (this->ChnlCnf->UseVoltageFormula) {
-		this->ChnlCnf->VoltageFormula = cnfChannel->formula;
-		this->txtBx1_VoltSPChnlView->Enabled = false;
-	}
-	this->ChnlCnf->UseCurrentFormula = cnfChannel->UseCurrentFormula;
-	this->txtBx2_CurrtSPChnlView->Enabled = true;
-	if (this->ChnlCnf->UseCurrentFormula) {
-		this->ChnlCnf->CurrentFormula = cnfChannel->iformula;
-		this->txtBx2_CurrtSPChnlView->Enabled = false;
-	}
-}
 // Load individual Chnl View
 private: System::Void ChnlViewForm_Load(System::Object^ sender, System::EventArgs^ e) {
 	// Fill form with default values from CrateList->ModList->Channel[i]
@@ -400,94 +283,11 @@ private: System::Void txtBx1_VoltSPChnlView_Preview(System::Object^ sender, Syst
 		this->ActiveControl = this->panel1;
 	}
 }
-//
-// Validate user direct inputs for Voltage and current Set Points
-private: System::Void ValidateSetPointInputs() {
-	if ((!m_cmdMsg->execRequest && (m_mainDataStruct->GetChnlEnableStatus(this->ChnlCnf->ChannelName))) 
-		|| (this->ChnlCnf->ChnlType == 0 )) { // ChnlType 0: Virtual channels
-		m_cmdMsg->CleanCmdsLists();
-		String^ spValue = gcnew String(txtBx1_VoltSPChnlView->Text);
-		// Validate user entry for VoltageSet or CurrentSet and change setting in Crate if ok
-		if (txtBx1_VoltSPChnlView->Modified && !(String::IsNullOrEmpty(spValue))) {
-			// Convert to numerical value and validate ranges
-			if (GlobalFuncValidateSP(spValue, this->ChnlCnf->LimitVoltage, 0.0, 1.0)) {
-				///*m_mainDataStruct->GetChnlNomVolt(this->ChnlCnf->ChannelName)*/, 0.0, 1.0)) {
-				if (this->ChnlCnf->ChnlType != 0) {
-					m_cmdMsg->GlobalAddSendCmds(this->ChnlCnf->ChannelName + ":VoltageSet",
-						spValue, CHANNEL_CMD, 3, false);
-				}
-				else {
-					// Set VChnl Voltage SP to Channel user input
-					this->ChnlCnf->VoltageSet  = spValue;
-					this->vSetPoint = System::Convert::ToDouble(spValue);
-				}
-			}
-			else {
-				m_cmdMsg->StatusBarMsgIndex = 16;
-				txtBx1_VoltSPChnlView->Undo(); 
-			}
-		}
-		
-		spValue = txtBx2_CurrtSPChnlView->Text;
-		if (txtBx2_CurrtSPChnlView->Modified && !(String::IsNullOrEmpty(spValue))) {
-			// Convert to numerical value and validate ranges
-			if (GlobalFuncValidateSP(spValue, this->ChnlCnf->LimitCurrent, 0.0, 1.0)) {
-				//m_mainDataStruct->GetChnlNomCrrnt(this->ChnlCnf->ChannelName), 0.0, 1.0)) {
-				if (this->ChnlCnf->ChnlType != 0) {
-					m_cmdMsg->GlobalAddSendCmds(this->ChnlCnf->ChannelName + ":CurrentSet",
-						spValue, CHANNEL_CMD, 3, false);
-				}
-				else {
-					// Set VChnl Voltage SP to Channel user input
-					this->ChnlCnf->CurrentSet = spValue;
-					this->cSetPoint = System::Convert::ToDouble(spValue);
-				}
-			}
-			else {
-				m_cmdMsg->StatusBarMsgIndex = 16;
-				txtBx2_CurrtSPChnlView->Undo();
-			}
-		}
-		if (m_cmdMsg->strCmdsToExcList->Count > 0) 
-			m_cmdMsg->GlobalAddSendCmds("", "", -1, 3, true);
-		if ((m_ptrMainCrateList->Count > 0) && (this->ChnlCnf->ChnlType != 0)) {
-			// ToDo here: Check with Crate S/N to update properly
-			String^ readoutValue( m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName));
-			this->txtBx1_VoltSPChnlView->Text = readoutValue;
-			this->ChnlCnf->VoltageSet = readoutValue;
-			this->vSetPoint = System::Convert::ToDouble(readoutValue);
-			readoutValue = m_mainDataStruct->GetChnlCrrntSet(this->ChnlCnf->ChannelName);
-			this->txtBx2_CurrtSPChnlView->Text = readoutValue;
-			this->ChnlCnf->CurrentSet = readoutValue;
-			this->cSetPoint = System::Convert::ToDouble(readoutValue);
-		}
-	}
-	else {
-		MessageBox::Show("Channel not connected or System busy with other cmd");
-		if (txtBx1_VoltSPChnlView->Modified) txtBx1_VoltSPChnlView->Undo();
-		if (txtBx2_CurrtSPChnlView->Modified) txtBx2_CurrtSPChnlView->Undo();
-	}
-	txtBx1_VoltSPChnlView->Modified = false;
-	txtBx2_CurrtSPChnlView->Modified = false;
-}
+
 //
 // Set ON/OFF channels individually
-	private: System::Void Btn1_ChnlView_Click(System::Object^ sender, System::EventArgs^ e) {
-		if (!m_cmdMsg->execRequest && m_cmdMsg->HrwConntd && (this->ChnlCnf->ChnlType != 0)) {
-			m_cmdMsg->CleanCmdsLists();
-			String^ strParam = gcnew String("false");
-			if (m_cmdMsg->HrwConntd) {
-				if (this->lbl1_StatusChnlView->Text != "ON") {
-					strParam = "true";
-				}
-				m_cmdMsg->GlobalAddSendCmds(this->ChnlCnf->ChannelName  + ":Control:setOn",
-												strParam, CHANNEL_CMD, 4, false);
-				Console::WriteLine("Channel {0} included to be: \n", this->ChnlCnf->ViewName);
-				m_cmdMsg->StatusBarMsgIndex = 17;
-				m_cmdMsg->GlobalAddSendCmds("", "", -1, 4, true);
-			}
-		}
-	}
+	private: System::Void Btn1_ChnlView_Click(System::Object^ sender, System::EventArgs^ e);
+
 private: System::Void ChnlViewForm_DoubleClick(System::Object^ sender, System::EventArgs^ e) {
 	this->Location = System::Drawing::Point(this->OriginalPosX, this->OriginalPosY);
 }

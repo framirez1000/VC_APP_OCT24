@@ -38,12 +38,15 @@ public:
 	bool scanned;
 	Double vValue;
 	Double iValue;
+	String^ vSet;
+	String^ iSet;
 	Double temperature;
 	String^ onStateValue;
 	String^ isVoltageRamp;
 	String^ isEmergency;
 	String^ isTrip;
 	String^ isVoltageLimit;
+	String^ chnlViewName;
 	RegCmdStruct_T() {
 		row = col = -1;
 		scanned = false;
@@ -52,6 +55,7 @@ public:
 		isEmergency = gcnew String("");
 		isTrip = gcnew String("");
 		isVoltageLimit = gcnew String("");
+		chnlViewName = gcnew String("");
 	}
 };
 typedef cliext::map<String^, RegCmdStruct_T^> FreqCmdsMapTable_T;
@@ -170,6 +174,14 @@ ref struct CratesT {
 		searchItem = gcnew EntityPredicate(strChnl);
 		Channel^ chnl = gcnew Channel;
 		chnl = mod->lstChannels->Find(gcnew Predicate<Channel^>(searchItem, &EntityPredicate::ChnlMatchedObj));
+		return chnl;
+	}
+	// Feb 23 -- 13/02/2023 
+	XML_Classes::Channel^ GetChnlInView(String^ strChnl, List<XML_Classes::Channel^>^ ptrMainCnfView) {
+		EntityPredicate^ searchItem;
+		searchItem = gcnew EntityPredicate(strChnl);
+		XML_Classes::Channel^ chnl = gcnew XML_Classes::Channel;
+		chnl = ptrMainCnfView->Find(gcnew Predicate<XML_Classes::Channel^>(searchItem, &EntityPredicate::ChnlMatchedObj));
 		return chnl;
 	}
 	int GetChnlType(String^ chnl) {

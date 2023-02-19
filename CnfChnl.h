@@ -44,11 +44,14 @@ namespace ListTest_CLI_Project {
 		property String^ iformula;
 		property String^ VoltSP_Limit;
 		property String^ CrrntSP_Limit;
-		property Double vSetPoint;
-		property double cSetPoint;
 		property double vRamp;
 		property double cRamp;
-		
+		// Changes on 05/12/22
+		property String^ vSetPoint;         // From Double to String
+		property String^ cSetPoint;         // Same
+		property String^ nominalVolt;       // New - For lbl9_MaxVltg
+		property String^ nominalCurrent;    // New - For lbl11_MaxCrrt
+
 	private: const int CB_SETCUEBANNER = 0x1703;
 
 	
@@ -861,6 +864,12 @@ private: System::Void CnfChnl_Load(System::Object^ sender, System::EventArgs^ e)
 	this->txtBx6_CrrtFrm->Enabled = this->UseCurrentFormula;
 	this->cmbBx2_currentFormChnls->Enabled = chkBx2_UseCrrtFrm->Checked;
 
+	// 05/12/22 Add MAX Limits for V,I using nominal and limits by user
+	this->lbl9_MaxVltg->Text = this->nominalVolt;
+	this->lbl19_CrateV_SP->Text = this->vSetPoint;
+	this->lbl11_MaxCrrt->Text = this->nominalCurrent;
+	this->lbl20_CrateI_SP->Text = this->cSetPoint;
+
 	// Tool tip for formula checkbox
 		// Set up the delays for the ToolTip.
 	toolTipFormulaTxtBx.AutoPopDelay = 5000;
@@ -873,7 +882,7 @@ private: System::Void CnfChnl_Load(System::Object^ sender, System::EventArgs^ e)
 	UpdateForm();
 }
 // 
-// Apply changes button click
+// Apply changes OK  button click
 private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e) {
 	// Validate input inside ranges [0.1 - 20]% of Nominal voltage
 	String^ msgToUser = nullptr;
@@ -884,7 +893,7 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 		if ((txtBx1_VltgRiseRate->Modified) && !(String::IsNullOrEmpty(txtBx1_VltgRiseRate->Text))) {
 			// Convert to numerical value and validate ranges
 			Double val;
-			if ((MyCrate != nullptr) && GlobalFuncValidateSP(txtBx1_VltgRiseRate->Text, this->lbl9_MaxVltg->Text, 0.0, 0.20))
+			if ((MyCrate != nullptr) && Double::TryParse(this->txtBx7_MaxVltg->Text, val) && GlobalFuncValidateSP(txtBx1_VltgRiseRate->Text, this->txtBx7_MaxVltg->Text, 0.0, 1.0))
 			{
 				Double val2;
 				Double::TryParse(this->txtBx1_VltgRiseRate->Text, val);
@@ -901,7 +910,7 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 		if ((txtBx3_CrrtRiseRate->Modified) && (!String::IsNullOrEmpty(txtBx3_CrrtRiseRate->Text))) {
 			// Convert to numerical value and validate ranges
 			Double val;
-			if ((MyCrate != nullptr) && GlobalFuncValidateSP(txtBx3_CrrtRiseRate->Text, this->lbl11_MaxCrrt->Text, 0.0, 1.0))
+			if ((MyCrate != nullptr) && (Double::TryParse(txtBx8_MaxCrrt->Text, val)) && GlobalFuncValidateSP(txtBx3_CrrtRiseRate->Text, this->lbl11_MaxCrrt->Text, 0.0, 1.0))
 			{
 				Double val2;
 				Double::TryParse(this->txtBx3_CrrtRiseRate->Text, val);
@@ -917,11 +926,12 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 		this->UseCurrentFormula = this->chkBx2_UseCrrtFrm->Checked;
 		this->UseVoltageFormula = this->chkBx1_UseFormuVltg->Checked;
 	}
-	/***** Checking Voltage and Current MAX values changes (Set Points) *******/
+	/***** Checking Voltage and Current MAX values changes (For Set Points) *******/
 	if ((txtBx7_MaxVltg->Modified) && (!String::IsNullOrEmpty(txtBx7_MaxVltg->Text))) {
 		// Convert to numerical value and validate ranges
 		Double val;
-		if (GlobalFuncValidateSP(txtBx7_MaxVltg->Text, this->lbl9_MaxVltg->Text, 0.0, 1.0))
+		if (GlobalFuncValidateSP(txtBx7_MaxVltg->Text, this->lbl9_MaxVltg->Text, 0.0, 1.0)
+			&& (!GlobalFuncValidateSP(txtBx7_MaxVltg->Text, vSetPoint, 0.0, 1.0)))
 		{
 			/*m_cmdMsg->GlobalAddSendCmds(this->ChnlName + ":VoltageSet",
 										txtBx7_MaxVltg->Text, CHANNEL_CMD, 3, false);*/
@@ -933,7 +943,8 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 		
 		txtBx7_MaxVltg->Modified = false;
 	}
-	if ((txtBx8_MaxCrrt->Modified) && (!String::IsNullOrEmpty(txtBx8_MaxCrrt->Text))) {
+	if ((txtBx8_MaxCrrt->Modified) && (!String::IsNullOrEmpty(txtBx8_MaxCrrt->Text))
+		&& (!GlobalFuncValidateSP(txtBx7_MaxVltg->Text, cSetPoint, 0.0, 1.0))) {
 		// Convert to numerical value and validate ranges
 		Double val;
 		if (GlobalFuncValidateSP(txtBx8_MaxCrrt->Text, this->lbl11_MaxCrrt->Text, 0.0,1.0))
@@ -1016,17 +1027,19 @@ private: void UpdateForm() {
 					 this->txtBx7_MaxVltg->Text = this->VoltSP_Limit;
 					 this->lbl11_MaxCrrt->Text = m_MainDataStruct->GetChnlNomCrrnt(this->ChnlName);
 					 this->txtBx8_MaxCrrt->Text = this->CrrntSP_Limit;
+					 
 					 if (this->lbl11_MaxCrrt->Text->Length > 6)
 						 this->lbl11_MaxCrrt->Text = this->lbl11_MaxCrrt->Text->Substring(0, 6);
-					this->lbl19_CrateV_SP->Text = m_MainDataStruct->GetChnlVoltSet(this->ChnlName);
+					 
+					 this->lbl19_CrateV_SP->Text = m_MainDataStruct->GetChnlVoltSet(this->ChnlName);
 					 if (Double::TryParse(this->lbl19_CrateV_SP->Text, val)) {
-						 vSetPoint = val;
-						 this->lbl19_CrateV_SP->Text = Math::Round(vSetPoint, 2).ToString();
+						 vSetPoint = this->lbl19_CrateV_SP->Text; // 05/12/22
+						 this->lbl19_CrateV_SP->Text = Math::Round(System::Convert::ToDouble(vSetPoint), 2).ToString();
 					 }
 					 this->lbl20_CrateI_SP->Text = m_MainDataStruct->GetChnlCrrntSet(this->ChnlName);
 					 if (Double::TryParse(this->lbl20_CrateI_SP->Text, val)) {
-						 cSetPoint = val;
-						 this->lbl20_CrateI_SP->Text = Math::Round(cSetPoint, 6).ToString();
+						 cSetPoint = this->lbl20_CrateI_SP->Text; // 05/12/22
+						 this->lbl20_CrateI_SP->Text = Math::Round(System::Convert::ToDouble(cSetPoint), 6).ToString();
 					 }
 				 }
 			 }

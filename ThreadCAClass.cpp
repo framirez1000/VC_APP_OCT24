@@ -1,6 +1,15 @@
-#pragma once
 #include "pch.h"
+#pragma once
 #include "ThreadCAClass.h"
+#ifndef SEM_H
+#include "CommsShMemPipesClass.h"
+#endif
+
+#define SIMULATE_DATA 1
+#define TIME_SENDING_NEW_CONF_SEC ((2 * 1000) / SAMPLE_TIME_mSEC) // Consider scan rate at 100 msec
+#define NBR_TEST_DATA 3
+#define TIME2WRITE_DATA_SEC 0.5
+#define COUNTER2WRITE_SH_MEM_DATA ((TIME2WRITE_DATA_SEC * 1000) / SAMPLE_TIME_mSEC)
 
 /* Thread entry point fuction */
 void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
@@ -10,6 +19,8 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	//throw gcnew System::NotImplementedException();
 	double doubArray1[MAX_VIEW_CHANNELS];
 	double doubArray2[MAX_VIEW_CHANNELS];
+	char vSP[MAX_VIEW_CHANNELS][40];
+	char iSP[MAX_VIEW_CHANNELS][40];
 	double chnlsTemperatures[MAX_VIEW_CHANNELS];
 	char isOnStatus[MAX_VIEW_CHANNELS][40];
 	char isVoltageRamp[MAX_VIEW_CHANNELS][40];
@@ -24,7 +35,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	char isCurrentLimit[MAX_VIEW_CHANNELS][40];
 	int iValue;
 	int commFailTime = 0;
-	int sleepTimeScan = SAMPLE_TIME_mSEC;
+	int sleepScanTime = SAMPLE_TIME_mSEC;
 	bool commFailure = false;
 	List<String^>^ cmmFailCrates = gcnew List<String^>;
 	// time variables
@@ -32,10 +43,16 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	double f;
 	bool stop_accessIO = false, GUIPipeConnected = false, hardwareConnected = false;
 	ini_Map();
-	GUIPipeConnected=CreateNamedPipeClient();
-	//Commands->cmdType = 1;
-	Commands->deviceCmd = "ISEG:5230225";
-	String^ str = gcnew String("");
+	// PIPES
+	GUIPipeConnected = CreateNamedPipeClient();
+	HANDLE myPipe, commPipe;
+	GUIPipeConnected = PipesFunc::GetPipe(PIPE_SERVER_T, PIPE_THREAD, &myPipe);
+	bool commPipeConnected = PipesFunc::GetPipe(PIPE_CLIENT_T, PIPE_COMM, &commPipe);
+	String^ msgIn = gcnew String("");
+	// end PIPES
+	
+	//Commands->deviceCmd = "ISEG:5230225";
+	//String^ str = gcnew String("");
 	Globals::globalVar = L"From Thread: started .... and sleeping for 20 sec ..";
 
 	//System::Threading::Thread::Sleep(20000);
@@ -46,16 +63,31 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 		n = pp;
 	}
 	// testing adding crate at startup
-	Commands->deviceCmd = "ISEG:5230225";
+	//Commands->deviceCmd = "ISEG:5230225";
 	// End test adding crate at startup
-	checkCommTime = (60 * 1000 / sleepTimeScan) * CHECK_COMM_IO_TIME_MIN - 10;
-	System::Threading::Thread::Sleep(sleepTimeScan);
+	checkCommTime = (60 * 1000 / sleepScanTime) * CHECK_COMM_IO_TIME_MIN - 10;
+	System::Threading::Thread::Sleep(sleepScanTime);
+	
+	// Sh Mem: write data to Comm Proc
+	TCHAR szName[] = TEXT("Global\MyIOChannelsDataObject");
+	TCHAR szMsg[] = TEXT("Message from VC_IO thread."); // TESTING
+	TCHAR semName[] = SH_MEM_SEM;
+	HANDLE hMapFileServer = NULL, hMapFileClient = NULL; 
+	LPCTSTR pBuf;
+	SemClass shMemDataSem, cmdsSem, freqCmdsSem;
+	String^ strDataToComm = gcnew String("");
+	Create_SharedMem_Object(1, szName, &hMapFileServer, &pBuf);
+	OnShMem(WRITE_SH_MEM, pBuf, szMsg, _tcslen(szMsg));
+	int time2sendNewConfData = TIME_SENDING_NEW_CONF_SEC;
+	bool writeDataSemCond = false;
+	int time2writeData = COUNTER2WRITE_SH_MEM_DATA;
+
 	while (!stop_accessIO)
 	{
-		System::Threading::Thread::Sleep(sleepTimeScan);
+		System::Threading::Thread::Sleep(sleepScanTime);
 		// Iterate MainCrateList to Check if any crate connected every X min for 
 		// keeping Channels open
-		if (checkCommTime++ >= (60 * 1000 / sleepTimeScan) * CHECK_COMM_IO_TIME_MIN) {
+		if (checkCommTime++ >= (60 * 1000 / sleepScanTime) * CHECK_COMM_IO_TIME_MIN) {
 			// For now just check the working crate but must be every crate in MainCrateList
 			DateTime cpCurrentDateTime = DateTime::Now;
 			String^ strTemp = cpCurrentDateTime.ToShortDateString();
@@ -69,6 +101,34 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				Console::WriteLine("Not Comm IO ->.... ISEG:5230225");
 			}
 		}
+
+		// PIPES: Check myPipe for EPICS commands to Crates
+		if (PipesFunc::OnPipe(READPIPE, myPipe, msgIn)) {
+			//Commands->statusBarMsg2 = "ThreadIO rcvd PipeMsg: " + msgIn;
+			if (cmdsSem.GetSem(CMDS_SEM)) {
+				if ((hardwareConnected) && Commands->ViewActive) {
+					System::Array^ cmdFromPipe = msgIn->Split(' ');
+					if (cmdFromPipe->Length == 2) {
+						Double spValue;
+						if (Double::TryParse(System::Convert::ToString(cmdFromPipe->GetValue(1)), spValue)) {
+							// Check Voltage limits before filling cmd struct
+							XML_Classes::Channel^ chnl = pMainDataStruct->GetChnlInView(System::Convert::ToString(cmdFromPipe->GetValue(0)), pMainDataStruct->pMainCnfView);
+							if (chnl != nullptr 
+								&& !chnl->UseVoltageFormula
+								&& GlobalFuncValidateSP(System::Convert::ToString(cmdFromPipe->GetValue(1)), chnl->LimitVoltage, 0.0, 1.0)) 
+							{
+								Commands->CleanCmdsLists();
+								Commands->GlobalAddSendCmds(System::Convert::ToString(cmdFromPipe->GetValue(0)) + ":VoltageSet",
+									System::Convert::ToString(cmdFromPipe->GetValue(1)), CHANNEL_CMD, 3, true);
+								Commands->execRequest = true;
+							}
+						}
+					}
+				}
+				cmdsSem.ReleaseSem();
+			}
+		} // end PIPES
+
 		// Check for new commands from USER (later implementation: namedPipes)
 		if (((Commands != nullptr) && (Commands->execRequest) && (!commFailure)) || (Commands->cmdType == DISCONNECT)) {
 			// Call function according to command type
@@ -164,7 +224,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 			case DISCONNECT:
 				commFailure = false;
 				commFailTime = 0;
-				sleepTimeScan = SAMPLE_TIME_mSEC;
+				sleepScanTime = SAMPLE_TIME_mSEC;
 				Commands->execRequest = false;
 				Commands->cmdExecuted = true;
 				cmmFailCrates->Clear();
@@ -217,29 +277,34 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 					Commands->StatusBarMsgIndex = 0;
 				}
 				bool send = false;
-				for each (FreqCmdsMapTable_T::value_type elem in pMainFreqCmds) {
-					// Check if hardware related to this chnl in connected by comparing 
-					// S/N & chnlName included in cmd
-					cmdItem = elem->first;
-					if ((chnlHrwConnected(elem, m_HrdwFailingList)) && elem->second->scanned) {
-						CA_Interf->FreqCmdsMgr(doubArray1, nullptr, nullptr, cmdItem + ":VoltageMeasure", index, false);
-						CA_Interf->FreqCmdsMgr(nullptr, doubArray2, nullptr, cmdItem + ":CurrentMeasure", index, false);
-						CA_Interf->FreqCmdsMgr(nullptr, nullptr, isOnStatus, cmdItem + ":isOn", index, false);
-						CA_Interf->FreqCmdsMgr(nullptr, nullptr, isVoltageRamp, cmdItem + ":isVoltageRamp", index, false);
-						CA_Interf->FreqCmdsMgr(nullptr, nullptr, isEmergency, cmdItem + ":isEmergency", index, false);
-						CA_Interf->FreqCmdsMgr(nullptr, nullptr, isTrip, cmdItem + ":isTrip", index, false);
-						CA_Interf->FreqCmdsMgr(nullptr, nullptr, isVoltageLimit, cmdItem + ":isVoltageLimit", index, false);
-						CA_Interf->FreqCmdsMgr(chnlsTemperatures, nullptr, nullptr, cmdItem + ":TemperatureExternal", index, false);
-						send = true;
+				if (freqCmdsSem.GetSem(FREQ_CMDS_SEM)) {
+					for each (FreqCmdsMapTable_T::value_type elem in pMainFreqCmds) {
+						// Check if hardware related to this chnl in connected by comparing 
+						// S/N & chnlName included in cmd
+						cmdItem = elem->first;
+						if ((chnlHrwConnected(elem, m_HrdwFailingList)) && elem->second->scanned) {
+							CA_Interf->FreqCmdsMgr(doubArray1, nullptr, nullptr, cmdItem + ":VoltageMeasure", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, nullptr, vSP, cmdItem + ":VoltageSet", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, doubArray2, nullptr, cmdItem + ":CurrentMeasure", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, nullptr, iSP, cmdItem + ":CurrentSet", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isOnStatus, cmdItem + ":isOn", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isVoltageRamp, cmdItem + ":isVoltageRamp", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isEmergency, cmdItem + ":isEmergency", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isTrip, cmdItem + ":isTrip", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isVoltageLimit, cmdItem + ":isVoltageLimit", index, false);
+							CA_Interf->FreqCmdsMgr(chnlsTemperatures, nullptr, nullptr, cmdItem + ":TemperatureExternal", index, false);
+							send = true;
+						}
+						index++;
 					}
-					index++;
+					freqCmdsSem.ReleaseSem();
 				}
 				if (send && (CA_Interf->FreqCmdsMgr(nullptr, nullptr, nullptr, "", -1, true) != ECA_NORMAL)) {
-					if (commFailTime >= COMM_FAILURE_TIME_SEC * (1000/sleepTimeScan)) {
+					if (commFailTime >= COMM_FAILURE_TIME_SEC * (1000/sleepScanTime)) {
 						
-						sleepTimeScan += 1000; // Slow down time scan by 1 sec till 10 sec
-						if (sleepTimeScan > MAX_SAMPLE_TIME_mSEC_AT_FAILURE)
-							sleepTimeScan = MAX_SAMPLE_TIME_mSEC_AT_FAILURE;
+						sleepScanTime += 1000; // Slow down time scan by 1 sec till 10 sec
+						if (sleepScanTime > MAX_SAMPLE_TIME_mSEC_AT_FAILURE)
+							sleepScanTime = MAX_SAMPLE_TIME_mSEC_AT_FAILURE;
 						commFailure = true;
 						
 						for each (CheckedList::value_type crate in pMainHrwList) {
@@ -264,7 +329,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				else {
 					commFailTime = 0;
 					if (send && commFailure) {
-						sleepTimeScan = SAMPLE_TIME_mSEC;
+						sleepScanTime = SAMPLE_TIME_mSEC;
 						
 						commFailure = false;
 						//Commands->statusBarMsg = COMM_BACK_MSG;
@@ -275,23 +340,75 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				
 				// Make/Put returned values available for the View (back in frqCmdList->Item->second)
 				index = 0;
-				
-				for each (FreqCmdsMapTable_T::value_type elem in pMainFreqCmds) {
-					elem->second->vValue = doubArray1[index];
-					elem->second->iValue = doubArray2[index];
-					elem->second->temperature = chnlsTemperatures[index];
-					String^ strIsOnStatus = gcnew String(isOnStatus[index]);
-					elem->second->onStateValue = strIsOnStatus;
-					String^ strIsVoltageRamp = gcnew String(isVoltageRamp[index]);
-					elem->second->isVoltageRamp = strIsVoltageRamp;
-					String^ strIsEmergency = gcnew String(isEmergency[index]);
-					elem->second->isEmergency = strIsEmergency;
-					String^ strIsTrip = gcnew String(isTrip[index]);
-					elem->second->isTrip = strIsTrip;
-					String^ strIsVoltageLimit = gcnew String(isVoltageLimit[index]);
-					elem->second->isVoltageLimit = strIsVoltageLimit;
-					index++;
+				String^ dataToCommProc("");
+				if (freqCmdsSem.GetSem(FREQ_CMDS_SEM)) {
+					for each (FreqCmdsMapTable_T::value_type elem in pMainFreqCmds) {
+						if (elem->second->scanned) {
+							// Data to user View
+							elem->second->vValue = doubArray1[index];
+							elem->second->iValue = doubArray2[index];
+							String^ setPointValue = gcnew String(vSP[index]);
+							elem->second->vSet = setPointValue;
+							setPointValue = gcnew String(iSP[index]);
+							elem->second->iSet = setPointValue;
+							elem->second->temperature = chnlsTemperatures[index];
+							String^ strIsOnStatus = gcnew String(isOnStatus[index]);
+							elem->second->onStateValue = strIsOnStatus;
+							String^ strIsVoltageRamp = gcnew String(isVoltageRamp[index]);
+							elem->second->isVoltageRamp = strIsVoltageRamp;
+							String^ strIsEmergency = gcnew String(isEmergency[index]);
+							elem->second->isEmergency = strIsEmergency;
+							String^ strIsTrip = gcnew String(isTrip[index]);
+							elem->second->isTrip = strIsTrip;
+							String^ strIsVoltageLimit = gcnew String(isVoltageLimit[index]);
+							elem->second->isVoltageLimit = strIsVoltageLimit;
+							index++;
+							// Data to Comm Proc
+							dataToCommProc += elem->first + "&";
+							dataToCommProc += elem->second->chnlViewName + "&";
+							dataToCommProc += elem->second->vValue.ToString() + ", ";
+							dataToCommProc += elem->second->vSet + ", ";
+							dataToCommProc += elem->second->iValue.ToString() + ", ";
+							dataToCommProc += elem->second->iSet + ", ";
+							dataToCommProc += elem->second->onStateValue + ", ";
+							dataToCommProc += elem->second->isTrip + ";";
+						}
+					}
+					freqCmdsSem.ReleaseSem();
 				}
+
+				if (time2writeData <= 0) {
+					// Write data to Sh_Mem 
+					strDataToComm = "FRESH";
+					if (cmdsSem.GetSem(CMDS_SEM)) {
+						if (Commands->nameChanged) {
+							strDataToComm = "NEW_CONF";
+							if (--time2sendNewConfData <= 0) {
+								Commands->nameChanged = false;
+								time2sendNewConfData = TIME_SENDING_NEW_CONF_SEC;
+							}
+						}
+						writeDataSemCond = true;
+						cmdsSem.ReleaseSem();
+					}
+					if (writeDataSemCond && shMemDataSem.GetSem(semName)) {
+						strDataToComm += ("&" + GetDateAndTime() + "&" + index.ToString() + ";" + (dataToCommProc));
+						wchar_t strArray[1024 * 2]{}, * str = strArray;
+						str = (wchar_t*)Marshal::StringToHGlobalUni(strDataToComm).ToPointer();
+						OnShMem(2, pBuf, str, sizeof(strArray));
+						Marshal::FreeHGlobal(IntPtr(str));
+						shMemDataSem.ReleaseSem();
+						writeDataSemCond = false;
+						time2writeData = COUNTER2WRITE_SH_MEM_DATA;
+						//Commands->statusBarMsg2 = "DataToComm Written";
+
+					}
+					else {
+						Commands->statusBarMsg2 = "SH_MEM Sem occupaid";
+					}
+
+				}
+				else time2writeData--;
 			}
 		}
 		Globals::globalVar = "From comm thread to " + crateObject->Name + ":" + crateObject->Address + " : time to die in sec .. " + (20 )
@@ -299,15 +416,14 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 		
 		System::Threading::Monitor::Enter(crateObject);  //EnterCriticalSection()
 		crateObject->Status = status;
-		
 		for (int i = 0; i < MAX_CHANNELS; i++) {
 			crateObject->voltageMeasurements[i] = doubArray1[i];
 			crateObject->currentMeasurements[i] = doubArray2[i];
 			String^ str1 = gcnew String(isOnStatus[i]);
 			crateObject->isOnStatus[i] = str1;
-		}
-				
+		}	
 		System::Threading::Monitor::Exit(crateObject);  // LeaveCriticalSection()
+		
 		Globals::globalVar = System::Convert::ToString(crateObject->voltageMeasurements.at(0)) + " vector legth: " + crateObject->voltageMeasurements.size();
 		if (time2TestGUIlife++ >= (1000 / SAMPLE_TIME_mSEC) * TIME_2_TEST_GUI_LIFE_SEC) {
 			if (check1sec++ >= (1000 / SAMPLE_TIME_mSEC)) {
@@ -332,8 +448,43 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				check1sec = 0;
 			}
 		}
-		
+		// Just for testing ShMem  ////////////////////
+		// Write data to Sh_Mem    ///////////////////
+		if ( !Commands->ViewActive) {
+			if (time2writeData <= 0) {
+				// Write data to Sh_Mem 
+				strDataToComm = "FRESH";
+				if (cmdsSem.GetSem(CMDS_SEM)) {
+					if (Commands->nameChanged) {
+						strDataToComm = "NEW_CONF";
+						if (--time2sendNewConfData <= 0) {
+							Commands->nameChanged = false;
+							time2sendNewConfData = TIME_SENDING_NEW_CONF_SEC;
+						}
+					}
+					writeDataSemCond = true;
+					cmdsSem.ReleaseSem();
+				}
+				else { Commands->statusBarMsg2 = "CMD Sem occupaid 2nd"; }
+				if (writeDataSemCond && shMemDataSem.GetSem(semName)) {
+					strDataToComm += ("&" + GetDateAndTime() + "&" + NBR_TEST_DATA + ";" + GetChannelsData(NBR_TEST_DATA));
+					wchar_t strArray[1024 * 2]{}, * str = strArray;
+					str = (wchar_t*)Marshal::StringToHGlobalUni(strDataToComm).ToPointer();
+					OnShMem(2, pBuf, str, sizeof(strArray));
+					Marshal::FreeHGlobal(IntPtr(str));
+					shMemDataSem.ReleaseSem();
+					writeDataSemCond = false;
+					time2writeData = COUNTER2WRITE_SH_MEM_DATA;
+					//Commands->statusBarMsg2 = "DataToComm Written";
 
+				}
+				else {
+					Commands->statusBarMsg2 = "SH MEM Sem occupaid 2nd";
+				}
+			}
+			else time2writeData--;
+			// End Sh Mem testing
+		}
 	}
 }
 

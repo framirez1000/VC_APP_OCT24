@@ -67,6 +67,7 @@ namespace XML_Classes {
 		property String^ NomVoltage;
 		property String^ Group;
 		property String^ ViewName;
+		property int units; // 0:kilo, 1:regular, 2:milli, 3:micro
 		
 	public:
 		Channel() {
@@ -136,7 +137,8 @@ namespace XML_Classes {
 			ChnlDir           = chnl->ChnlDir;
 			ChnlColor         = chnl->ChnlColor;
 			ChnlType          = chnl->ChnlType;
-			LimitVoltage      = (ChnlType == 0) ? "1001": chnl->LimitVoltage;
+			LimitVoltage      = (ChnlType == 0) ? "1000": chnl->LimitVoltage;
+			units			  = 1; // normal Amp OR Volts
 		}
 		String^ GetCrateName()
 		{

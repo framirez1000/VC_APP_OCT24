@@ -1,6 +1,8 @@
 
 #include "pch.h"
 #include "MainForm.h"
+#include <wtsapi32.h>
+#pragma comment(lib, "Wtsapi32.lib")
 
 System::Void CppCLRWinformsProjekt::MainForm::drawChnlsView(int rows, int columns, System::Object^ Sender, System::EventArgs^ e)
 {
@@ -37,7 +39,7 @@ System::Void CppCLRWinformsProjekt::MainForm::drawChnlsView(int rows, int column
 			this->panel1->Controls->Add(chnlFrame);
 			chnlFrame->Show();
 			// Draw channel Views
-			pChnlViewItem = gcnew ChnlViewForm(% m_mainDataStruct, %pChnlsViewList, pGroupNames, pChnlsNames4formulas);
+			pChnlViewItem = gcnew ChnlViewForm(% m_mainDataStruct, %pChnlsViewList, pGroupNames, pChnlsNames4formulas, pFreqCmds);
 			pChnlViewItem->MdiParent = this;
 			pChnlViewItem->ChnlName = CHANNEL_VIEW_DEFAULT_NAME;
 			pChnlViewItem->OriginalPosX = (posX + 2) + (adicX + panelSizeW) * j;
@@ -96,6 +98,7 @@ System::Void CppCLRWinformsProjekt::MainForm::drawChnlsView(int rows, int column
 						RegCmdStruct_T^ item = gcnew RegCmdStruct_T;
 						item->row = pChnlViewItem->ChnlCnf->Row;
 						item->col = pChnlViewItem->ChnlCnf->Col;
+						item->chnlViewName = pChnlViewItem->lbl2_NameChnlView->Text;
 						if ((m_mainDataStruct.ptrMainCrateList->Count > 0) &&
 							(pChnlViewItem->ChnlCnf->ChnlType != 0) &&
 							(m_mainDataStruct.GetChnlEnableStatus(pChnlViewItem->ChnlCnf->ChannelName))){
@@ -322,3 +325,103 @@ System::Boolean CppCLRWinformsProjekt::MainForm::EvaluateChannelFormula(String^ 
 	}
 }
 
+System::Void CppCLRWinformsProjekt::MainForm::CommProcessHandler() {
+	STARTUPINFO si;
+static PROCESS_INFORMATION pi;
+
+ZeroMemory(&si, sizeof(si));
+si.cb = sizeof(si);
+
+if (pi.hProcess != NULL) {
+	TerminateProcess(pi.hProcess, 0);
+	const DWORD result = WaitForSingleObject(pi.hProcess, 500);
+	if (result == WAIT_OBJECT_0) {
+		// Success
+		Console::WriteLine();
+	}
+	else {
+		// Timed out or an error occurred
+		Console::WriteLine();
+	}
+	// Close process and thread handles. 
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+	return;
+}
+
+ZeroMemory(&pi, sizeof(pi));
+
+WCHAR wszExe[MAX_PATH] = L"VC_COMM_test.exe";
+/*WCHAR wszDrive[MAX_PATH], wszDir[MAX_PATH], wszModule[MAX_PATH], wszPath[MAX_PATH];
+GetModuleFileName(NULL, wszModule, MAX_PATH);
+_wsplitpath(wszModule, wszDrive, wszDir, NULL, NULL);
+swprintf(wszPath, L"%s%s%s", wszDrive, wszDir, wszExe);*/
+//WCHAR module[MAX_PATH] = L"C:\\Users\\frang\\source\\repos\\VC_COMM\\x64\\Release\\VC_COMM1.exe ";
+WCHAR module[MAX_PATH] = L"C:\\Users\\framirez\\AppData\\Local\\0_gsi_executables\\VC_COMM.exe ";
+wcscat(module, (COMM_PROC_VERBOSE == 1) ? L"1" : L"0");
+// Start the child process. 
+if (!CreateProcess(
+	NULL,//LPWSTR (module),            // No module name (use command line)
+	LPWSTR(module),        // Command line
+	NULL,            // Process handle not inheritable
+	NULL,            // Thread handle not inheritable
+	FALSE,           // Set handle inheritance to FALSE
+	(COMM_PROC_VERBOSE == 1) ? 0 : DETACHED_PROCESS,//0,               // No creation flags
+	NULL,            // Use parent's environment block
+	NULL,            // Use parent's starting directory 
+	&si,             // Pointer to STARTUPINFO structure
+	&pi)             // Pointer to PROCESS_INFORMATION structure
+	)
+{
+	int x = GetLastError();
+	Console::WriteLine("CreateProcess failed (%d).\n", GetLastError());
+	//system(module);
+	return;
+}
+Console::WriteLine("CreateProcess Success! (%d).\n", GetLastError());
+
+// Wait until child process exits.
+//WaitForSingleObject(pi.hProcess, INFINITE);
+
+// Close process and thread handles. 
+//CloseHandle(pi.hProcess);
+//CloseHandle(pi.hThread);
+}
+
+System::Void CppCLRWinformsProjekt::MainForm::SearchAndKillProc(String^ commProcName) {
+	WTS_PROCESS_INFO* pWPIs = NULL;
+	DWORD dwProcCount = 0;
+	if (WTSEnumerateProcesses(WTS_CURRENT_SERVER_HANDLE, NULL, 1, &pWPIs, &dwProcCount))
+	{
+		if (dwProcCount > 0) {
+			IntPtr ip = Marshal::StringToHGlobalUni(commProcName);
+			const char* stream = static_cast<const char*>(ip.ToPointer());
+
+			//Search among all process
+			for (DWORD i = 0; i < dwProcCount; i++)
+			{
+				if (!strncmp(stream, (const char*)pWPIs[i].pProcessName, commProcName->Length)) {
+					Console::WriteLine("OLD Comm process alive");
+					HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pWPIs[i].ProcessId);
+					TerminateProcess(hProcess, 0);
+					CloseHandle(hProcess);
+
+					break;
+				}
+				//pWPIs[i].pProcessName = process file name only, no path!
+				//pWPIs[i].ProcessId = process ID
+				//pWPIs[i].SessionId = session ID, if you need to limit it to the logged in user processes
+				//pWPIs[i].pUserSid = user SID that started the process
+			}
+			Marshal::FreeHGlobal(ip);
+		}
+
+	}
+
+	//Free memory
+	if (pWPIs)
+	{
+		WTSFreeMemory(pWPIs);
+		pWPIs = NULL;
+	}
+}

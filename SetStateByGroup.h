@@ -37,9 +37,7 @@ namespace ListTest_CLI_Project {
 			//m_cmdMsg = pCmdMsg;
 			m_cmdMsg = SingletonCmmdClass::Instance;
 			m_pChnlsViewList = pChnlsViewList;
-			//
-			//TODO: Add the constructor code here
-			//
+			
 		}
 
 	protected:

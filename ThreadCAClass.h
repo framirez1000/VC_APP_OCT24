@@ -1,5 +1,4 @@
 #pragma once
-
 #using <System.dll>
 #include "servprov.h"
 #include "MainHeader.h"
@@ -7,20 +6,18 @@
 #include <stdio.h>
 #include <io.h>
 #include "Crate.h"
+#pragma once
+#include <cliext/vector>
+#include <cliext/map>
+#include "CaInterfaceClass.h"
 //#include "GlobalsHeader.h"
-
-
 //#include "C:\Epics\base-3.16.2\include\cadef.h"
+
 #define SAMPLE_TIME_mSEC 100
 #define MAX_SAMPLE_TIME_mSEC_AT_FAILURE 10000
 #define MAX_GUI_TIME_DOWN_SEC 9
 #define CHECK_COMM_IO_TIME_MIN 6
 #define COMM_FAILURE_TIME_SEC 1 
-
-
-#include <cliext/vector>
-#include <cliext/map>
-#include "CaInterfaceClass.h"
 
 //ref struct RegCmdStruct_T {
 //	int row;
@@ -30,6 +27,7 @@
 //	//String^ onStateValue;
 //};
 //typedef cliext::map<String^, RegCmdStruct_T^> FreqCmdsMapTable_T;
+
 
 using namespace System;
 using namespace std;
@@ -48,26 +46,24 @@ namespace Thread_CA {
 		Crate^ crateObject;
 		List<Crate^>^ m_pCrateList;
 		CaInterface^ m_ptrCA_Interface;
-		//ChnlDirClass^ myChannelDir;
 		SingletonCmmdClass^ m_Commands;
 		HANDLE m_PipeClient = nullptr;
 		FreqCmdsMapTable_T^ pMainFreqCmds;
-		//cliext::vector<Double> voltageMeasurements;
-		//cliext::vector<Double> currentMeasurments;
+		CratesT^ pMainDataStruct;
 
 	public:
 		ThreadCAClass(FreqCmdsMapTable_T^ pFreqCmds) {}
-		ThreadCAClass(List<Crate^>^ ptrCrateMainList, CratesT^ mainDataStruct, CheckedList^ pHrwList , Crate^ MainCrate, FreqCmdsMapTable_T ^ pFreqCmds, CheckedList^ hrdwFailingList) {
-			//crateObject = gcnew Crate();
+		ThreadCAClass(List<Crate^>^ ptrCrateMainList, CratesT^ mainDataStruct, CheckedList^ pHrwList , Crate^ MainCrate, FreqCmdsMapTable_T ^ pFreqCmds, CheckedList^ hrdwFailingList) 
+		{
 			crateObject = MainCrate;
-			m_pCrateList = mainDataStruct->ptrMainCrateList;// ptrCrateMainList;
+			m_pCrateList = mainDataStruct->ptrMainCrateList;
 			m_ptrCA_Interface = gcnew CaInterface(ptrCrateMainList, mainDataStruct);
 			Commands = SingletonCmmdClass::Instance;
 			pMainHrwList = pHrwList;
 			pMainFreqCmds = gcnew FreqCmdsMapTable_T;
 			pMainFreqCmds = pFreqCmds;
 			m_HrdwFailingList = hrdwFailingList;
-			//voltageMeasurements = gcnew cliext::vector<Double>;
+			pMainDataStruct = mainDataStruct;
 		}
 		/* Properties */
 		property List<Crate^>^ CrateList {
@@ -87,16 +83,14 @@ namespace Thread_CA {
 			void set(HANDLE pipe) { m_PipeClient = pipe; }
 		}
 		property CheckedList^ pMainHrwList;
-	public: property CheckedList^ m_HrdwFailingList;
-		//property FreqCmdsMapTable_T^ pMainFreqCmds;
+		property CheckedList^ m_HrdwFailingList;
 		
 		void ThreadCaEntryPoint();
 
-		//String^ assemblyCmd(int cmdIndex, int target);
-
-	private: System::Boolean CreateNamedPipeClient();
-	private: System::Boolean TestPipeConn();
-	private: System::Void UpdateLists();
-	private: System::Boolean chnlHrwConnected(FreqCmdsMapTable_T::value_type cmd, CheckedList^ cmmFailCrates);
+	private: 
+		System::Boolean CreateNamedPipeClient();
+		System::Boolean TestPipeConn();
+		System::Void UpdateLists();
+		System::Boolean chnlHrwConnected(FreqCmdsMapTable_T::value_type cmd, CheckedList^ cmmFailCrates);
 	};
 }

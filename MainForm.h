@@ -1,5 +1,5 @@
 #pragma once
-#define TIME_2_CLEAN_STATUS_MSG2_SEC 2 // Aprox 2 sec
+
 #include <tchar.h>
 #include <stdio.h>
 #include <io.h>
@@ -24,6 +24,14 @@
 #include "GlobalSettingsForm.h"
 #include "SetStateByGroup.h"
 #include "GroupNaming.h"
+#ifndef SEM_H
+#include "CommsShMemPipesClass.h"
+#endif
+
+#define TIME_2_CLEAN_STATUS_MSG2_SEC 2 // Aprox 2 sec
+#define COMM_PROC_VERBOSE 1
+#define MAX_DIFF_vSP_READING 0.90  // Percentage
+
 namespace CppCLRWinformsProjekt {
 
     using namespace System;
@@ -91,6 +99,7 @@ namespace CppCLRWinformsProjekt {
 			 property bool ConnectingOrLoading;
 			 property bool SwitchAllChnlsOffAtStart;
 			 property bool SwitchAllChnlsOffAtEnd;
+			 property bool newViewCnf;
 	private:
 		Crate^ crateInMainForm;
 		SingletonCmmdClass^ m_cmdMsg;
@@ -114,7 +123,8 @@ namespace CppCLRWinformsProjekt {
 		Crate^ crateMainObject;
 		FileData DataFile;
 		FreqCmdsMapTable_T^ pFreqCmds;
-		
+		FreqCmdsMapTable_T mFreqCmds;
+		SemClass cmdsSem, freqCmdsSem;
 
 	private: System::Windows::Forms::ToolStripMenuItem^ toolStripMenuItem2;
 	private: System::Windows::Forms::ToolStripMenuItem^ toolStripMenuItem1;
@@ -182,6 +192,20 @@ namespace CppCLRWinformsProjekt {
 	private: System::Windows::Forms::ToolStripSeparator^ toolStripSeparator10;
 	private: System::Windows::Forms::ToolStripButton^ toolStripButton1;
 private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel2;
+private: System::Windows::Forms::ToolStripSeparator^ toolStripSeparator11;
+private: System::Windows::Forms::ToolStripButton^ TG1;
+
+private: System::Windows::Forms::ToolStripButton^ TG2;
+private: System::Windows::Forms::ToolStripButton^ TG3;
+private: System::Windows::Forms::ToolStripButton^ TG4;
+private: System::Windows::Forms::ToolStripButton^ TG5;
+private: System::Windows::Forms::ToolStripButton^ TG6;
+private: System::Windows::Forms::ToolStripButton^ TG7;
+private: System::Windows::Forms::ToolStripButton^ TG8;
+private: System::Windows::Forms::ToolStripButton^ TG9;
+private: System::Windows::Forms::ToolStripButton^ TG10;
+private: System::Windows::Forms::ToolStripButton^ TG11;
+private: System::Windows::Forms::ToolStripButton^ TG12;
 private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 
 
@@ -206,6 +230,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			m_HrdwFailList = gcnew CheckedList;
 			pHrwList = gcnew CheckedList;
 			pFreqCmds = gcnew FreqCmdsMapTable_T;
+			mFreqCmds = gcnew FreqCmdsMapTable_T;
 			m_mainDataStruct.ptrMainCrateList = m_ptrMainCrateList;
 			m_mainDataStruct.pMainCnfView = M_ViewCnfList;
 			
@@ -230,6 +255,8 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			SwitchAllChnlsOffAtStart = false;
 			SwitchAllChnlsOffAtEnd = false;
 			FilesPath = "C:\\ProgramData\\VoltageControllerNew\\LOG";
+			newViewCnf = true;
+			
 		}
 		void mainFormEntryPoint() {
 			//InitializeComponent();
@@ -280,6 +307,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 		void InitializeComponent(void)
 		{
 			this->components = (gcnew System::ComponentModel::Container());
+			System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(MainForm::typeid));
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->configToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -335,6 +363,19 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->toolStripButton2 = (gcnew System::Windows::Forms::ToolStripButton());
 			this->toolStripSeparator10 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->toolStripButton1 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->toolStripSeparator11 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->TG1 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG2 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG3 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG4 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG5 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG6 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG7 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG8 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG9 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG10 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG11 = (gcnew System::Windows::Forms::ToolStripButton());
+			this->TG12 = (gcnew System::Windows::Forms::ToolStripButton());
 			this->statusStrip1 = (gcnew System::Windows::Forms::StatusStrip());
 			this->toolStripStatusLabel1 = (gcnew System::Windows::Forms::ToolStripStatusLabel());
 			this->toolStripSplitButton1 = (gcnew System::Windows::Forms::ToolStripSplitButton());
@@ -390,7 +431,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->toolStripMenuItem1->Name = L"toolStripMenuItem1";
 			this->toolStripMenuItem1->Size = System::Drawing::Size(207, 22);
 			this->toolStripMenuItem1->Text = L"Open selection Settings...";
-			this->toolStripMenuItem1->Click += gcnew System::EventHandler(this, &MainForm::ToolStripMenuItem1_Click);
+			this->toolStripMenuItem1->Click += gcnew System::EventHandler(this, &MainForm::LoadCOnfViewFromFile_Click);
 			// 
 			// toolStripSeparator2
 			// 
@@ -696,7 +737,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// timer1
 			// 
 			this->timer1->Enabled = true;
-			this->timer1->Interval = 1000;
+			this->timer1->Interval = 750;
 			this->timer1->Tick += gcnew System::EventHandler(this, &MainForm::Timer1_Tick);
 			// 
 			// panel1
@@ -714,9 +755,10 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// toolStrip1
 			// 
 			this->toolStrip1->AllowDrop = true;
-			this->toolStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(3) {
+			this->toolStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(16) {
 				this->toolStripButton2,
-					this->toolStripSeparator10, this->toolStripButton1
+					this->toolStripSeparator10, this->toolStripButton1, this->toolStripSeparator11, this->TG1, this->TG2, this->TG3, this->TG4, this->TG5,
+					this->TG6, this->TG7, this->TG8, this->TG9, this->TG10, this->TG11, this->TG12
 			});
 			this->toolStrip1->Location = System::Drawing::Point(0, 24);
 			this->toolStrip1->Name = L"toolStrip1";
@@ -746,6 +788,179 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->toolStripButton1->Size = System::Drawing::Size(23, 22);
 			this->toolStripButton1->Text = L"toolStripButton1";
 			this->toolStripButton1->Click += gcnew System::EventHandler(this, &MainForm::SwitchALLChannelsOffToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator11
+			// 
+			this->toolStripSeparator11->Name = L"toolStripSeparator11";
+			this->toolStripSeparator11->Size = System::Drawing::Size(6, 25);
+			// 
+			// TG1
+			// 
+			this->TG1->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG1->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG1->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG1.Image")));
+			this->TG1->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG1->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG1->Name = L"TG1";
+			this->TG1->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG1->Size = System::Drawing::Size(36, 22);
+			this->TG1->Text = L"TG1";
+			this->TG1->ToolTipText = L"Toggle Group 1";
+			this->TG1->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG2
+			// 
+			this->TG2->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG2->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG2->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG2.Image")));
+			this->TG2->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG2->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG2->Name = L"TG2";
+			this->TG2->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG2->Size = System::Drawing::Size(36, 22);
+			this->TG2->Text = L"TG2";
+			this->TG2->ToolTipText = L"Toggle Group 2";
+			this->TG2->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG3
+			// 
+			this->TG3->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG3->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG3->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG3.Image")));
+			this->TG3->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG3->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG3->Name = L"TG3";
+			this->TG3->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG3->Size = System::Drawing::Size(36, 22);
+			this->TG3->Text = L"TG3";
+			this->TG3->ToolTipText = L"Toggle Group 3";
+			this->TG3->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG4
+			// 
+			this->TG4->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG4->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG4->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG4.Image")));
+			this->TG4->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG4->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG4->Name = L"TG4";
+			this->TG4->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG4->Size = System::Drawing::Size(36, 22);
+			this->TG4->Text = L"TG4";
+			this->TG4->ToolTipText = L"Toggle Group 4";
+			this->TG4->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG5
+			// 
+			this->TG5->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG5->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG5->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG5.Image")));
+			this->TG5->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG5->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG5->Name = L"TG5";
+			this->TG5->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG5->Size = System::Drawing::Size(36, 22);
+			this->TG5->Text = L"TG5";
+			this->TG5->ToolTipText = L"Toggle Group 5";
+			this->TG5->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG6
+			// 
+			this->TG6->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG6->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG6->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG6.Image")));
+			this->TG6->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG6->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG6->Name = L"TG6";
+			this->TG6->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG6->Size = System::Drawing::Size(36, 22);
+			this->TG6->Text = L"TG6";
+			this->TG6->ToolTipText = L"Toggle Group 6";
+			this->TG6->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG7
+			// 
+			this->TG7->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG7->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG7->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG7.Image")));
+			this->TG7->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG7->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG7->Name = L"TG7";
+			this->TG7->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG7->Size = System::Drawing::Size(36, 22);
+			this->TG7->Text = L"TG7";
+			this->TG7->ToolTipText = L"Toggle Group 7";
+			this->TG7->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG8
+			// 
+			this->TG8->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG8->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG8->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG8.Image")));
+			this->TG8->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG8->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG8->Name = L"TG8";
+			this->TG8->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG8->Size = System::Drawing::Size(36, 22);
+			this->TG8->Text = L"TG8";
+			this->TG8->ToolTipText = L"Toggle Group 8";
+			this->TG8->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG9
+			// 
+			this->TG9->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG9->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG9->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG9.Image")));
+			this->TG9->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG9->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG9->Name = L"TG9";
+			this->TG9->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG9->Size = System::Drawing::Size(36, 22);
+			this->TG9->Text = L"TG9";
+			this->TG9->ToolTipText = L"Toggle Group 9";
+			this->TG9->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG10
+			// 
+			this->TG10->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG10->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG10->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG10.Image")));
+			this->TG10->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG10->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG10->Name = L"TG10";
+			this->TG10->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG10->Size = System::Drawing::Size(42, 22);
+			this->TG10->Text = L"TG10";
+			this->TG10->ToolTipText = L"Toggle Group 10";
+			this->TG10->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG11
+			// 
+			this->TG11->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG11->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG11->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG11.Image")));
+			this->TG11->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG11->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG11->Name = L"TG11";
+			this->TG11->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG11->Size = System::Drawing::Size(42, 22);
+			this->TG11->Text = L"TG11";
+			this->TG11->ToolTipText = L"Toggle Group 11";
+			this->TG11->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
+			// 
+			// TG12
+			// 
+			this->TG12->BackColor = System::Drawing::Color::RosyBrown;
+			this->TG12->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			//this->TG12->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG12.Image")));
+			this->TG12->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->TG12->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
+			this->TG12->Name = L"TG12";
+			this->TG12->Padding = System::Windows::Forms::Padding(0, 0, 5, 0);
+			this->TG12->Size = System::Drawing::Size(42, 22);
+			this->TG12->Text = L"TG12";
+			this->TG12->ToolTipText = L"Toggle Group 12";
+			this->TG12->Click += gcnew System::EventHandler(this, &MainForm::ToggleGroup_Click);
 			// 
 			// statusStrip1
 			// 
@@ -864,9 +1079,13 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 		static Double val;
 		static int msgLifeTime;
 
+		if (freqCmdsSem.GetSem(FREQ_CMDS_SEM)) {
+			mFreqCmds = pFreqCmds;
+			freqCmdsSem.ReleaseSem();
+		}
 		bool found = false;
 		if ( m_cmdMsg->ViewActive) { //m_cmdMsg->HrwConntd &&
-			for each (FreqCmdsMapTable_T::value_type elem in pFreqCmds) {
+			for each (FreqCmdsMapTable_T::value_type elem in mFreqCmds) {
 				found = false;
 				for (int index = 0; (index < Rows * Cols) && !found; ++index) {
 					if (pChnlsViewList[index]->Visible) {
@@ -876,26 +1095,55 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 							this->pChnlsViewList[index]->vValue = elem->second->vValue;
 							this->pChnlsViewList[index]->readoutsValues.voltg = elem->second->vValue;
 							this->pChnlsViewList[index]->lbl6_NomCurrtChnlView->Text = elem->second->iValue.ToString("G3");
+							
+							Double viewValue, spValue;
+							// Voltage SetPoint
+							if (Double::TryParse(this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text, viewValue)) {
+								if (Double::TryParse(elem->second->vSet, spValue))
+								if (viewValue != spValue && !this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Modified) {
+										// If vSP from Crate Not equal to SP in View then Update View and CnfChnl 16.01.23
+										this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text = elem->second->vSet;
+										//this->pChnlsViewList[index]->ChnlCnf->VoltageSet = this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text;
+								}
+							}
+							// Current SetPoint
+							//if (viewValue != spValue) {
+								// If vSP from Crate Not equal to SP in View then Update View and CnfChnl 16.01.23
+								//this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text = elem->second->vSet.ToString("G3");
+								//this->pChnlsViewList[index]->ChnlCnf->CurrentSet = this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text;
+							//}
 							if (elem->second->onStateValue != nullptr) {
 								this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = elem->second->onStateValue->ToUpper();
 								// Set backgorund color for Channel Status 
-								if (((elem->second->isVoltageRamp == "ramping") || (elem->second->isEmergency == "active")
-									|| (elem->second->isTrip == "tripped") || (elem->second->isVoltageLimit == "exceeded"))
-									|| ((elem->second->onStateValue == "on") && (elem->second->isVoltageRamp != "ramping") && ValidateVoltgReading(elem->second->vValue.ToString(), this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text))) {
-									// Blink
-									if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::GreenYellow)
-										this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
-									else
-										this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
-								}
-								else
-									if ((elem->second->onStateValue == "on") || (elem->second->onStateValue == "ON") || (elem->second->onStateValue == "On"))
+								if (elem->second->onStateValue->Equals("on")) {
+									//spValue *= 1.20; // Simulating a fail state
+									if (elem->second->vValue < spValue * MAX_DIFF_vSP_READING) {
+										// Blink
+										if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::Red)
+											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
+										else
+											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::Red;
+									}
+									else if (((elem->second->isVoltageRamp == "ramping") || (elem->second->isEmergency == "active")
+										|| (elem->second->isTrip == "tripped") || (elem->second->isVoltageLimit == "exceeded"))
+										|| ((elem->second->isVoltageRamp != "ramping")
+											&& ValidateVoltgReading(elem->second->vValue.ToString(), this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text)))
+									{
+										// Blink
+										if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::GreenYellow)
+											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
+										else
+											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
+									}
+									else if ((elem->second->onStateValue == "on") || (elem->second->onStateValue == "ON") || (elem->second->onStateValue == "On"))
 										this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
 									else if (elem->second->onStateValue == "off")
 										this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::Gray;
-								found = true;
+									found = true;
+								}
 							}
 							else this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = "N/A";
+							// Logging channels
 							if (this->pChnlsViewList[index]->ChnlCnf->LoggingChnl) {
 								if (data2save != "") data2save += ", ";
 								data2save += this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text;
@@ -911,45 +1159,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 							// Calculate/evaluate formulas for SP
 							if ((this->pChnlsViewList[index]->ChnlCnf->UseVoltageFormula) && !ConnectingOrLoading) {
 								EvaluateChannelFormula("Voltage", index);
-								//Double vSetPoint = this->pChnlsViewList[index]->GetFormulaEvaluation(this->pChnlsViewList[index]->ChnlCnf->VoltageFormula, "Voltage");
-								//if (Math::Truncate(pChnlsViewList[index]->vSetPoint) != Math::Truncate(vSetPoint)) {
-								//	String^ cmd = gcnew String(this->pChnlsViewList[index]->ChnlCnf->ChannelName +  ":VoltageSet");
-								//	if (System::Threading::Monitor::TryEnter(m_cmdMsg)) {
-								//		if (this->pChnlsViewList[index]->ChnlCnf->ChnlType != 0) { // Not a Virtual Channel
-								//			if (!m_cmdMsg->execRequest) {
-								//				m_cmdMsg->CleanCmdsLists();
-								//				String^ nomValue = gcnew String(m_ptrMainCrateList[this->pChnlsViewList[index]->ChnlCnf->CrateDir]->m_lstModules[this->pChnlsViewList[index]->ChnlCnf->ModDir]->lstChannels[this->pChnlsViewList[index]->ChnlCnf->ChnlDir]->VoltageNominal);
-								//				Double val;
-								//				String^ strSetPoint = gcnew String(vSetPoint.ToString());
-								//				if (GlobalFuncValidateSP(strSetPoint, nomValue, 0.0, 1.0)) {
-								//					val = Math::Round(vSetPoint, 2);
-								//					if ((((System::Convert::ToDouble(nomValue) < 0) && (val < 0)) || ((System::Convert::ToDouble(nomValue) > 0)) && (val > 0)))
-								//						m_cmdMsg->GlobalAddSendCmds(cmd, val.ToString(), CHANNEL_CMD, 3, true);
-								//					m_cmdMsg->StatusBarMsgIndex = 4;
-								//				}
-								//				System::Threading::Monitor::Exit(m_cmdMsg);
-								//			}
-								//		}
-								//		else {
-								//			// It is a Virtual Channel so just check the formula result is a valid new SP for the channel
-								//			String^ nomValue = gcnew String(this->pChnlsViewList[index]->ChnlCnf->LimitVoltage);
-								//			String^ strSetPoint = gcnew String(vSetPoint.ToString());
-								//			if (GlobalFuncValidateSP(strSetPoint, nomValue, 0.0, 1.0)) {
-								//				// Set the voltage SP on ChnlView and ChnlCnf objects
-								//				Double val;
-								//				val = Math::Round(vSetPoint, 2);
-								//				if ((((val < 0) && (-System::Convert::ToDouble(nomValue) < 0)) || ((val > 0) && (System::Convert::ToDouble(nomValue) > 0)))) {
-								//					this->pChnlsViewList[index]->ChnlCnf->VoltageSet = vSetPoint.ToString();
-								//					this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text = vSetPoint.ToString();
-								//				}
-								//			}
-								//		}
-								//	}
-								//	if (m_cmdMsg->cmdResult && this->pChnlsViewList[index]->ChnlCnf->ChnlType != 0) {
-								//		this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text = m_mainDataStruct.GetChnlVoltSet(this->pChnlsViewList[index]->ChnlCnf->ChannelName);
-								//		pChnlsViewList[index]->vSetPoint = vSetPoint;
-								//	}
-								//}
 							}
 							if ((this->pChnlsViewList[index]->ChnlCnf->UseCurrentFormula) && !ConnectingOrLoading) {
 								EvaluateChannelFormula("Current", index);
@@ -1002,13 +1211,20 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			ShowMsg2OnStatusBar(-1);
 			this->Time2ClearStatusMsg2 = 0;
 		}
+		if (newViewCnf) {
+			if (cmdsSem.GetSem(CMDS_SEM)) {
+				m_cmdMsg->nameChanged = true; //Force to create New Data Structure in COMM
+				cmdsSem.ReleaseSem();
+				newViewCnf = false;
+			}
+		}
 	}
 
 	// Draw channels view declaration
-	public: System::Void drawChnlsView(int rows, int columns, System::Object^ Sender, System::EventArgs^ e);
+public: System::Void drawChnlsView(int rows, int columns, System::Object^ Sender, System::EventArgs^ e);
 	//
 	// Load Form event callback
-	private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
+private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
 
 		//int rc = Win32::AllocConsole();
 		//Console::SetWindowPosition(1, 1);
@@ -1017,6 +1233,12 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 		//GetWindowRect(console, &r); //stores the console's current dimensions
 		//MoveWindow(console, 1305, 1, 500, 1000, TRUE); // 500 width, 1000 height
 		//Console::WriteLine("Main GUI Thread created");
+		
+		// COMM process creation
+	SearchAndKillProc("VC_COMM.exe");
+
+	CommProcessHandler();
+		System::Threading::Thread::Sleep(2 * SAMPLE_TIME_mSEC);
 		
 		/* Creates thread managing comm IO */
 		ThreadStart^ threadDelegate = gcnew ThreadStart(m_ptrMainThreadCA, &ThreadCAClass::ThreadCaEntryPoint);
@@ -1054,12 +1276,13 @@ private: System::Void ConfigRampGroupSettings_Click(System::Object^ sender, Syst
 }
 
 //
-// SetUp By groups menu cration
+// SetUp By groups menu creation
 private: System::Void SetupByGroupDynamicMenu_Builder() {
 	// Create all submenu Items under Setup groups MainMenu submenu item dynamically
 	// according to GroupItems List. This submenu must be updated every time a View
 	// is load as well as when the group names change
 	this->setupByGorupsToolStripMenuItem->DropDownItems->Clear();
+	int i = 1; 
 	for each (String ^ group in pGroupNames) {
 		System::Windows::Forms::ToolStripMenuItem^ SubItemToAdd;
 		SubItemToAdd = gcnew System::Windows::Forms::ToolStripMenuItem(group);
@@ -1069,6 +1292,14 @@ private: System::Void SetupByGroupDynamicMenu_Builder() {
 		System::Windows::Forms::ToolStripSeparator^ toolStripSeparator;
 		toolStripSeparator = (gcnew System::Windows::Forms::ToolStripSeparator());
 		this->setupByGorupsToolStripMenuItem->DropDownItems->Add(toolStripSeparator);
+		try {
+			//Console::WriteLine(this->toolStrip1->Items->Find("ToggleGroup1", true)[0]->Text);
+			this->toolStrip1->Items->Find("TG" + i, false)[0]->ToolTipText = SubItemToAdd->Text;
+		}
+		catch (Exception^ e) {
+			Console::WriteLine(e->ToString());
+		}
+		i++;
 	}
 }
 
@@ -1110,7 +1341,7 @@ private: System::Void CrateTableSetupToolStripMenuItem_Click(System::Object^ sen
 	}
 //
 // Set selection channels View menu option
-	private: System::Void SetupSelectionViewToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
+private: System::Void SetupSelectionViewToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
 		 SetSltnViewForm^ vForm = gcnew SetSltnViewForm(% m_mainDataStruct);
 
 		if (vForm->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
@@ -1123,53 +1354,60 @@ private: System::Void CrateTableSetupToolStripMenuItem_Click(System::Object^ sen
 			drawChnlsView(Rows, Cols, this, e);
 		}
 }
-	private: System::Boolean CreateServerPipes();
-	private: System::Boolean checkPipe(HANDLE pipe);
-	private: System::Void SendData2Pipe(HANDLE Pipe, String^ Data);
-    private: System::Void ExitToolStripMenuItem1_Click(System::Object^ sender, System::EventArgs^ e) {
-		if (SwitchAllChnlsOffAtEnd)
+
+private: System::Boolean CreateServerPipes();
+private: System::Boolean checkPipe(HANDLE pipe);
+private: System::Void SendData2Pipe(HANDLE Pipe, String^ Data);
+private: System::Void ExitToolStripMenuItem1_Click(System::Object^ sender, System::EventArgs^ e) {
+	CloseAllAtExit(sender, e);
+	/*if (SwitchAllChnlsOffAtEnd)
 			SwitchALLChannelsOffToolStripMenuItem_Click(sender, e);
 		try {
 			if (Pipe_GuiAlive != nullptr)
 				CloseHandle(Pipe_GuiAlive);
 			if (Pipe4Data2File)
 				CloseHandle(Pipe4Data2File);
+			CommProcessHandler();
 		}
 		catch (Exception^ e) {
 			;
 		}
 		Environment::Exit(0);
-		Application::Exit();
+		Application::Exit();*/
 	}
-	private: System::Void ExitToolStripMenuItem_Click_1(System::Object^ sender, System::EventArgs^ e) {
-		if (SwitchAllChnlsOffAtEnd)
+private: System::Void ExitToolStripMenuItem_Click_1(System::Object^ sender, System::EventArgs^ e) {
+	CloseAllAtExit(sender, e);
+	/*if (SwitchAllChnlsOffAtEnd)
 			SwitchALLChannelsOffToolStripMenuItem_Click(sender, e);
 		try {
 			if (Pipe_GuiAlive != nullptr)
 				CloseHandle(Pipe_GuiAlive);
 			if (Pipe4Data2File)
 				CloseHandle(Pipe4Data2File);
+			CommProcessHandler();
 		}
 		catch (Exception^ e) {
 			;
 		}
 		Environment::Exit(0);
-		Application::Exit();
+		Application::Exit();*/
 	}
-	private: System::Void OnFormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {
-		if (SwitchAllChnlsOffAtEnd)
+private: System::Void OnFormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {
+	CloseAllAtExit(sender, e);
+	/*if (SwitchAllChnlsOffAtEnd)
 			SwitchALLChannelsOffToolStripMenuItem_Click(sender, e);
 		try {
 			if (Pipe_GuiAlive != nullptr)
 				CloseHandle(Pipe_GuiAlive);
 			if (Pipe4Data2File)
 				CloseHandle(Pipe4Data2File);
+			CommProcessHandler();
 		}
 		catch (Exception^ e) { 
 			; 
 		}
 		Environment::Exit(0);
-		Application::Exit();
+		Application::Exit();*/
 	}
 
 //
@@ -1314,7 +1552,8 @@ private: System::Void ToolStripMenuItem2_Click(System::Object^ sender, System::E
 }
 //
 // Open/Load View selection view settings from a XML file
-private: System::Void ToolStripMenuItem1_Click(System::Object^ sender, System::EventArgs^ e) {
+//
+private: System::Void LoadCOnfViewFromFile_Click(System::Object^ sender, System::EventArgs^ e) {
 	ConnectingOrLoading = true;
 	String^ msgToUsr = "If continue, actual View Setting will be overwritten by an XML config file of your choice";
 	String^ msgCaption = "Click Ok to overwrite or Cancel to cancel";
@@ -1482,6 +1721,7 @@ private: System::Void ToolStripMenuItem1_Click(System::Object^ sender, System::E
 			if (pFreqCmds->size() > 0) {
 				m_cmdMsg->ViewActive = true;
 			}
+			SetStateGroupToggleBtns(false);
 			// After loaded View a check for hardware already connected is done to 
 			// match channels in View with channels from hrw (if posssible)
 			// this possible hrw connected come from Manu option Connect/Disconnect
@@ -1493,6 +1733,7 @@ private: System::Void ToolStripMenuItem1_Click(System::Object^ sender, System::E
 }// End Load View
 //
 // Clear ALL channels, modules and crates from the Main system data structure
+//
 void CleanMainLists() {
 	// Clear ALL crate main list
 	for each (Crate ^ crate in m_ptrMainCrateList) {
@@ -1528,6 +1769,7 @@ void TaskBarProgress() {
 }
 //
 // Fill order to set ALL/Group channels state to OFF
+//
 private: System::Void SwitchALLChannelsOffToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
 		List<String^> cmdList;
 		List<String^> paramList;
@@ -1535,6 +1777,9 @@ private: System::Void SwitchALLChannelsOffToolStripMenuItem_Click(System::Object
 		paramList.Add("false");
 		if (!SetChannelsCnfParam("AllChannels", % cmdList, % paramList))
 			Console::Write("OFF cmds sent but not answer from Crate(s)");
+		else {
+			SetStateGroupToggleBtns(false);
+		}
 	}
 //
 // Set ALL Group(s) channels state (ON/OFF) by filling the cmd list to execute
@@ -1765,16 +2010,18 @@ private: System::Void ToolStripMenuItem3_Click(System::Object^ sender, System::E
 				}
 			}
 		}
+		
+		
 	}
 	else {
 		if (connectionState) m_cmdMsg->StatusBarMsgIndex = 10; 
 		connectionState = false;
 		this->toolStripStatusLabel1->Text = "System status: Not connected";
 		this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\unplugged2.png")));
-		
 
 	}
 	ConnectingOrLoading = false;
+	newViewCnf = true; //Force to create New Data Structure in COMM
 }
 //
 // Save crate hardware List
@@ -1998,7 +2245,7 @@ private: System::Void ShowMsgOnStatusBar(int msgIndex) {
 		this->toolStripStatusLabel5->BackColor = System::Drawing::SystemColors::GrayText;
 	}
 }
- private: System::Void ShowMsg2OnStatusBar(int msgIndex) {
+private: System::Void ShowMsg2OnStatusBar(int msgIndex) {
 			 this->toolStripStatusLabel2->Text = "Doing... ";
 			 if (msgIndex >= 0) {
 				 this->toolStripStatusLabel2->Text += m_cmdMsg->statusBarMsg2;
@@ -2011,7 +2258,75 @@ private: System::Boolean ValidateVoltgReading(String^ voltMeas, String^ voltSP);
 
 private: System::Boolean EvaluateChannelFormula( String^ target, int chnlViewIndex);
 
+//
+// Event to catch user click for togglin channels On-Off by group
+// Gets the button clicked and then calls setByGroup according to last state
+//
+private: System::Void ToggleGroup_Click(System::Object^ sender, System::EventArgs^ e) {
+	List<String^> cmdList;
+	List<String^> paramList;
 
+	cmdList.Add(":Control:setOn");
+	String^ btnName = safe_cast<ToolStripItem^>(sender)->Name;
+	String^ btnGroupName = safe_cast<ToolStripItem^>(sender)->ToolTipText;
+	//MessageBox::Show("\r\nButtonName: " + btnGroupName + "\r\nButtonState: " + "Selected");
+	try {
+		ToolStripItem^ btn = this->toolStrip1->Items->Find(btnName->ToString(), false)[0];
+		auto color = btn->BackColor;
+		if (String::Equals(btn->BackColor.ToString(), "Color [RosyBrown]")) {
+			//MessageBox::Show("\r\nButtonName: " + btnGroupName + "\r\nButtonState: " + "Selected");
+			paramList.Add("true");
+			btn->BackColor = System::Drawing::Color::GreenYellow;
+		}
+		else {
+			paramList.Add("false");
+			btn->BackColor = System::Drawing::Color::RosyBrown;
+		}
+
+		if (SetChannelsCnfParam(btn->ToolTipText, % cmdList, % paramList)) {
+			m_cmdMsg->CleanCmdsLists;
+			m_cmdMsg->StatusBarMsgIndex = 6;
+			Console::Write("Group Channels cmds sent ");
+		}
+		else {
+			//btn->BackColor = color;
+		}
+	}
+	catch (...) {}
+} // ToggleGroup_Click END
+
+//
+// Sets Group direct buttoms action state: On/OFF
+//
+    private: 
+	  System::Void SetStateGroupToggleBtns(bool state) {
+
+	for each (ToolStripItem^ item in (this->toolStrip1->Items))
+	{
+		if (item->Name->Contains("TG") && !state) {
+			item->BackColor = System::Drawing::Color::RosyBrown;
+		}
+	} 
+
+}
+	  System::Void CommProcessHandler();
+	  System::Void CloseAllAtExit(System::Object^ sender, System::EventArgs^ e) {
+				 if (SwitchAllChnlsOffAtEnd)
+					 SwitchALLChannelsOffToolStripMenuItem_Click(sender, e);
+				 try {
+					 if (Pipe_GuiAlive != nullptr)
+						 CloseHandle(Pipe_GuiAlive);
+					 if (Pipe4Data2File)
+						 CloseHandle(Pipe4Data2File);
+					 CommProcessHandler();
+				 }
+				 catch (Exception^ e) {
+					 ;
+				 }
+				 Environment::Exit(0);
+				 Application::Exit();
+			 }
+	  System::Void SearchAndKillProc(String^ commProcName);
 
 };
 }

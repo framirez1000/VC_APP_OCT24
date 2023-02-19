@@ -164,6 +164,7 @@
     <ClInclude Include="CnfChnl.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="CommsShMemPipesClass.h" />
     <ClInclude Include="Crate.h" />
     <ClInclude Include="DeviceCommonInfo.h" />
     <ClInclude Include="GlobalSettingsForm.h">

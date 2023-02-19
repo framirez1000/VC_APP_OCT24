@@ -23,4 +23,8 @@ public:
 	bool ChnlMatchedObj(Channel^ ItemToCompare) {
 		return (ItemToCompare->Name == SearchListItem);
 	}
+	// 02/13/22
+	bool ChnlMatchedObj(XML_Classes::Channel^ ItemToCompare) {
+		return (ItemToCompare->ChannelName == SearchListItem);
+	}
 };

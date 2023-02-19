@@ -1,6 +1,10 @@
 #ifndef _GlobalsHeader
 #define _GlobalsHeader
+#endif
 #pragma once
+#include <tchar.h>
+#include <stdio.h>
+#include <Windows.h>
 
 #include <cliext/vector>
 #include <cliext/list>
@@ -8,6 +12,7 @@
 #include <list>
 #include "XML_ViewSettingsConf_Class.h"
 #include "C:\Epics\base-3.16.2\include\cadef.h"
+#include <fileapi.h>
 
 //#include "Crate.h"
 //#include "MainHeader.h"
@@ -16,9 +21,7 @@
 #define INSIDE_LIMITS(value, lower, upper) ((value > lower) && (value < upper))
 #define IN_LEFT_LIMITS(value, lower, upper) ((value >= lower) && (value < upper))
 #define IN_RIGHT_LIMITS(value, lower, upper) ((value > lower) && (value <= upper))
-#define PIPE_TESTING_GUI_LIFE TEXT("\\\\.\\pipe\\PipeLifeGUI")
 #define TIME_2_TEST_GUI_LIFE_SEC 30
-#define PIPE_DATA_FILE TEXT("\\\\.\\pipe\\PipeDataFile")
 #define DEFAULT_DATA_FILE_PATH "C:\\ProgramData\\GECA_VC_Data\\LOG\\"
 #define DEFAULT_DATA_FILE_NAME "dataFile.csv"
 #define MSG_DATA_HEADER "DATA "
@@ -28,6 +31,12 @@
 #define COMM_FAILURE_MSG "COMM FAILURE"
 #define COMM_TRY_MSG "TRYING TO COMMUNICATE"
 #define COMM_BACK_MSG "COMMUNICATION RE-STABLISHED"
+#define PIPE_TESTING_GUI_LIFE TEXT("\\\\.\\pipe\\PipeLifeGUI")
+#define PIPE_DATA_FILE TEXT("\\\\.\\pipe\\PipeDataFile")
+//#define PIPE_COMM TEXT("\\\\.\\pipe\\CommPipe")
+//#define PIPE_THREAD TEXT("\\\\.\\pipe\\ThreadPipe")
+//#define SH_MEM_SEM TEXT("Global\MyShMemChannelsDataSem")
+//#define CMDS_SEM TEXT("Global\MyShMemChannelsDataSem")
 
 #define MAX_CRATES 8
 #define MAX_CHANNELS 16
@@ -94,6 +103,7 @@ public:
 	property String^ statusBarMsg;
 	property String^ statusBarMsg2;
 	property int StatusBarMsgIndex;
+	property bool nameChanged;
 public:
 	static property SingletonCmmdClass^ Instance { SingletonCmmdClass^ get() { return % m_instance; } }
 	static System::Void GlobalAddSendCmds(String^ cmd, String^ param, int destiny, int cmdType, bool send)
@@ -113,7 +123,7 @@ public:
 			while (!Instance->cmdExecuted && (i++ < 10 * (Instance->strCmdsToExcList->Count)))
 				System::Threading::Thread::Sleep(100);
 			if (Instance->cmdExecuted) {
-				Console::WriteLine("Settings sent");
+				Console::WriteLine("Setting(s) sent");
 			}
 		}
 		else if (send) { 
@@ -234,4 +244,44 @@ static cli::array<StatusBarMsgT^>^ GetArrayMsg() {
 	return local;
 }
 
-#endif
+#define kA 0		// kilo
+#define Amp 1     // Amp
+#define mA 2     // milli
+#define uA 3     // micro
+#define CONVERSION_TABLE_NBR_ELEM 4
+
+const double conversionCoef[CONVERSION_TABLE_NBR_ELEM] { 1000, 1, 0.001, 0.000001 };
+inline String^ ConvertUnits(Double% val, int unitsIn, int unitsOut) {
+	if ((unitsIn >= 0) && (unitsIn <= (CONVERSION_TABLE_NBR_ELEM-1)) 
+		&& (unitsOut >= 0) && (unitsOut <= (CONVERSION_TABLE_NBR_ELEM-1))) 
+	{
+		if (conversionCoef[unitsOut] != 0)
+			val = val * ((DOUBLE)conversionCoef[unitsIn] / (Double)conversionCoef[unitsOut]);
+			return System::Convert::ToString(val);
+	}
+	else return "0";
+}
+bool inline ProcessSPvalStrUserInput(String^% strSP, int* pUnitsOut)
+{
+	System::Array^ splitInput = strSP->Split(' ');
+	if (splitInput->Length == 2) {
+		Double newVal=0;
+		if (Double::TryParse(System::Convert::ToString(splitInput->GetValue(0)), newVal))
+		{
+			String^ str = System::Convert::ToString(splitInput->GetValue(1));
+			if (str->Equals("k") || str->Equals("kA") || str->Equals("kV"))
+				* pUnitsOut = kA;
+			else if (str->Equals("A") || str->Equals("Amp") || str->Equals("V"))
+				* pUnitsOut = Amp;
+			else if (str->Equals("m") || str->Equals("mA") || str->Equals("mV"))
+				* pUnitsOut = mA;
+			else if (str->Equals("u") || str->Equals("uA") || str->Equals("uV"))
+				* pUnitsOut = uA;
+			
+			strSP = System::Convert::ToString(splitInput->GetValue(0));
+			return true;
+		}
+	}
+	return false;
+	
+}
