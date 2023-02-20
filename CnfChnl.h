@@ -3,6 +3,13 @@
 #include "Crate.h"
 #include <cliext/map>
 #include "MainHeader.h"
+#include <regex>
+//#include <iostream>
+#include <sstream>
+//#include<string>
+
+using namespace System::Text::RegularExpressions;
+
 using namespace System;
 typedef cli::array<System::String^>^ Groups;
 
@@ -966,6 +973,8 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 	else {
 		;
 	}
+
+	
 	
 	if (m_cmdMsg->cmdExecuted) {
 		// Load channel config info: vRamp, iRamp, vSetPoint, iSetPoint, NominalVolt, NominalCurrent.
@@ -980,9 +989,27 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 	}
 	
 	if (this->txtBx1_NewChnlName->Modified) {
-		if (!String::IsNullOrEmpty(this->txtBx1_NewChnlName->Text)) {
-			this->lbl1_CnfChnl->Text = this->txtBx1_NewChnlName->Text;
+		if (!String::IsNullOrEmpty(this->txtBx1_NewChnlName->Text)) 
+		{
+			String^ strName(this->txtBx1_NewChnlName->Text);
+			std::string os;
+			//const std::regex vowels("[+/^%* =!~`'\"\\,; ]");
+			using namespace Runtime::InteropServices;
+			const char* chars =
+				(const char*)(Marshal::StringToHGlobalAnsi(strName)).ToPointer();
+			os = chars; std::regex rx2("[+/^%* =\\!\\~`'\"\\\\,; \\]\\[\\{\\}&@#$\\%()]");
+			Marshal::FreeHGlobal(IntPtr((void*)chars));
+			std::stringstream result;
+			std::regex_replace(std::ostream_iterator<char>(result),
+				os.begin(),	os.end(), rx2, "");
 			
+			//this->lbl1_CnfChnl->Text = strName;
+			const std::string& resultstr = result.str();
+			const char* cstr2 = resultstr.c_str();
+			String^ strNewName = gcnew String(cstr2);
+			strNewName = strNewName->TrimStart('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', ':');
+			this->txtBx1_NewChnlName->Text = strNewName;
+			this->lbl1_CnfChnl->Text = this->txtBx1_NewChnlName->Text;
 		}
 		this->txtBx1_NewChnlName->Modified = false;
 	}
