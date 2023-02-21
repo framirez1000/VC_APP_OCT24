@@ -1091,7 +1091,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 					if (pChnlsViewList[index]->Visible) {
 						if ((pChnlsViewList[index]->ChnlCnf->Row == elem->second->row) &&
 							(pChnlsViewList[index]->ChnlCnf->Col == elem->second->col)) {
-							this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text = elem->second->vValue.ToString("f4");
+							this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text = elem->second->vValue.ToString("f3");
 							this->pChnlsViewList[index]->vValue = elem->second->vValue;
 							this->pChnlsViewList[index]->readoutsValues.voltg = elem->second->vValue;
 							this->pChnlsViewList[index]->lbl6_NomCurrtChnlView->Text = elem->second->iValue.ToString("G3");

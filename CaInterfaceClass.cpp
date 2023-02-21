@@ -906,6 +906,32 @@ using namespace System::Collections::Generic;
 		return 0;
 	}
 
+	System::Int16 CaInterface::FreqCmdsMgrSP(double* doubArray, double* doubArray2, char isOnArray[][40], System::String^ cmd, int index, bool sendCmds)
+	{
+		int crateDir, crateLine, mod, chnl, type;
+
+		if (!sendCmds) {
+			DecodeCmdMsg(cmd, &crateDir, &crateLine, &mod, &chnl, &type);
+			String^ chnl = GetChnlName(cmd);
+			if (chnl != nullptr) {
+				auto it = pMainDataStruct->GetChnlObj(chnl)->ChnlCmdsTableId[cmd];
+				if (doubArray != nullptr) {
+					ca_get(DBR_DOUBLE, it->chnlID, &doubArray[index]);
+				}
+				else if (doubArray2 != nullptr) {
+					ca_get(DBR_DOUBLE, it->chnlID, &doubArray2[index]);
+				}
+				else if (isOnArray != nullptr) {
+					ca_get(DBR_STRING, it->chnlID, &(isOnArray[index]));
+				}
+			}
+			else return false;
+		}
+		else return(ca_pend_io(MAX_WAIT_CA_TIME));
+
+		return 0;
+	}
+	
 	String^ CaInterface::GetCrateName(String^ chnl)
 	{
 		// TODO: insert return statement here

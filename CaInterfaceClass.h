@@ -166,6 +166,7 @@ using namespace std;
 		void DecodeCmdMsg(String^ cmd, int* crateDir, int* crateLine, int* mod, int* chnl, int* type);
 		int GetChnlType(String^ cmd, CmdsT* cmdTable, int tableSize);
 	public: System::Int16 FreqCmdsMgr(double* doubArray, double* doubArray2, char isOnArray[][40], System::String^ cmd, int index, bool sendCmds);
+			System::Int16 CaInterface::FreqCmdsMgrSP(double* doubArray, double* doubArray2, char isOnArray[][40], System::String^ cmd, int index, bool sendCmds);
 			String^ GetCrateName(String^ chnl);
 			String^ GetModName(String^ chnl);
 			String^ GetChnlName(String^ chnl);

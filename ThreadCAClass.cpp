@@ -19,8 +19,10 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	//throw gcnew System::NotImplementedException();
 	double doubArray1[MAX_VIEW_CHANNELS];
 	double doubArray2[MAX_VIEW_CHANNELS];
-	char vSP[MAX_VIEW_CHANNELS][40];
-	char iSP[MAX_VIEW_CHANNELS][40];
+	double vSP[MAX_VIEW_CHANNELS];
+	double iSP[MAX_VIEW_CHANNELS];
+	//char vSP[MAX_VIEW_CHANNELS][40];
+	//char iSP[MAX_VIEW_CHANNELS][40];
 	double chnlsTemperatures[MAX_VIEW_CHANNELS];
 	char isOnStatus[MAX_VIEW_CHANNELS][40];
 	char isVoltageRamp[MAX_VIEW_CHANNELS][40];
@@ -284,9 +286,9 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 						cmdItem = elem->first;
 						if ((chnlHrwConnected(elem, m_HrdwFailingList)) && elem->second->scanned) {
 							CA_Interf->FreqCmdsMgr(doubArray1, nullptr, nullptr, cmdItem + ":VoltageMeasure", index, false);
-							CA_Interf->FreqCmdsMgr(nullptr, nullptr, vSP, cmdItem + ":VoltageSet", index, false);
+							//CA_Interf->FreqCmdsMgr(nullptr, nullptr, vSP, cmdItem + ":VoltageSet", index, false);
 							CA_Interf->FreqCmdsMgr(nullptr, doubArray2, nullptr, cmdItem + ":CurrentMeasure", index, false);
-							CA_Interf->FreqCmdsMgr(nullptr, nullptr, iSP, cmdItem + ":CurrentSet", index, false);
+							//CA_Interf->FreqCmdsMgr(nullptr, nullptr, iSP, cmdItem + ":CurrentSet", index, false);
 							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isOnStatus, cmdItem + ":isOn", index, false);
 							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isVoltageRamp, cmdItem + ":isVoltageRamp", index, false);
 							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isEmergency, cmdItem + ":isEmergency", index, false);
@@ -337,6 +339,25 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 						m_HrdwFailingList->clear();
 					}
 				} 
+
+				// ++++++++++++++++  Test for SP readings +++++++++++++++++++
+				if (freqCmdsSem.GetSem(FREQ_CMDS_SEM)) {
+					index = 0;
+					for each (FreqCmdsMapTable_T::value_type elem in pMainFreqCmds) {
+						// Check if hardware related to this chnl in connected by comparing 
+						// S/N & chnlName included in cmd
+						cmdItem = elem->first;
+						if ((chnlHrwConnected(elem, m_HrdwFailingList)) && elem->second->scanned) {
+							CA_Interf->FreqCmdsMgrSP(vSP, nullptr, nullptr, cmdItem + ":VoltageSet", index, false);
+							CA_Interf->FreqCmdsMgrSP(iSP, nullptr, nullptr, cmdItem + ":CurrentSet", index, false);
+							send = true;
+						}
+						index++;
+					}
+					freqCmdsSem.ReleaseSem();
+				}
+				CA_Interf->FreqCmdsMgr(nullptr, nullptr, nullptr, "", -1, true);
+				// ----------------   End Test Sp readings
 				
 				// Make/Put returned values available for the View (back in frqCmdList->Item->second)
 				index = 0;
@@ -347,9 +368,9 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 							// Data to user View
 							elem->second->vValue = doubArray1[index];
 							elem->second->iValue = doubArray2[index];
-							String^ setPointValue = gcnew String(vSP[index]);
+							String^ setPointValue = gcnew String(vSP[index].ToString("f3"));
 							elem->second->vSet = setPointValue;
-							setPointValue = gcnew String(iSP[index]);
+							setPointValue = gcnew String(iSP[index].ToString());
 							elem->second->iSet = setPointValue;
 							elem->second->temperature = chnlsTemperatures[index];
 							String^ strIsOnStatus = gcnew String(isOnStatus[index]);
