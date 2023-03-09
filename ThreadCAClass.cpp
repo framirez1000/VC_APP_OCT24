@@ -368,7 +368,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 							// Data to user View
 							elem->second->vValue = doubArray1[index];
 							elem->second->iValue = doubArray2[index];
-							String^ setPointValue = gcnew String(vSP[index].ToString("f3"));
+							String^ setPointValue = gcnew String(vSP[index].ToString("f4"));
 							elem->second->vSet = setPointValue;
 							setPointValue = gcnew String(iSP[index].ToString());
 							elem->second->iSet = setPointValue;

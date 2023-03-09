@@ -14,24 +14,30 @@ System::Void ListTest_CLI_Project::ChnlViewForm::ValidateSetPointInputs() {
 		String^ spValue = gcnew String(txtBx1_VoltSPChnlView->Text);
 		// Validate user entry for VoltageSet or CurrentSet and change setting in Crate if ok
 		if (txtBx1_VoltSPChnlView->Modified && !(String::IsNullOrEmpty(spValue))) {
+			//Process user input: "value units", example: 3.2 mV Or 3.2 uV
+			int unitsIn;
+			if (ProcessSPvalStrUserInput(spValue, &unitsIn, true)) { // param3 true for volt
+				Double val = System::Convert::ToDouble(spValue);
+				spValue = ConvertUnits(val, unitsIn, 1); // Converting to Amp from any (mAmp, uAmp)
 			// Convert to numerical value and validate ranges
-			if (GlobalFuncValidateSP(spValue, this->ChnlCnf->LimitVoltage, 0.0, 1.0)) {
-				///*m_mainDataStruct->GetChnlNomVolt(this->ChnlCnf->ChannelName)*/, 0.0, 1.0)) {
-				SemClass cmdsSem;
-				if ((this->ChnlCnf->ChnlType != 0) && cmdsSem.GetSem(CMDS_SEM)) {
-					m_cmdMsg->GlobalAddSendCmds(this->ChnlCnf->ChannelName + ":VoltageSet",
-						spValue, CHANNEL_CMD, 3, false);
-					cmdsSem.ReleaseSem();
+				if (GlobalFuncValidateSP(spValue, this->ChnlCnf->LimitVoltage, 0.0, 1.0)) {
+					///*m_mainDataStruct->GetChnlNomVolt(this->ChnlCnf->ChannelName)*/, 0.0, 1.0)) {
+					SemClass cmdsSem;
+					if ((this->ChnlCnf->ChnlType != 0) && cmdsSem.GetSem(CMDS_SEM)) {
+						m_cmdMsg->GlobalAddSendCmds(this->ChnlCnf->ChannelName + ":VoltageSet",
+							spValue, CHANNEL_CMD, 3, false);
+						cmdsSem.ReleaseSem();
+					}
+					else {
+						// Set VChnl Voltage SP to Channel user input
+						this->ChnlCnf->VoltageSet = spValue;
+						this->vSetPoint = System::Convert::ToDouble(spValue);
+					}
 				}
 				else {
-					// Set VChnl Voltage SP to Channel user input
-					this->ChnlCnf->VoltageSet = spValue;
-					this->vSetPoint = System::Convert::ToDouble(spValue);
+					m_cmdMsg->StatusBarMsgIndex = 16;
+					txtBx1_VoltSPChnlView->Undo();
 				}
-			}
-			else {
-				m_cmdMsg->StatusBarMsgIndex = 16;
-				txtBx1_VoltSPChnlView->Undo();
 			}
 		}
 
@@ -39,7 +45,7 @@ System::Void ListTest_CLI_Project::ChnlViewForm::ValidateSetPointInputs() {
 		if (txtBx2_CurrtSPChnlView->Modified && !(String::IsNullOrEmpty(spValue))) {
 			//Process user input: "value units", example: 3.2 mA Or 3.2 uA
 			int unitsIn;
-			if (ProcessSPvalStrUserInput(spValue, &unitsIn)) {
+			if (ProcessSPvalStrUserInput(spValue, &unitsIn, false)) { // param3 false for current
 				Double val = System::Convert::ToDouble(spValue);
 				spValue = ConvertUnits(val, unitsIn, 1); // Converting to Amp from any (mAmp, uAmp)
 

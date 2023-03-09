@@ -244,10 +244,10 @@ static cli::array<StatusBarMsgT^>^ GetArrayMsg() {
 	return local;
 }
 
-#define kA 0		// kilo
-#define Amp 1     // Amp
-#define mA 2     // milli
-#define uA 3     // micro
+#define kilo 0		 // kilo
+#define normal 1     // Volts OR Amp
+#define mili 2       // milli
+#define uicro 3      // micro
 #define CONVERSION_TABLE_NBR_ELEM 4
 
 const double conversionCoef[CONVERSION_TABLE_NBR_ELEM] { 1000, 1, 0.001, 0.000001 };
@@ -261,25 +261,30 @@ inline String^ ConvertUnits(Double% val, int unitsIn, int unitsOut) {
 	}
 	else return "0";
 }
-bool inline ProcessSPvalStrUserInput(String^% strSP, int* pUnitsOut)
+bool inline ProcessSPvalStrUserInput(String^% strSP, int* pUnitsOut, bool voltage)
 {
 	System::Array^ splitInput = strSP->Split(' ');
 	if (splitInput->Length == 2) {
 		Double newVal=0;
 		if (Double::TryParse(System::Convert::ToString(splitInput->GetValue(0)), newVal))
 		{
+			bool unitsOk = false;
 			String^ str = System::Convert::ToString(splitInput->GetValue(1));
-			if (str->Equals("k") || str->Equals("kA") || str->Equals("kV"))
-				* pUnitsOut = kA;
-			else if (str->Equals("A") || str->Equals("Amp") || str->Equals("V"))
-				* pUnitsOut = Amp;
-			else if (str->Equals("m") || str->Equals("mA") || str->Equals("mV"))
-				* pUnitsOut = mA;
-			else if (str->Equals("u") || str->Equals("uA") || str->Equals("uV"))
-				* pUnitsOut = uA;
+			if ((voltage && System::Convert::ToString("kV V m mV u uV")->Contains(str))
+				|| (!voltage && System::Convert::ToString("kA A Amp m mA uA")->Contains(str)))
+			{
+				if (str->Equals("k") || str->Equals("kA") || str->Equals("kV"))
+					* pUnitsOut = kilo;
+				else if (str->Equals("A") || str->Equals("Amp") || str->Equals("V"))
+					* pUnitsOut = normal;
+				else if (str->Equals("m") || str->Equals("mA") || str->Equals("mV"))
+					* pUnitsOut = mili;
+				else if (str->Equals("u") || str->Equals("uA") || str->Equals("uV"))
+					* pUnitsOut = uicro;
 			
-			strSP = System::Convert::ToString(splitInput->GetValue(0));
-			return true;
+				strSP = System::Convert::ToString(splitInput->GetValue(0));
+				return true;
+			}
 		}
 	}
 	return false;

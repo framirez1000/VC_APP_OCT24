@@ -29,7 +29,7 @@
 #endif
 
 #define TIME_2_CLEAN_STATUS_MSG2_SEC 2 // Aprox 2 sec
-#define COMM_PROC_VERBOSE 1
+#define COMM_PROC_VERBOSE 0
 #define MAX_DIFF_vSP_READING 0.90  // Percentage
 
 namespace CppCLRWinformsProjekt {
@@ -1091,7 +1091,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 					if (pChnlsViewList[index]->Visible) {
 						if ((pChnlsViewList[index]->ChnlCnf->Row == elem->second->row) &&
 							(pChnlsViewList[index]->ChnlCnf->Col == elem->second->col)) {
-							this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text = elem->second->vValue.ToString("f3");
+							this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text = elem->second->vValue.ToString("f5");
 							this->pChnlsViewList[index]->vValue = elem->second->vValue;
 							this->pChnlsViewList[index]->readoutsValues.voltg = elem->second->vValue;
 							this->pChnlsViewList[index]->lbl6_NomCurrtChnlView->Text = elem->second->iValue.ToString("G3");
@@ -1118,7 +1118,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 								if (elem->second->onStateValue->Equals("on")) {
 									//spValue *= 1.20; // Simulating a fail state
 									if (elem->second->vValue < spValue * MAX_DIFF_vSP_READING) {
-										// Blink
+										// Blink: red
 										if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::Red)
 											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
 										else
@@ -1129,18 +1129,18 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 										|| ((elem->second->isVoltageRamp != "ramping")
 											&& ValidateVoltgReading(elem->second->vValue.ToString(), this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text)))
 									{
-										// Blink
+										// Blink: yellow
 										if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::GreenYellow)
 											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
 										else
 											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
 									}
-									else if ((elem->second->onStateValue == "on") || (elem->second->onStateValue == "ON") || (elem->second->onStateValue == "On"))
-										this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
-									else if (elem->second->onStateValue == "off")
-										this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::Gray;
+									else this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
+									
 									found = true;
 								}
+								else if (elem->second->onStateValue == "off")
+									this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::Gray;
 							}
 							else this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = "N/A";
 							// Logging channels
