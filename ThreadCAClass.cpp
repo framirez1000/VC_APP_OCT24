@@ -23,18 +23,19 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	double iSP[MAX_VIEW_CHANNELS];
 	//char vSP[MAX_VIEW_CHANNELS][40];
 	//char iSP[MAX_VIEW_CHANNELS][40];
+	
 	double chnlsTemperatures[MAX_VIEW_CHANNELS];
-	char isOnStatus[MAX_VIEW_CHANNELS][40];
-	char isVoltageRamp[MAX_VIEW_CHANNELS][40];
-	char isEmergency[MAX_VIEW_CHANNELS][40];
-	char isVoltageBound[MAX_VIEW_CHANNELS][40];
-	char isTrip[MAX_VIEW_CHANNELS][40];
-	char isVoltageLimit[MAX_VIEW_CHANNELS][40];
-	char isCC[MAX_VIEW_CHANNELS][40];
-	char isCV[MAX_VIEW_CHANNELS][40];
-	char isCurrentBound[MAX_VIEW_CHANNELS][40];
-	char isExternalInhibit[MAX_VIEW_CHANNELS][40];
-	char isCurrentLimit[MAX_VIEW_CHANNELS][40];
+	char isOnStatus[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isVoltageRamp[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isEmergency[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isVoltageBound[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isTrip[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isVoltageLimit[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isCC[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isCV[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isCurrentBound[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isExternalInhibit[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
+	char isCurrentLimit[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
 	int iValue;
 	int commFailTime = 0;
 	int sleepScanTime = SAMPLE_TIME_mSEC;
@@ -106,25 +107,32 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 
 		// PIPES: Check myPipe for EPICS commands to Crates
 		if (PipesFunc::OnPipe(READPIPE, myPipe, msgIn)) {
-			//Commands->statusBarMsg2 = "ThreadIO rcvd PipeMsg: " + msgIn;
+			Commands->statusBarMsg2 = "ThreadIO Cmds: " + msgIn;
 			if (cmdsSem.GetSem(CMDS_SEM)) {
+				Commands->CleanCmdsLists();
 				if ((hardwareConnected) && Commands->ViewActive) {
-					System::Array^ cmdFromPipe = msgIn->Split(' ');
-					if (cmdFromPipe->Length == 2) {
-						Double spValue;
-						if (Double::TryParse(System::Convert::ToString(cmdFromPipe->GetValue(1)), spValue)) {
-							// Check Voltage limits before filling cmd struct
-							XML_Classes::Channel^ chnl = pMainDataStruct->GetChnlInView(System::Convert::ToString(cmdFromPipe->GetValue(0)), pMainDataStruct->pMainCnfView);
-							if (chnl != nullptr 
-								&& !chnl->UseVoltageFormula
-								&& GlobalFuncValidateSP(System::Convert::ToString(cmdFromPipe->GetValue(1)), chnl->LimitVoltage, 0.0, 1.0)) 
-							{
-								Commands->CleanCmdsLists();
-								Commands->GlobalAddSendCmds(System::Convert::ToString(cmdFromPipe->GetValue(0)) + ":VoltageSet",
-									System::Convert::ToString(cmdFromPipe->GetValue(1)), CHANNEL_CMD, 3, true);
-								Commands->execRequest = true;
+					System::Array^ splitArray = msgIn->Split(';');
+					for each (String ^ strTemp in splitArray) {
+						System::Array^ cmdFromPipe = strTemp->Split(' ');
+						if (cmdFromPipe->Length == 2) {
+							Double spValue;
+							if (Double::TryParse(System::Convert::ToString(cmdFromPipe->GetValue(1)), spValue)) {
+								// Check Voltage limits before filling cmd struct
+								XML_Classes::Channel^ chnl = pMainDataStruct->GetChnlInView(System::Convert::ToString(cmdFromPipe->GetValue(0)), pMainDataStruct->pMainCnfView);
+								if (chnl != nullptr
+									&& !chnl->UseVoltageFormula
+									&& GlobalFuncValidateSP(System::Convert::ToString(cmdFromPipe->GetValue(1)), chnl->LimitVoltage, 0.0, 1.0))
+								{
+									
+									Commands->GlobalAddSendCmds(System::Convert::ToString(cmdFromPipe->GetValue(0)) + ":VoltageSet",
+										System::Convert::ToString(cmdFromPipe->GetValue(1)), CHANNEL_CMD, 3, false);
+									Commands->execRequest = true;
+								}
 							}
 						}
+					}
+					if (Commands->execRequest) {
+						Commands->GlobalAddSendCmds("", "", -1, 4, true);
 					}
 				}
 				cmdsSem.ReleaseSem();
@@ -210,7 +218,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 					else {
 						result = m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], true);
 						if (result == E_OK) {
-							Console::WriteLine("All cmds sent successfully ");
+							//Console::WriteLine("All cmds sent successfully ");
 						}
 					}
 					i++;
@@ -269,6 +277,13 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 								CheckedList::const_reference cref = *it;
 								m_HrdwFailingList->erase(crate->first);
 							}
+							// Clear Error on Modules to enable proper functioning of modules 06/03/2024
+							/*for each (Crate^ m_crate in pMainDataStruct->ptrMainCrateList) {
+								if (crate->Equals(m_crate->Address))
+									CA_Interf->ClearModErrors(crate->first, m_crate->Modules);
+									
+							}*/
+
 							//if (m_HrdwFailingList->Contains(crate->first))
 							//	m_HrdwFailingList->Remove((crate->first));
 							//	//cmmFailCrates->Remove((crate->first));
@@ -289,7 +304,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 							//CA_Interf->FreqCmdsMgr(nullptr, nullptr, vSP, cmdItem + ":VoltageSet", index, false);
 							CA_Interf->FreqCmdsMgr(nullptr, doubArray2, nullptr, cmdItem + ":CurrentMeasure", index, false);
 							//CA_Interf->FreqCmdsMgr(nullptr, nullptr, iSP, cmdItem + ":CurrentSet", index, false);
-							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isOnStatus, cmdItem + ":isOn", index, false);
+							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isOnStatus, cmdItem + ":Control:setOn", index, false);
 							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isVoltageRamp, cmdItem + ":isVoltageRamp", index, false);
 							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isEmergency, cmdItem + ":isEmergency", index, false);
 							CA_Interf->FreqCmdsMgr(nullptr, nullptr, isTrip, cmdItem + ":isTrip", index, false);

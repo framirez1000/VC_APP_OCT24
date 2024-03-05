@@ -263,7 +263,10 @@ System::Boolean CppCLRWinformsProjekt::MainForm::EvaluateChannelFormula(String^ 
 			: this->pChnlsViewList[chnlViewIndex]->GetFormulaEvaluation(this->pChnlsViewList[chnlViewIndex]->ChnlCnf->CurrentFormula, target);
 		Double actual_setPoint = (target->Contains("Voltage")) ? pChnlsViewList[chnlViewIndex]->vSetPoint
 			: pChnlsViewList[chnlViewIndex]->cSetPoint;
-		if ((new_setPoint < 0.925 * actual_setPoint) || (new_setPoint > 1.075 * actual_setPoint)) {
+		auto newSP = abs(new_setPoint);
+		auto actualSP = abs(actual_setPoint);
+		if (!IN_LIMITS(newSP, actualSP*(1.0 - TOL_BAND_FORMULA), actualSP*(1.0 + TOL_BAND_FORMULA))) {
+		//if ((new_setPoint < 0.925 * actual_setPoint) || (new_setPoint > 1.075 * actual_setPoint)) {
 			//if ((Math::Truncate(actual_setPoint) != Math::Truncate(new_setPoint)) || (target->Contains("Current"))) {
 			String^ cmd = gcnew String(this->pChnlsViewList[chnlViewIndex]->ChnlCnf->ChannelName + ":" + target + "Set");
 			if (System::Threading::Monitor::TryEnter(m_cmdMsg)) {
@@ -275,7 +278,7 @@ System::Boolean CppCLRWinformsProjekt::MainForm::EvaluateChannelFormula(String^ 
 						String^ strSetPoint = gcnew String(new_setPoint.ToString());
 						if (GlobalFuncValidateSP(strSetPoint, nomValue, 0.0, 1.0)) {
 							val = Math::Round(new_setPoint, 4);
-							if ((((System::Convert::ToDouble(nomValue) < 0) && (val < 0)) || ((System::Convert::ToDouble(nomValue) > 0)) && (val > 0)))
+							//if ((((System::Convert::ToDouble(nomValue) < 0) && (val <= 0)) || ((System::Convert::ToDouble(nomValue) >= 0)) && (val > 0)))
 								m_cmdMsg->GlobalAddSendCmds(cmd, val.ToString(), CHANNEL_CMD, 3, true);
 							m_cmdMsg->StatusBarMsgIndex = 4;
 						}
@@ -315,6 +318,7 @@ System::Boolean CppCLRWinformsProjekt::MainForm::EvaluateChannelFormula(String^ 
 				new_setPoint = System::Convert::ToDouble(m_mainDataStruct.GetChnlCrrntSet(this->pChnlsViewList[chnlViewIndex]->ChnlCnf->ChannelName));
 				this->pChnlsViewList[chnlViewIndex]->txtBx2_CurrtSPChnlView->Text = new_setPoint.ToString();
 				pChnlsViewList[chnlViewIndex]->cSetPoint = new_setPoint;
+				this->pChnlsViewList[chnlViewIndex]->txtBx1_VoltSPChnlView->Modified = false;
 			}
 		}
 		return true;

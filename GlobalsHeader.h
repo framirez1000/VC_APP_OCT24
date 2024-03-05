@@ -41,6 +41,7 @@
 #define MAX_CRATES 8
 #define MAX_CHANNELS 16
 #define MAX_VIEW_CHANNELS 100
+#define LONG_CA_ARRAYS_RESP 60
 #define MAX_MODULES 8
 #define MAX_CHANNELS_X_CRATE 128
 
@@ -150,9 +151,14 @@ static bool GlobalFuncValidateSP(String^ spValue, String^ nomVltg, double lowLim
 	}
 	else {
 		Double val2 = System::Convert::ToDouble(nomVltg);
+		if (val2 < 0 && val > 0) return false; // Negative polarity modul => setpoit < 0
+		//if (val2 > 0 && val < 0) return false; // Positive polarity modul => setpoit > 0
+		if (val < 0) {  // if new SP is Negative set point, NomVolt is always > 0. 
+			val *= -1;  // Can't check the channel polarity so try to set the SP anyway
+		}				// the channel won't accept it.
 		if (val2 < 0) {
 			val2 *= -1;
-			val *= -1;
+			//val *= -1;
 		}
 		if (IN_LIMITS((double)val, lowLimitFactor * (double)val2, highLimitFactor * (double)val2)
 			&& (val2 != 0)) { // value Ok
@@ -264,26 +270,31 @@ inline String^ ConvertUnits(Double% val, int unitsIn, int unitsOut) {
 bool inline ProcessSPvalStrUserInput(String^% strSP, int* pUnitsOut, bool voltage)
 {
 	System::Array^ splitInput = strSP->Split(' ');
-	if (splitInput->Length == 2) {
+	if (splitInput->Length <= 2) {
 		Double newVal=0;
 		if (Double::TryParse(System::Convert::ToString(splitInput->GetValue(0)), newVal))
 		{
-			bool unitsOk = false;
-			String^ str = System::Convert::ToString(splitInput->GetValue(1));
-			if ((voltage && System::Convert::ToString("kV V m mV u uV")->Contains(str))
-				|| (!voltage && System::Convert::ToString("kA A Amp m mA uA")->Contains(str)))
-			{
-				if (str->Equals("k") || str->Equals("kA") || str->Equals("kV"))
-					* pUnitsOut = kilo;
-				else if (str->Equals("A") || str->Equals("Amp") || str->Equals("V"))
-					* pUnitsOut = normal;
-				else if (str->Equals("m") || str->Equals("mA") || str->Equals("mV"))
-					* pUnitsOut = mili;
-				else if (str->Equals("u") || str->Equals("uA") || str->Equals("uV"))
-					* pUnitsOut = uicro;
-			
-				strSP = System::Convert::ToString(splitInput->GetValue(0));
+			*pUnitsOut = normal;
+			if (splitInput->Length == 1)   // Default units V, A
 				return true;
+			else {
+				String^ str = System::Convert::ToString(splitInput->GetValue(1));
+				
+				if ((voltage && System::Convert::ToString("kV V m mV u uV")->Contains(str))
+					|| (!voltage && System::Convert::ToString("kA A Amp m mA uA")->Contains(str)))
+				{
+					if (str->Equals("k") || str->Equals("kA") || str->Equals("kV"))
+						* pUnitsOut = kilo;
+					else if (str->Equals("A") || str->Equals("Amp") || str->Equals("V"))
+						* pUnitsOut = normal;
+					else if (str->Equals("m") || str->Equals("mA") || str->Equals("mV"))
+						* pUnitsOut = mili;
+					else if (str->Equals("u") || str->Equals("uA") || str->Equals("uV"))
+						* pUnitsOut = uicro;
+
+					strSP = System::Convert::ToString(splitInput->GetValue(0));
+					return true;
+				}
 			}
 		}
 	}

@@ -58,6 +58,7 @@ public:
 		chnlViewName = gcnew String("");
 	}
 };
+typedef cliext::map<String^, int> NamePos_T;
 typedef cliext::map<String^, RegCmdStruct_T^> FreqCmdsMapTable_T;
 
 ref struct CratesT {

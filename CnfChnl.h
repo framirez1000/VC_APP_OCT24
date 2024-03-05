@@ -68,27 +68,13 @@ namespace ListTest_CLI_Project {
 	private: System::Windows::Forms::Label^ label1;
 	private: System::Windows::Forms::Label^ lbl_NewVhnlName;
 	public: System::Windows::Forms::TextBox^ txtBx1_NewChnlName;
-	private:
-
-	private:
-
 	private: System::Windows::Forms::Label^ label3;
 	private: System::Windows::Forms::ComboBox^ cmbBx1_ChnlNames;
 	public: System::Windows::Forms::Label^ lbl14_ChooseChnl;
 	public: System::Windows::Forms::Label^ label4_CurrentFormuChnl;
-
 	private: System::Windows::Forms::ComboBox^ cmbBx2_currentFormChnls;
-	public:
-
-	public:
-
-	public:
-	private:
-
-
 	private: System::Windows::Forms::Label^ label2;
-		
-			 
+		 
 	public:
 		CnfChnl(void)
 		{
@@ -988,6 +974,7 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 		msgToUser = "";
 	}
 	
+	// Check if channel was renamed
 	if (this->txtBx1_NewChnlName->Modified) {
 		if (!String::IsNullOrEmpty(this->txtBx1_NewChnlName->Text)) 
 		{
@@ -997,7 +984,7 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 			using namespace Runtime::InteropServices;
 			const char* chars =
 				(const char*)(Marshal::StringToHGlobalAnsi(strName)).ToPointer();
-			os = chars; std::regex rx2("[+/^%* =\\!\\~`'\"\\\\,; \\]\\[\\{\\}&@#$\\%()]");
+			os = chars; std::regex rx2("[+/^%* =\\!\\~`'\"\\\\,; \\]\\[\\{\\}&@#$\\%()_]");
 			Marshal::FreeHGlobal(IntPtr((void*)chars));
 			std::stringstream result;
 			std::regex_replace(std::ostream_iterator<char>(result),
@@ -1013,10 +1000,13 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 		}
 		this->txtBx1_NewChnlName->Modified = false;
 	}
+	// Channel formula checkbox
 	if ((this->chkBx1_UseFormuVltg->Checked) && (this->formula != this->txtBx5_VltgFrm->Text)) {
 		this->formula = this->txtBx5_VltgFrm->Text;
-		this->NameIndex = 0;		
+		this->NameIndex = 0;
+		//ChnlViewForm::ClearFormList();
 	}
+	// Channel formula
 	if ((this->chkBx2_UseCrrtFrm->Checked) && (this->iformula != this->txtBx6_CrrtFrm->Text)) {
 		this->iformula = this->txtBx6_CrrtFrm->Text;
 		this->NameIndex = 0;
@@ -1153,7 +1143,7 @@ private: void cmbBx1_DrawItem(System::Object^ sender, DrawItemEventArgs^ e)
 			 e->DrawFocusRectangle();
 		 }
 
-// Tool Tio for combobox Current channels
+// Tool Tip for combobox Current channels
 private: void cmbBx2_DrawItem(System::Object^ sender, DrawItemEventArgs^ e)
 {
 	//this->lbl14_ChooseChnl->Visible = false;
@@ -1218,7 +1208,7 @@ private: System::Void CmbBx1_ChnlNames_IndexChanged(System::Object^ sender, Syst
 		this->NameIndex = this->cmbBx1_ChnlNames->SelectedIndex;
 		this->toolTipChosenChnl.SetToolTip(this->lbl14_ChooseChnl, this->lbl14_ChooseChnl->Text);
 		this->toolTip1.SetToolTip(this->txtBx5_VltgFrm, this->txtBx5_VltgFrm->Text);
-		Console::WriteLine("Channel chosen: {0} at index: {1}", this->lbl14_ChooseChnl->Text, this->NameIndex);
+		//Console::WriteLine("Channel chosen: {0} at index: {1}", this->lbl14_ChooseChnl->Text, this->NameIndex);
 	}
 }
 

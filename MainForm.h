@@ -28,9 +28,11 @@
 #include "CommsShMemPipesClass.h"
 #endif
 
-#define TIME_2_CLEAN_STATUS_MSG2_SEC 2 // Aprox 2 sec
-#define COMM_PROC_VERBOSE 0
-#define MAX_DIFF_vSP_READING 0.90  // Percentage
+#define TIME_2_CLEAN_STATUS_MSG2_SEC 2	// Aprox 2 sec
+#define COMM_PROC_VERBOSE 0				// Opens a shell window
+#define MAX_DIFF_vSP_READING 0.20		// Percentage
+#define TOL_BAND_FORMULA 0.05			// Percentage (Tolerance band in formula evaluation SP)
+#define MIN_DIFF_vSP 0.5				// Min volt diff to make ChannelStatus blink +/- precentage
 
 namespace CppCLRWinformsProjekt {
 
@@ -246,8 +248,8 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			DataFile.savingInterval = 5; // sec, default 5 sec
 			TimeDataRecording = 5;       // Global setting
 			CreateServerPipes();
-			PercentageDeviationAllow = .001;
-			VoltgDeviationAllow = .01;
+			PercentageDeviationAllow = .005;
+			VoltgDeviationAllow = 0.3;
 			pGroupNames = gcnew List<String^>;
 			pChnlsNames4formulas = gcnew List<String^>;
 			ConnectingOrLoading = false;
@@ -1069,10 +1071,11 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 		}
 #pragma endregion
 
-	//
-	// Timer CLick event callback
-	// Updates User interface values: Voltage/currents readouts, channels states
-	private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) {
+//
+// Timer CLick event callback. Loops to Update the View
+// Updates User interface values: Voltage/currents readouts, channels states
+//
+private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) {
 	System:String^ data2save = "";
 		static int savingTime = 0;
 		static int checkPipeTime = 0;
@@ -1096,14 +1099,15 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 							this->pChnlsViewList[index]->readoutsValues.voltg = elem->second->vValue;
 							this->pChnlsViewList[index]->lbl6_NomCurrtChnlView->Text = elem->second->iValue.ToString("G3");
 							
-							Double viewValue, spValue;
+							Double viewValue, spValue, vSP_ConfValue;
 							// Voltage SetPoint
-							if (Double::TryParse(this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text, viewValue)) {
+							//if (Double::TryParse(this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text, viewValue)) {
+							if (Double::TryParse(this->pChnlsViewList[index]->ChnlCnf->VoltageSet, vSP_ConfValue)) { // 03/03/24
 								if (Double::TryParse(elem->second->vSet, spValue))
-								if (viewValue != spValue && !this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Modified) {
+								if (vSP_ConfValue != spValue && !this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Modified) {
 										// If vSP from Crate Not equal to SP in View then Update View and CnfChnl 16.01.23
 										this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text = elem->second->vSet;
-										//this->pChnlsViewList[index]->ChnlCnf->VoltageSet = this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text;
+										this->pChnlsViewList[index]->ChnlCnf->VoltageSet = elem->second->vSet;
 								}
 							}
 							// Current SetPoint
@@ -1113,11 +1117,21 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 								//this->pChnlsViewList[index]->ChnlCnf->CurrentSet = this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text;
 							//}
 							if (elem->second->onStateValue != nullptr) {
+								elem->second->onStateValue = elem->second->onStateValue->Replace("Channel ", "");
 								this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = elem->second->onStateValue->ToUpper();
-								// Set backgorund color for Channel Status 
+								this->pChnlsViewList[index]->ChnlCnf->State = elem->second->onStateValue;
+								// Set backgorund color for Channel State 
 								if (elem->second->onStateValue->Equals("on")) {
+									
 									//spValue *= 1.20; // Simulating a fail state
-									if (elem->second->vValue < spValue * MAX_DIFF_vSP_READING) {
+									auto voltValue = abs(elem->second->vValue);
+									auto setPointValue = abs(spValue);
+
+									// BLINKING
+									if (!IN_LIMITS(voltValue, (setPointValue-setPointValue * MAX_DIFF_vSP_READING - MIN_DIFF_vSP), (setPointValue + setPointValue * MAX_DIFF_vSP_READING + MIN_DIFF_vSP)))
+									/*if ((voltValue > (setPointValue + setPointValue * MAX_DIFF_vSP_READING + MIN_DIFF_vSP)) ||
+										(voltValue < (setPointValue - setPointValue * MAX_DIFF_vSP_READING - MIN_DIFF_vSP)))*/
+									{
 										// Blink: red
 										if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::Red)
 											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
@@ -1313,7 +1327,7 @@ private: System::Void CrateTableSetupToolStripMenuItem_Click(System::Object^ sen
 		int x = m_ptrMainCrateList->Count; //AddCrateForm->listView1->Items->Count;
 		for (int i = 0; i < x; i++) {
 			LVItem = gcnew ListViewItem();
-			LVItem->Text = m_ptrMainCrateList[i]->Name;
+			LVItem->Text = m_ptrMainCrateList[i]->Name; // Name: "ISEG:crate_S/N"
 			LVItem->SubItems->Add(System::Convert::ToString(m_ptrMainCrateList[i]->Modules));
 			LVItem->SubItems->Add(System::Convert::ToString(m_ptrMainCrateList[i]->Channels));
 			LVItem->SubItems->Add("Connected");

@@ -179,8 +179,8 @@ using namespace System::Collections::Generic;
 				ca_get(DBR_STRING, it->chnlID, strChar);
 				status = ca_pend_io(MAX_WAIT_CA_TIME);
 				String^ str = gcnew String(strChar);
-				Console::Write("Value written (type String): ");
-				Console::WriteLine(str);
+				//Console::Write("Value written (type String): ");
+				//Console::WriteLine(str);
 				break;
 			}
 			case DBR_DOUBLE: {
@@ -190,12 +190,12 @@ using namespace System::Collections::Generic;
 				val = 0;
 				ca_get(DBR_DOUBLE, it->chnlID, &val);
 				status = ca_pend_io(MAX_WAIT_CA_TIME);
-				Console::WriteLine("Value written (type Double): " + val);
+				//Console::WriteLine("Value written (type Double): " + val);
 				break;
 			}
 			case DBR_ENUM:
 			{ // Use to put new channel state order ON/OFF 
-				bool val = System::Convert::ToBoolean(dValue);
+ 				bool val = ( System::Convert::ToBoolean(dValue)); // 04/03/24
 				ca_put(DBR_SHORT, it->chnlID, &val);
 				break;
 			}
@@ -373,8 +373,8 @@ using namespace System::Collections::Generic;
 		
 		IntPtr ip = Marshal::StringToHGlobalAnsi(crateToAdd + ":Status");  //cmd: ISEG:5230225:Status
 		const char* mod = static_cast<const char*>(ip.ToPointer());
-		Console::ForegroundColor = ConsoleColor::White;
-		Console::WriteLine("Searching for crate: ... " + crateToAdd);
+		//Console::ForegroundColor = ConsoleColor::White;
+		//Console::WriteLine("Searching for crate: ... " + crateToAdd);
 		status = getCrateLine(crateToAdd, &line, &crateNumber);
 		char errorStatus[40];
 		chtype chnlDataType;
@@ -492,7 +492,7 @@ using namespace System::Collections::Generic;
 
 		//throw gcnew System::NotImplementedException();
 		Console::ForegroundColor = ConsoleColor::White;
-		Console::WriteLine("Trying adding a Module... ");
+		//Console::WriteLine("Trying adding a Module... ");
 		if (ptrMod == nullptr) return;
 		//ca_task_initialize();
 		String^ baseCmd(Commands->deviceCmd + ":" + line + ":" + modDir);   //cmd: ISEG:5230225:$line$:$modDir$
@@ -644,24 +644,31 @@ using namespace System::Collections::Generic;
 	{
 		//throw gcnew System::NotImplementedException();
 		const char cAux[40] = { ""};
+		try
+		{
+			ptrCrate->Address = System::Convert::ToString(crateDir);                // crateDir = $line$
+			String^ CrateNumber = gcnew System::String((char*)mmbersValues[1]);
+			ptrCrate->CrateNumber = (int)System::Convert::ToDecimal(CrateNumber);
+			String^ ModuleNumber = gcnew System::String((char*)mmbersValues[2]);
+			ptrCrate->ModuleNumber = (int)System::Convert::ToDecimal(ModuleNumber);
+			String^ FirmwareRelease = gcnew System::String((char*)mmbersValues[3]);
+			ptrCrate->FirmwareRelease = FirmwareRelease;
+			String^ FirmwareName = gcnew System::String((char*)mmbersValues[4]);
+			ptrCrate->FirmwareName = FirmwareName;
+			String^ Article = gcnew System::String((char*)mmbersValues[5]);
+			ptrCrate->Article = Article;
+			String^ FanSpeed = gcnew System::String((char*)mmbersValues[6]);
+			ptrCrate->FanSpeed = FanSpeed;
+			String^ SerialNumber = gcnew System::String((char*)mmbersValues[7]);
+			ptrCrate->SerialNumber = SerialNumber;
+			String^ PowerOn = gcnew System::String((char*)mmbersValues[8]);
+			ptrCrate->PowerOn = PowerOn;
+		}
+		catch (const std::exception&)
+		{
 
-		ptrCrate->Address = System::Convert::ToString(crateDir);                // crateDir = $line$
-		String^ CrateNumber = gcnew System::String((char*)mmbersValues[1]);
-		ptrCrate->CrateNumber = (int)System::Convert::ToDecimal(CrateNumber);
-		String^ ModuleNumber = gcnew System::String((char*)mmbersValues[2]);
-		ptrCrate->ModuleNumber = (int)System::Convert::ToDecimal(ModuleNumber);
-		String^ FirmwareRelease = gcnew System::String(( char *)mmbersValues[3]);
-		ptrCrate->FirmwareRelease = FirmwareRelease;
-		String^ FirmwareName = gcnew System::String(( char*)mmbersValues[4]);
-		ptrCrate->FirmwareName = FirmwareName;
-		String^ Article = gcnew System::String(( char*)mmbersValues[5]);
-		ptrCrate->Article = Article;
-		String^ FanSpeed = gcnew System::String(( char*)mmbersValues[6]);
-		ptrCrate->FanSpeed = FanSpeed;
-		String^ SerialNumber = gcnew System::String(( char*)mmbersValues[7]);
-		ptrCrate->SerialNumber = SerialNumber;
-		String^ PowerOn = gcnew System::String(( char*)mmbersValues[8]);
-		ptrCrate->PowerOn = PowerOn;
+		}
+		
 		
 	}
 
@@ -818,7 +825,8 @@ using namespace System::Collections::Generic;
 		ptrchnl->CurrentMeasure = chnlValues[2].ToString(); //CurrentMeasure;
 		ptrchnl->VoltageNominal = chnlValues[3].ToString();
 		ptrchnl->CurrentNominal = chnlValues[4].ToString();
-		if ((chnlValues[3] != 0) && ((chnlValues[4] != 0))) ptrchnl->Enable = true;
+		if ((chnlValues[3] != 0) && ((chnlValues[4] != 0))) 
+			ptrchnl->Enable = true;  // 
 		//ptrchnl->Enable = true; // This line is to Just test if Wiener mod works but NOT luck
 		ptrchnl->IsOn = chnlValues[15].ToString();
 		chnlValues[7] = Math::Round(chnlValues[7], 2);
@@ -865,7 +873,7 @@ using namespace System::Collections::Generic;
 
 	int CaInterface::GetChnlType(String^ cmd, CmdsT* cmdTable, int tableSize)
 	{
-		int chnlType = -1;
+		short chnlType = -1;
 		for (int i = 0; i < tableSize; i++) {
 			{
 				String^ str = gcnew String(cmdTable[i].strCmd);
@@ -878,7 +886,7 @@ using namespace System::Collections::Generic;
 		return chnlType;
 	}
 
-	System::Int16 CaInterface::FreqCmdsMgr(double* doubArray, double* doubArray2, char isOnArray[][40], System::String^ cmd, int index, bool sendCmds)
+	System::Int16 CaInterface::FreqCmdsMgr(double* doubArray, double* doubArray2, char isOnArray[][LONG_CA_ARRAYS_RESP], System::String^ cmd, int index, bool sendCmds)
 	{
 		int crateDir, crateLine, mod, chnl, type;
 
@@ -986,4 +994,19 @@ using namespace System::Collections::Generic;
 			}
 		}
 		return modIndex;
+	}
+
+	void CaInterface::ClearModErrors(String^ crate, short nbrMod)		
+	{
+		short line, crateNbr;
+		throw gcnew System::NotImplementedException();
+
+		if (getCrateLine(crate, &line, &crateNbr) == ECA_NORMAL) {
+			
+			for (short i = 0; i < nbrMod; i++)
+				//cmd: ISEG:5230225:line:mod:doClear
+				(i != nbrMod - 1) ?
+				this->setCAValue((crate + ":" + line + i + ":doClear"), "1", false) :
+				this->setCAValue((crate + ":" + line + i + ":doClear"), "1", true);
+		}
 	}

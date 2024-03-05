@@ -289,7 +289,7 @@ namespace PipesFunc {
 					IntPtr ip = Marshal::StringToHGlobalAnsi(msg);
 					const char* stream = static_cast<const char*>(ip.ToPointer());
 					if (WriteFile(pipe, stream, msg->Length + 1, &numWritten, FILE_FLAG_NO_BUFFERING & FILE_FLAG_WRITE_THROUGH)) {
-						//Console::WriteLine("Sent Msg, length: " + numWritten.ToString());
+						Console::WriteLine("Sent Msg, length: {0} {1}" + numWritten.ToString(), msg);
 					}
 					else {
 						return false;
