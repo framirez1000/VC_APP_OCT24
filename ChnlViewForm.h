@@ -40,7 +40,9 @@ namespace ListTest_CLI_Project {
 		property bool evaluateFormulaAtRamping;
 		property int OriginalPosX;
 		property int OriginalPosY;
+		ToolTip toolTipChnlName;
 		readouts readoutsValues;
+		NamePos_T chnlNamePosInViewTable; // Contains ChnlName & its pos in the ChnlsView to rapid access
 		
 	private: property cliext::vector <ChnlViewForm^>^ ChnlsViewList;
 	private:
@@ -71,6 +73,7 @@ namespace ListTest_CLI_Project {
 			myPtrFreqCmds = gcnew FreqCmdsMapTable_T;
 			myPtrFreqCmds = pFreqCmds;
 			InitializeComponent();
+			chnlNamePosInViewTable = gcnew NamePos_T();
 			
 		}
 
@@ -272,7 +275,7 @@ private: System::Void ChnlViewForm_Load(System::Object^ sender, System::EventArg
 		this->txtBx1_VoltSPChnlView->Text = m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName);
 		this->txtBx2_CurrtSPChnlView->Text = m_mainDataStruct->GetChnlCrrntSet(this->ChnlCnf->ChannelName);;
 	}
-	
+	toolTipChnlName.SetToolTip(this->lbl2_NameChnlView, this->ChnlName);
 }
 // 
 // Change value on textbox1/textbox2 (V/I SPs) validate user input
@@ -297,6 +300,12 @@ private: System::Void TxtBx1_VoltSPChnlView_TextChanged(System::Object^ sender, 
 }
 private: System::Void TxtBx2_CurrtSPChnlView_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 }
+// Clear the ChannelsInFormulaList if the formula checkBox was cleared
+		 public: static void ClearFormList() {
+			 //chnlNamePosInViewTable.
+			 /*if (ChnlCnf->UseVoltageFormula) {
 
+			 }*/
+		 }
 };
 }
