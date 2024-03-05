@@ -16,7 +16,7 @@ System::Void ListTest_CLI_Project::ChnlViewForm::ValidateSetPointInputs() {
 		if (txtBx1_VoltSPChnlView->Modified && !(String::IsNullOrEmpty(spValue))) {
 			//Process user input: "value units", example: 3.2 mV Or 3.2 uV
 			int unitsIn;
-			if (ProcessSPvalStrUserInput(spValue, &unitsIn, true)) { // param3 true for volt
+			if (ProcessSPvalStrUserInput(spValue, &unitsIn, true)) { // Check is string iinput is valid, param3 true for volt
 				Double val = System::Convert::ToDouble(spValue);
 				spValue = ConvertUnits(val, unitsIn, 1); // Converting to Amp from any (mAmp, uAmp)
 			// Convert to numerical value and validate ranges
@@ -114,6 +114,8 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 	// Changes on 05/12/22
 	cnfChannel->vSetPoint = this->ChnlCnf->VoltageSet;
 	cnfChannel->cSetPoint = this->ChnlCnf->CurrentSet;
+	// Save the last formula and compare to new one, if different then clear chnlNamesFormList
+	String^ actualFormula = gcnew String(this->ChnlCnf->VoltageFormula);
 	if (this->ChnlCnf->ChnlType != 0) {
 		cnfChannel->nominalVolt = m_mainDataStruct->GetChnlNomVolt(this->ChnlCnf->ChannelName);
 		cnfChannel->nominalCurrent = m_mainDataStruct->GetChnlNomCrrnt(this->ChnlCnf->ChannelName);
@@ -138,20 +140,21 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 
 	if (cnfChannel->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
 		// Open the form that gets user inputs for voltage/current Ramp Set Points/formulas
-		if ((m_ptrMainCrateList->Count > 0) && (m_mainDataStruct->GetChnlConnectedStatus(this->ChnlCnf->ChannelName))) {
+		if (((m_ptrMainCrateList->Count > 0) && (m_mainDataStruct->GetChnlConnectedStatus(this->ChnlCnf->ChannelName)) || this->ChnlCnf->ChnlType == 0)) {
 			this->txtBx1_VoltSPChnlView->Text = m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName);
 			Double val;
 			Double::TryParse(this->txtBx1_VoltSPChnlView->Text, val);
 			this->vSetPoint = val;
 
 			// Evaluate Voltage Formula
+			if (actualFormula != cnfChannel->formula) chnlNamePosInViewTable.clear(); // 2024
 			if (cnfChannel->chkBx1_UseFormuVltg->Checked) {
 				if ((cnfChannel->formula != nullptr) && (cnfChannel->formula != "")) {
 					// Evaluate expression/formula from the user input
 					this->ChnlCnf->UseVoltageFormula = true;
 					this->ChnlCnf->VoltageFormula = cnfChannel->formula;
 					GetformEvalAtRamp(cnfChannel->formula);
-					if (cnfChannel->NameIndex >= 0) { /////??????
+					if (cnfChannel->NameIndex >= 0 && ChnlCnf->ChnlType != 0) { /////??????
 						vSetPoint = GetFormulaEvaluation(cnfChannel->formula, "Voltage");
 						if (GlobalFuncValidateSP(vSetPoint.ToString(),
 							m_mainDataStruct->GetChnlNomVolt(this->ChnlCnf->ChannelName), 0.0, 1.0)) 
@@ -282,14 +285,15 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 			m_cmdMsg->CleanCmdsLists();
 			String^ strParam = gcnew String("false");
 			if (m_cmdMsg->HrwConntd) {
-				if (this->lbl1_StatusChnlView->Text != "ON") {
+				if (this->ChnlCnf->State->Contains("off"))
+				//if (this->lbl1_StatusChnlView->Text != "ON") 
 					strParam = "true";
-				}
+				
 				SemClass cmdsSem;
 				if (cmdsSem.GetSem(CMDS_SEM)) {
 					m_cmdMsg->GlobalAddSendCmds(this->ChnlCnf->ChannelName + ":Control:setOn",
 						strParam, CHANNEL_CMD, 4, false);
-					Console::WriteLine("Channel {0} included to be: \n", this->ChnlCnf->ViewName);
+					//Console::WriteLine("Channel {0} included to be: \n", this->ChnlCnf->ViewName);
 					m_cmdMsg->StatusBarMsgIndex = 17;
 					m_cmdMsg->GlobalAddSendCmds("", "", -1, 4, true);
 					cmdsSem.ReleaseSem();
@@ -303,27 +307,48 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 	String^ strReadOut = gcnew String("");
 	String^ strSP = gcnew String("");
 	int index = 0;
-	for each (String ^ chnlName in m_pChnlViewNames) {
-		if (formula->Contains(chnlName)) {
-			if (target->Contains("Voltage")) {
-				strReadOut = System::Convert::ToString(this->ChnlsViewList[index / 2]->readoutsValues.voltg);
-				strSP = System::Convert::ToString(this->ChnlsViewList[index / 2]->ChnlCnf->VoltageSet);
+	if (chnlNamePosInViewTable.size() != 0) {
+		for each (NamePos_T::value_type pair in chnlNamePosInViewTable) {
+			if (formula->Contains(pair->first)) {
+				if (target->Contains("Voltage")) {
+					strReadOut = System::Convert::ToString(this->ChnlsViewList[pair->second]->readoutsValues.voltg);
+					strSP = System::Convert::ToString(this->ChnlsViewList[pair->second]->ChnlCnf->VoltageSet);
+				}
+				else if (target->Contains("Current")) {
+					strReadOut = System::Convert::ToString(this->ChnlsViewList[pair->second]->readoutsValues.current);
+					strSP = System::Convert::ToString(this->ChnlsViewList[pair->second]->ChnlCnf->CurrentSet);
+				}
+				formula = formula->Replace(pair->first + "U", strReadOut);
+				formula = formula->Replace(pair->first, strSP);
 			}
-			else if (target->Contains("Current")) {
-				strReadOut = System::Convert::ToString(this->ChnlsViewList[index / 2]->readoutsValues.current);
-				strSP = System::Convert::ToString(this->ChnlsViewList[index / 2]->ChnlCnf->CurrentSet);
-			}
-			formula = formula->Replace(chnlName + "U", strReadOut);
-			formula = formula->Replace(chnlName, strSP);
 		}
-		index++;
+	}
+	else {
+		for each (String ^ chnlName in m_pChnlViewNames) {
+			if (formula->Contains(chnlName)) {
+				if (target->Contains("Voltage")) {
+					strReadOut = System::Convert::ToString(this->ChnlsViewList[index / 2]->readoutsValues.voltg);
+					strSP = System::Convert::ToString(this->ChnlsViewList[index / 2]->ChnlCnf->VoltageSet);
+				}
+				else if (target->Contains("Current")) {
+					strReadOut = System::Convert::ToString(this->ChnlsViewList[index / 2]->readoutsValues.current);
+					strSP = System::Convert::ToString(this->ChnlsViewList[index / 2]->ChnlCnf->CurrentSet);
+				}
+				formula = formula->Replace(chnlName + "U", strReadOut);
+				formula = formula->Replace(chnlName, strSP);
+				chnlNamePosInViewTable.insert(NamePos_T::make_value(chnlName, index / 2));
+			}
+			
+			index++;
+		}
 	}
 	Expression^ e = gcnew Expression(formula);
 	Double val = e->calculate();
 	val = Math::Round(val, 5);
 	//Console::WriteLine("Expression eval: {0}", val);
-	
+
 	return Double(val);
+	
 }
 
 System::Void ListTest_CLI_Project::ChnlViewForm::GetformEvalAtRamp(String^ formula)
