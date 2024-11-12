@@ -190,6 +190,14 @@ ref struct CratesT {
 		if (chnlFound != nullptr) return chnlFound->ChnlType;
 		return -1;
 	}
+
+	int GetChnlCnfListPos(String^ chnlName, List<XML_Classes::Channel^>^ ptrChnlConfList) {
+		EntityPredicate^ searchChnl;
+		searchChnl = gcnew EntityPredicate(chnlName);
+		int pos = ptrChnlConfList->FindIndex(gcnew Predicate<XML_Classes::Channel^>(searchChnl, &EntityPredicate::ChnlMatchedObj));
+
+		return (pos);
+	}
 };
 
 #endif

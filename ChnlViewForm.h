@@ -1,4 +1,5 @@
 #include "CnfChnl.h"
+//#include "XML_ViewSettingsConf_Class.h"
 #pragma once
 
 namespace ListTest_CLI_Project {
@@ -43,6 +44,7 @@ namespace ListTest_CLI_Project {
 		ToolTip toolTipChnlName;
 		readouts readoutsValues;
 		NamePos_T chnlNamePosInViewTable; // Contains ChnlName & its pos in the ChnlsView to rapid access
+		property bool myNameChanged;      // To control wheter chnlNamePosInViewTable must be clear for the Formula Evaluation
 		
 	private: property cliext::vector <ChnlViewForm^>^ ChnlsViewList;
 	private:
@@ -50,6 +52,7 @@ namespace ListTest_CLI_Project {
 		SingletonCmmdClass^ m_cmdMsg;
 		List<Crate^>^ m_ptrMainCrateList;
 		FreqCmdsMapTable_T^ myPtrFreqCmds = nullptr;
+	public: System::Windows::Forms::Label^ label1;
 
 	public: System::Windows::Forms::Label^ lbl_GroupName;
 	public:
@@ -125,6 +128,7 @@ namespace ListTest_CLI_Project {
 		{
 			System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(ChnlViewForm::typeid));
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->txtBx1_StateChnlView = (gcnew System::Windows::Forms::TextBox());
 			this->txtBx2_CurrtSPChnlView = (gcnew System::Windows::Forms::TextBox());
 			this->txtBx1_VoltSPChnlView = (gcnew System::Windows::Forms::TextBox());
@@ -143,6 +147,7 @@ namespace ListTest_CLI_Project {
 			// panel1
 			// 
 			this->panel1->BackColor = System::Drawing::SystemColors::ControlDarkDark;
+			this->panel1->Controls->Add(this->label1);
 			this->panel1->Controls->Add(this->txtBx1_StateChnlView);
 			this->panel1->Controls->Add(this->txtBx2_CurrtSPChnlView);
 			this->panel1->Controls->Add(this->txtBx1_VoltSPChnlView);
@@ -154,6 +159,11 @@ namespace ListTest_CLI_Project {
 			this->panel1->Controls->Add(this->lbl2_NameChnlView);
 			resources->ApplyResources(this->panel1, L"panel1");
 			this->panel1->Name = L"panel1";
+			// 
+			// label1
+			// 
+			resources->ApplyResources(this->label1, L"label1");
+			this->label1->Name = L"label1";
 			// 
 			// txtBx1_StateChnlView
 			// 
@@ -211,6 +221,7 @@ namespace ListTest_CLI_Project {
 			this->lbl2_NameChnlView->AutoEllipsis = true;
 			resources->ApplyResources(this->lbl2_NameChnlView, L"lbl2_NameChnlView");
 			this->lbl2_NameChnlView->Name = L"lbl2_NameChnlView";
+			this->lbl2_NameChnlView->Click += gcnew System::EventHandler(this, &ChnlViewForm::Lbl2_NameChnlView_Click);
 			// 
 			// lbl1_StatusChnlView
 			// 
@@ -254,6 +265,7 @@ namespace ListTest_CLI_Project {
 			this->ResumeLayout(false);
 
 		}
+		
 #pragma endregion
 	
 public: Double GetFormulaEvaluation(String^ formula, String^ target);
@@ -275,8 +287,16 @@ private: System::Void ChnlViewForm_Load(System::Object^ sender, System::EventArg
 		this->txtBx1_VoltSPChnlView->Text = m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName);
 		this->txtBx2_CurrtSPChnlView->Text = m_mainDataStruct->GetChnlCrrntSet(this->ChnlCnf->ChannelName);;
 	}
-	toolTipChnlName.SetToolTip(this->lbl2_NameChnlView, this->ChnlName);
-}
+	System::Array^ chnlNameSplitted = this->ChnlName->Split(':');
+	int length = chnlNameSplitted->Length - 1;
+	String^ toolTip = "Crate: ";
+	if (length >= 2) toolTip = String::Concat(toolTip, chnlNameSplitted->GetValue(2));
+	toolTip = String::Concat(toolTip, ", Module: ");
+	if (length >= 3) toolTip = String::Concat(toolTip, chnlNameSplitted->GetValue(3));
+	toolTip = String::Concat(toolTip, ", Channel: ");
+	if (length >= 4) toolTip = String::Concat(toolTip, chnlNameSplitted->GetValue(4));
+	toolTipChnlName.SetToolTip(lbl2_NameChnlView, toolTip);
+}	
 // 
 // Change value on textbox1/textbox2 (V/I SPs) validate user input
 private: System::Void txtBx1_VoltSPChnlView_Preview(System::Object^ sender, System::Windows::Forms::KeyEventArgs^ e) {
@@ -307,5 +327,10 @@ private: System::Void TxtBx2_CurrtSPChnlView_TextChanged(System::Object^ sender,
 
 			 }*/
 		 }
+private: System::Void Lbl2_NameChnlView_Click(System::Object^ sender, System::EventArgs^ e) {
+}
+	// Update Config Channel List for the modified channel so changes are avaliable for UserViewChanges
+	private: System::Void UpdateCnfChnlList(String^ chnlName, String^ formula, String^ newChnlName, String^ voltLimit, bool useVoltForm, String^ voltSP);
+
 };
 }

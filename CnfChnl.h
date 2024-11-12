@@ -58,6 +58,7 @@ namespace ListTest_CLI_Project {
 		property String^ cSetPoint;         // Same
 		property String^ nominalVolt;       // New - For lbl9_MaxVltg
 		property String^ nominalCurrent;    // New - For lbl11_MaxCrrt
+		property String^ VoltRampLimit;     // 02/10/24 
 
 	private: const int CB_SETCUEBANNER = 0x1703;
 
@@ -73,6 +74,12 @@ namespace ListTest_CLI_Project {
 	public: System::Windows::Forms::Label^ lbl14_ChooseChnl;
 	public: System::Windows::Forms::Label^ label4_CurrentFormuChnl;
 	private: System::Windows::Forms::ComboBox^ cmbBx2_currentFormChnls;
+	private: System::Windows::Forms::Label^ label4;
+	public: System::Windows::Forms::TextBox^ textBox1;
+	private:
+	private: System::Windows::Forms::Label^ label5;
+	public:
+	private: System::Windows::Forms::Label^ label6;
 	private: System::Windows::Forms::Label^ label2;
 		 
 	public:
@@ -97,6 +104,7 @@ namespace ListTest_CLI_Project {
 			String^ iformula = gcnew String("");
 			String^ VoltSPLimit = gcnew String("");
 			String^ CrrntSPLimit = gcnew String("");
+			String^ VoltRampLimit = gcnew String("");
 			//TextRenderer^ textRenderer = gcnew TextRenderer;
 			InitializeComponent();
 			//
@@ -230,6 +238,10 @@ private:
 			this->lbl14_ChooseChnl = (gcnew System::Windows::Forms::Label());
 			this->label4_CurrentFormuChnl = (gcnew System::Windows::Forms::Label());
 			this->cmbBx2_currentFormChnls = (gcnew System::Windows::Forms::ComboBox());
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
+			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->label6 = (gcnew System::Windows::Forms::Label());
 			this->groupBox1->SuspendLayout();
 			this->panel1->SuspendLayout();
 			this->SuspendLayout();
@@ -352,7 +364,7 @@ private:
 			this->chkBx1_UseFormuVltg->AutoSize = true;
 			this->chkBx1_UseFormuVltg->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->chkBx1_UseFormuVltg->ForeColor = System::Drawing::SystemColors::Window;
-			this->chkBx1_UseFormuVltg->Location = System::Drawing::Point(19, 192);
+			this->chkBx1_UseFormuVltg->Location = System::Drawing::Point(19, 224);
 			this->chkBx1_UseFormuVltg->Name = L"chkBx1_UseFormuVltg";
 			this->chkBx1_UseFormuVltg->Size = System::Drawing::Size(125, 17);
 			this->chkBx1_UseFormuVltg->TabIndex = 4;
@@ -364,7 +376,7 @@ private:
 			// 
 			this->lbl6_VltgFrm->AutoSize = true;
 			this->lbl6_VltgFrm->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl6_VltgFrm->Location = System::Drawing::Point(16, 212);
+			this->lbl6_VltgFrm->Location = System::Drawing::Point(16, 244);
 			this->lbl6_VltgFrm->Name = L"lbl6_VltgFrm";
 			this->lbl6_VltgFrm->Size = System::Drawing::Size(237, 13);
 			this->lbl6_VltgFrm->TabIndex = 2;
@@ -374,7 +386,7 @@ private:
 			// 
 			this->txtBx5_VltgFrm->Enabled = false;
 			this->txtBx5_VltgFrm->ForeColor = System::Drawing::SystemColors::WindowFrame;
-			this->txtBx5_VltgFrm->Location = System::Drawing::Point(19, 228);
+			this->txtBx5_VltgFrm->Location = System::Drawing::Point(19, 260);
 			this->txtBx5_VltgFrm->Name = L"txtBx5_VltgFrm";
 			this->txtBx5_VltgFrm->Size = System::Drawing::Size(284, 20);
 			this->txtBx5_VltgFrm->TabIndex = 5;
@@ -384,7 +396,7 @@ private:
 			// 
 			this->lbl7_CrrtFrm->AutoSize = true;
 			this->lbl7_CrrtFrm->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl7_CrrtFrm->Location = System::Drawing::Point(16, 295);
+			this->lbl7_CrrtFrm->Location = System::Drawing::Point(16, 331);
 			this->lbl7_CrrtFrm->Name = L"lbl7_CrrtFrm";
 			this->lbl7_CrrtFrm->Size = System::Drawing::Size(230, 13);
 			this->lbl7_CrrtFrm->TabIndex = 2;
@@ -394,7 +406,7 @@ private:
 			// 
 			this->txtBx6_CrrtFrm->Enabled = false;
 			this->txtBx6_CrrtFrm->ForeColor = System::Drawing::SystemColors::WindowFrame;
-			this->txtBx6_CrrtFrm->Location = System::Drawing::Point(19, 313);
+			this->txtBx6_CrrtFrm->Location = System::Drawing::Point(19, 349);
 			this->txtBx6_CrrtFrm->Name = L"txtBx6_CrrtFrm";
 			this->txtBx6_CrrtFrm->Size = System::Drawing::Size(284, 20);
 			this->txtBx6_CrrtFrm->TabIndex = 8;
@@ -405,7 +417,7 @@ private:
 			this->chkBx2_UseCrrtFrm->AutoSize = true;
 			this->chkBx2_UseCrrtFrm->FlatStyle = System::Windows::Forms::FlatStyle::Popup;
 			this->chkBx2_UseCrrtFrm->ForeColor = System::Drawing::SystemColors::Window;
-			this->chkBx2_UseCrrtFrm->Location = System::Drawing::Point(19, 275);
+			this->chkBx2_UseCrrtFrm->Location = System::Drawing::Point(19, 311);
 			this->chkBx2_UseCrrtFrm->Name = L"chkBx2_UseCrrtFrm";
 			this->chkBx2_UseCrrtFrm->Size = System::Drawing::Size(123, 17);
 			this->chkBx2_UseCrrtFrm->TabIndex = 7;
@@ -417,7 +429,7 @@ private:
 			// 
 			this->lbl8_SwtcGrpCnf->AutoSize = true;
 			this->lbl8_SwtcGrpCnf->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl8_SwtcGrpCnf->Location = System::Drawing::Point(16, 372);
+			this->lbl8_SwtcGrpCnf->Location = System::Drawing::Point(16, 416);
 			this->lbl8_SwtcGrpCnf->Name = L"lbl8_SwtcGrpCnf";
 			this->lbl8_SwtcGrpCnf->Size = System::Drawing::Size(152, 13);
 			this->lbl8_SwtcGrpCnf->TabIndex = 2;
@@ -427,7 +439,7 @@ private:
 			// 
 			this->cmbBx1_SwtGrp->FlatStyle = System::Windows::Forms::FlatStyle::System;
 			this->cmbBx1_SwtGrp->FormattingEnabled = true;
-			this->cmbBx1_SwtGrp->Location = System::Drawing::Point(211, 369);
+			this->cmbBx1_SwtGrp->Location = System::Drawing::Point(211, 413);
 			this->cmbBx1_SwtGrp->Name = L"cmbBx1_SwtGrp";
 			this->cmbBx1_SwtGrp->Size = System::Drawing::Size(92, 21);
 			this->cmbBx1_SwtGrp->TabIndex = 9;
@@ -438,7 +450,7 @@ private:
 			this->lbl9_MaxVltg->AutoSize = true;
 			this->lbl9_MaxVltg->BackColor = System::Drawing::SystemColors::ControlDarkDark;
 			this->lbl9_MaxVltg->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl9_MaxVltg->Location = System::Drawing::Point(115, 405);
+			this->lbl9_MaxVltg->Location = System::Drawing::Point(115, 449);
 			this->lbl9_MaxVltg->Name = L"lbl9_MaxVltg";
 			this->lbl9_MaxVltg->Size = System::Drawing::Size(34, 13);
 			this->lbl9_MaxVltg->TabIndex = 2;
@@ -448,7 +460,7 @@ private:
 			// txtBx7_MaxVltg
 			// 
 			this->txtBx7_MaxVltg->ForeColor = System::Drawing::SystemColors::WindowFrame;
-			this->txtBx7_MaxVltg->Location = System::Drawing::Point(115, 421);
+			this->txtBx7_MaxVltg->Location = System::Drawing::Point(115, 465);
 			this->txtBx7_MaxVltg->Name = L"txtBx7_MaxVltg";
 			this->txtBx7_MaxVltg->Size = System::Drawing::Size(107, 20);
 			this->txtBx7_MaxVltg->TabIndex = 10;
@@ -460,7 +472,7 @@ private:
 			this->lbl11_MaxCrrt->AutoSize = true;
 			this->lbl11_MaxCrrt->BackColor = System::Drawing::SystemColors::ControlDarkDark;
 			this->lbl11_MaxCrrt->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl11_MaxCrrt->Location = System::Drawing::Point(115, 446);
+			this->lbl11_MaxCrrt->Location = System::Drawing::Point(115, 490);
 			this->lbl11_MaxCrrt->Name = L"lbl11_MaxCrrt";
 			this->lbl11_MaxCrrt->Size = System::Drawing::Size(34, 13);
 			this->lbl11_MaxCrrt->TabIndex = 2;
@@ -470,7 +482,7 @@ private:
 			// txtBx8_MaxCrrt
 			// 
 			this->txtBx8_MaxCrrt->ForeColor = System::Drawing::SystemColors::WindowFrame;
-			this->txtBx8_MaxCrrt->Location = System::Drawing::Point(115, 462);
+			this->txtBx8_MaxCrrt->Location = System::Drawing::Point(115, 506);
 			this->txtBx8_MaxCrrt->Name = L"txtBx8_MaxCrrt";
 			this->txtBx8_MaxCrrt->Size = System::Drawing::Size(107, 20);
 			this->txtBx8_MaxCrrt->TabIndex = 11;
@@ -481,7 +493,7 @@ private:
 			// btn1_ClearAllLimits
 			// 
 			this->btn1_ClearAllLimits->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->btn1_ClearAllLimits->Location = System::Drawing::Point(115, 486);
+			this->btn1_ClearAllLimits->Location = System::Drawing::Point(115, 530);
 			this->btn1_ClearAllLimits->Name = L"btn1_ClearAllLimits";
 			this->btn1_ClearAllLimits->Size = System::Drawing::Size(107, 18);
 			this->btn1_ClearAllLimits->TabIndex = 12;
@@ -493,7 +505,7 @@ private:
 			// 
 			this->lbl10_ActVltg->AutoSize = true;
 			this->lbl10_ActVltg->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl10_ActVltg->Location = System::Drawing::Point(16, 424);
+			this->lbl10_ActVltg->Location = System::Drawing::Point(16, 468);
 			this->lbl10_ActVltg->Name = L"lbl10_ActVltg";
 			this->lbl10_ActVltg->Size = System::Drawing::Size(84, 13);
 			this->lbl10_ActVltg->TabIndex = 2;
@@ -503,7 +515,7 @@ private:
 			// 
 			this->lbl12_ActCrrt->AutoSize = true;
 			this->lbl12_ActCrrt->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl12_ActCrrt->Location = System::Drawing::Point(16, 465);
+			this->lbl12_ActCrrt->Location = System::Drawing::Point(16, 509);
 			this->lbl12_ActCrrt->Name = L"lbl12_ActCrrt";
 			this->lbl12_ActCrrt->Size = System::Drawing::Size(82, 13);
 			this->lbl12_ActCrrt->TabIndex = 2;
@@ -528,7 +540,7 @@ private:
 			this->panel1->Controls->Add(this->chkBx3_CtrlPwr);
 			this->panel1->Controls->Add(this->txtBx9_CtrlPwr);
 			this->panel1->Enabled = false;
-			this->panel1->Location = System::Drawing::Point(19, 508);
+			this->panel1->Location = System::Drawing::Point(19, 552);
 			this->panel1->Name = L"panel1";
 			this->panel1->Size = System::Drawing::Size(283, 27);
 			this->panel1->TabIndex = 7;
@@ -547,7 +559,7 @@ private:
 			// 
 			this->btn2_Ok->DialogResult = System::Windows::Forms::DialogResult::OK;
 			this->btn2_Ok->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->btn2_Ok->Location = System::Drawing::Point(20, 561);
+			this->btn2_Ok->Location = System::Drawing::Point(20, 593);
 			this->btn2_Ok->Name = L"btn2_Ok";
 			this->btn2_Ok->Size = System::Drawing::Size(128, 21);
 			this->btn2_Ok->TabIndex = 15;
@@ -559,7 +571,7 @@ private:
 			// 
 			this->btn3_Cancel->DialogResult = System::Windows::Forms::DialogResult::Cancel;
 			this->btn3_Cancel->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->btn3_Cancel->Location = System::Drawing::Point(181, 561);
+			this->btn3_Cancel->Location = System::Drawing::Point(181, 593);
 			this->btn3_Cancel->Name = L"btn3_Cancel";
 			this->btn3_Cancel->Size = System::Drawing::Size(132, 21);
 			this->btn3_Cancel->TabIndex = 16;
@@ -625,7 +637,7 @@ private:
 			// 
 			this->lbl18_CrateSPs->AutoSize = true;
 			this->lbl18_CrateSPs->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl18_CrateSPs->Location = System::Drawing::Point(226, 405);
+			this->lbl18_CrateSPs->Location = System::Drawing::Point(226, 449);
 			this->lbl18_CrateSPs->Name = L"lbl18_CrateSPs";
 			this->lbl18_CrateSPs->Size = System::Drawing::Size(101, 13);
 			this->lbl18_CrateSPs->TabIndex = 2;
@@ -636,7 +648,7 @@ private:
 			// 
 			this->lbl19_CrateV_SP->AutoSize = true;
 			this->lbl19_CrateV_SP->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl19_CrateV_SP->Location = System::Drawing::Point(249, 424);
+			this->lbl19_CrateV_SP->Location = System::Drawing::Point(249, 468);
 			this->lbl19_CrateV_SP->Name = L"lbl19_CrateV_SP";
 			this->lbl19_CrateV_SP->Size = System::Drawing::Size(29, 13);
 			this->lbl19_CrateV_SP->TabIndex = 2;
@@ -647,7 +659,7 @@ private:
 			// 
 			this->lbl20_CrateI_SP->AutoSize = true;
 			this->lbl20_CrateI_SP->ForeColor = System::Drawing::SystemColors::Window;
-			this->lbl20_CrateI_SP->Location = System::Drawing::Point(249, 465);
+			this->lbl20_CrateI_SP->Location = System::Drawing::Point(249, 509);
 			this->lbl20_CrateI_SP->Name = L"lbl20_CrateI_SP";
 			this->lbl20_CrateI_SP->Size = System::Drawing::Size(38, 13);
 			this->lbl20_CrateI_SP->TabIndex = 2;
@@ -658,7 +670,7 @@ private:
 			// 
 			this->label1->AutoSize = true;
 			this->label1->ForeColor = System::Drawing::SystemColors::Window;
-			this->label1->Location = System::Drawing::Point(16, 405);
+			this->label1->Location = System::Drawing::Point(16, 449);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(154, 13);
 			this->label1->TabIndex = 2;
@@ -669,7 +681,7 @@ private:
 			// 
 			this->label2->AutoSize = true;
 			this->label2->ForeColor = System::Drawing::SystemColors::Window;
-			this->label2->Location = System::Drawing::Point(17, 446);
+			this->label2->Location = System::Drawing::Point(17, 490);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(166, 13);
 			this->label2->TabIndex = 2;
@@ -705,7 +717,7 @@ private:
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(238)));
 			this->cmbBx1_ChnlNames->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(64)), static_cast<System::Int32>(static_cast<System::Byte>(64)),
 				static_cast<System::Int32>(static_cast<System::Byte>(0)));
-			this->cmbBx1_ChnlNames->Location = System::Drawing::Point(212, 253);
+			this->cmbBx1_ChnlNames->Location = System::Drawing::Point(212, 297);
 			this->cmbBx1_ChnlNames->Margin = System::Windows::Forms::Padding(4);
 			this->cmbBx1_ChnlNames->Name = L"cmbBx1_ChnlNames";
 			this->cmbBx1_ChnlNames->Size = System::Drawing::Size(92, 19);
@@ -723,7 +735,7 @@ private:
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
 			this->lbl14_ChooseChnl->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(128)),
 				static_cast<System::Int32>(static_cast<System::Byte>(64)), static_cast<System::Int32>(static_cast<System::Byte>(64)));
-			this->lbl14_ChooseChnl->Location = System::Drawing::Point(214, 255);
+			this->lbl14_ChooseChnl->Location = System::Drawing::Point(214, 282);
 			this->lbl14_ChooseChnl->Margin = System::Windows::Forms::Padding(1, 0, 1, 0);
 			this->lbl14_ChooseChnl->Name = L"lbl14_ChooseChnl";
 			this->lbl14_ChooseChnl->Size = System::Drawing::Size(69, 15);
@@ -738,7 +750,7 @@ private:
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
 			this->label4_CurrentFormuChnl->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(128)),
 				static_cast<System::Int32>(static_cast<System::Byte>(64)), static_cast<System::Int32>(static_cast<System::Byte>(64)));
-			this->label4_CurrentFormuChnl->Location = System::Drawing::Point(214, 340);
+			this->label4_CurrentFormuChnl->Location = System::Drawing::Point(214, 369);
 			this->label4_CurrentFormuChnl->Margin = System::Windows::Forms::Padding(1, 0, 1, 0);
 			this->label4_CurrentFormuChnl->Name = L"label4_CurrentFormuChnl";
 			this->label4_CurrentFormuChnl->Size = System::Drawing::Size(69, 15);
@@ -754,15 +766,55 @@ private:
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(238)));
 			this->cmbBx2_currentFormChnls->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(64)),
 				static_cast<System::Int32>(static_cast<System::Byte>(64)), static_cast<System::Int32>(static_cast<System::Byte>(0)));
-			this->cmbBx2_currentFormChnls->Location = System::Drawing::Point(211, 338);
+			this->cmbBx2_currentFormChnls->Location = System::Drawing::Point(211, 385);
 			this->cmbBx2_currentFormChnls->Margin = System::Windows::Forms::Padding(4);
 			this->cmbBx2_currentFormChnls->Name = L"cmbBx2_currentFormChnls";
 			this->cmbBx2_currentFormChnls->Size = System::Drawing::Size(92, 19);
 			this->cmbBx2_currentFormChnls->TabIndex = 18;
 			this->cmbBx2_currentFormChnls->DrawItem += gcnew System::Windows::Forms::DrawItemEventHandler(this, &CnfChnl::cmbBx2_DrawItem);
 			this->cmbBx2_currentFormChnls->SelectedIndexChanged += gcnew System::EventHandler(this, &CnfChnl::cmbBx2_currentFormChnls_IndexChanged);
-			//this->cmbBx2_currentFormChnls->DropDownClosed += gcnew System::EventHandler(this, &CnfChnl::cmBx2_DropClosed);
-			//this->cmbBx2_currentFormChnls->MouseLeave += gcnew System::EventHandler(this, &CnfChnl::cmBx2_MouseLeave);
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->BackColor = System::Drawing::SystemColors::ControlDarkDark;
+			this->label4->ForeColor = System::Drawing::SystemColors::Window;
+			this->label4->Location = System::Drawing::Point(146, 187);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(34, 13);
+			this->label4->TabIndex = 19;
+			this->label4->Text = L"100.0";
+			this->label4->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
+			// 
+			// textBox1
+			// 
+			this->textBox1->ForeColor = System::Drawing::SystemColors::WindowFrame;
+			this->textBox1->Location = System::Drawing::Point(146, 203);
+			this->textBox1->Name = L"textBox1";
+			this->textBox1->Size = System::Drawing::Size(107, 20);
+			this->textBox1->TabIndex = 22;
+			this->textBox1->Text = L"100.0";
+			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->ForeColor = System::Drawing::SystemColors::Window;
+			this->label5->Location = System::Drawing::Point(33, 206);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(89, 13);
+			this->label5->TabIndex = 20;
+			this->label5->Text = L"Act. Voltage Rise";
+			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->ForeColor = System::Drawing::SystemColors::Window;
+			this->label6->Location = System::Drawing::Point(32, 187);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(178, 13);
+			this->label6->TabIndex = 21;
+			this->label6->Text = L"Max. Voltage Rise =                       V";
+			this->label6->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
 			// CnfChnl
 			// 
@@ -771,7 +823,11 @@ private:
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::Black;
 			this->CancelButton = this->btn3_Cancel;
-			this->ClientSize = System::Drawing::Size(325, 597);
+			this->ClientSize = System::Drawing::Size(325, 627);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->textBox1);
+			this->Controls->Add(this->label5);
+			this->Controls->Add(this->label6);
 			this->Controls->Add(this->label4_CurrentFormuChnl);
 			this->Controls->Add(this->cmbBx2_currentFormChnls);
 			this->Controls->Add(this->lbl14_ChooseChnl);
@@ -894,6 +950,8 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 				val = (val / val2) * 100;
 				m_cmdMsg->GlobalAddSendCmds(GlobalGetModName(this->ChnlName) + ":VoltageRampSpeed",
 											val.ToString(), MODULE_CMD, 3, false);
+				/*m_cmdMsg->GlobalAddSendCmds(GlobalGetModName(this->ChnlName) + ":VoltageRampSpeedUp",
+					val.ToString(), CHANNEL_CMD, 3, false);*/
 			}
 			else m_cmdMsg->StatusBarMsgIndex = 16;
 
@@ -918,6 +976,26 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 		}
 		this->UseCurrentFormula = this->chkBx2_UseCrrtFrm->Checked;
 		this->UseVoltageFormula = this->chkBx1_UseFormuVltg->Checked;
+		/*  Max Ramp Speed Limit */
+		if ((textBox1->Modified) && !(String::IsNullOrEmpty(textBox1->Text))) {
+			// Convert to numerical value and validate ranges
+			Double val;
+			if ((MyCrate != nullptr) && Double::TryParse(this->textBox1->Text, val) && GlobalFuncValidateSP(textBox1->Text, this->txtBx7_MaxVltg->Text, 0.0, 1.0))
+			{
+				Double val2;
+				Double::TryParse(this->textBox1->Text, val);
+				Double::TryParse(this->lbl9_MaxVltg->Text, val2);
+				val = (val / val2) * 100;
+				/*m_cmdMsg->GlobalAddSendCmds(GlobalGetModName(this->ChnlName) + ":VoltageRampSpeed",
+											val.ToString(), MODULE_CMD, 3, false);*/
+				m_cmdMsg->GlobalAddSendCmds(GlobalGetModName(this->ChnlName) + ":VoltageRampSpeedMax",
+					val.ToString(), CHANNEL_CMD, 3, false);
+			}
+			else m_cmdMsg->StatusBarMsgIndex = 16;
+
+			textBox1->Modified = false;
+			this->VoltRampLimit = textBox1->Text;
+		} /*  End Max Ramp Speed Limit */
 	}
 	/***** Checking Voltage and Current MAX values changes (For Set Points) *******/
 	if ((txtBx7_MaxVltg->Modified) && (!String::IsNullOrEmpty(txtBx7_MaxVltg->Text))) {
@@ -926,14 +1004,13 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 		if (GlobalFuncValidateSP(txtBx7_MaxVltg->Text, this->lbl9_MaxVltg->Text, 0.0, 1.0)
 			&& (!GlobalFuncValidateSP(txtBx7_MaxVltg->Text, vSetPoint, 0.0, 1.0)))
 		{
-			/*m_cmdMsg->GlobalAddSendCmds(this->ChnlName + ":VoltageSet",
-										txtBx7_MaxVltg->Text, CHANNEL_CMD, 3, false);*/
+			m_cmdMsg->GlobalAddSendCmds(this->ChnlName + ":VoltageLimit",
+										txtBx7_MaxVltg->Text, CHANNEL_CMD, 3, false);
 			this->VoltSP_Limit = txtBx7_MaxVltg->Text;
 			
 		}
 		else m_cmdMsg->StatusBarMsgIndex = 16;
 
-		
 		txtBx7_MaxVltg->Modified = false;
 	}
 	if ((txtBx8_MaxCrrt->Modified) && (!String::IsNullOrEmpty(txtBx8_MaxCrrt->Text))
@@ -959,8 +1036,6 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 	else {
 		;
 	}
-
-	
 	
 	if (m_cmdMsg->cmdExecuted) {
 		// Load channel config info: vRamp, iRamp, vSetPoint, iSetPoint, NominalVolt, NominalCurrent.
@@ -984,7 +1059,7 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 			using namespace Runtime::InteropServices;
 			const char* chars =
 				(const char*)(Marshal::StringToHGlobalAnsi(strName)).ToPointer();
-			os = chars; std::regex rx2("[+/^%* =\\!\\~`'\"\\\\,; \\]\\[\\{\\}&@#$\\%()_]");
+			os = chars; std::regex rx2("[+/^%* =\\!\\~`'\"\\\\; \\]\\[\\{\\}&#$\\%()]");
 			Marshal::FreeHGlobal(IntPtr((void*)chars));
 			std::stringstream result;
 			std::regex_replace(std::ostream_iterator<char>(result),
@@ -994,9 +1069,16 @@ private: System::Void Btn2_Ok_Click(System::Object^ sender, System::EventArgs^ e
 			const std::string& resultstr = result.str();
 			const char* cstr2 = resultstr.c_str();
 			String^ strNewName = gcnew String(cstr2);
-			strNewName = strNewName->TrimStart('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', ':');
-			this->txtBx1_NewChnlName->Text = strNewName;
-			this->lbl1_CnfChnl->Text = this->txtBx1_NewChnlName->Text;
+			strNewName = strNewName->TrimStart('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', ':', '@');
+			if (!m_ChnlNames->Contains(strNewName + "_")) {
+				this->txtBx1_NewChnlName->Text = strNewName;
+				this->lbl1_CnfChnl->Text = this->txtBx1_NewChnlName->Text;
+			}
+			else {
+				this->txtBx1_NewChnlName->Text = this->lbl1_CnfChnl->Text;
+				MessageBox::Show("Channel Names Must be Unique");
+			}
+			
 		}
 		this->txtBx1_NewChnlName->Modified = false;
 	}

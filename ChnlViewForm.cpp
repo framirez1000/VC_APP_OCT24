@@ -16,7 +16,7 @@ System::Void ListTest_CLI_Project::ChnlViewForm::ValidateSetPointInputs() {
 		if (txtBx1_VoltSPChnlView->Modified && !(String::IsNullOrEmpty(spValue))) {
 			//Process user input: "value units", example: 3.2 mV Or 3.2 uV
 			int unitsIn;
-			if (ProcessSPvalStrUserInput(spValue, &unitsIn, true)) { // Check is string iinput is valid, param3 true for volt
+			if (ProcessSPvalStrUserInput(spValue, &unitsIn, true)) { // Check if input string is valid, param3 true for volt
 				Double val = System::Convert::ToDouble(spValue);
 				spValue = ConvertUnits(val, unitsIn, 1); // Converting to Amp from any (mAmp, uAmp)
 			// Convert to numerical value and validate ranges
@@ -32,6 +32,7 @@ System::Void ListTest_CLI_Project::ChnlViewForm::ValidateSetPointInputs() {
 						// Set VChnl Voltage SP to Channel user input
 						this->ChnlCnf->VoltageSet = spValue;
 						this->vSetPoint = System::Convert::ToDouble(spValue);
+						this->UpdateCnfChnlList(this->ChnlCnf->ChannelName, "", "", "", this->ChnlCnf->UseVoltageFormula, spValue);
 					}
 				}
 				else {
@@ -97,7 +98,7 @@ System::Void ListTest_CLI_Project::ChnlViewForm::ValidateSetPointInputs() {
 	txtBx2_CurrtSPChnlView->Modified = false;
 }
 //
-// Open Chnl Conf settings Form (Ramp & set points Limits)
+// Open Chnl Conf settings Form (Chnl name, formulas, Ramp & set points Limits) and check OK return
 System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::Object^ sender, System::EventArgs^ e) {
 	CnfChnl^ cnfChannel = gcnew CnfChnl(m_mainDataStruct, m_pGroupNames, m_pChnlViewNames);
 
@@ -108,12 +109,14 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 	cnfChannel->VoltSP_Limit = this->ChnlCnf->LimitVoltage;
 	cnfChannel->CrrntSP_Limit = this->ChnlCnf->LimitCurrent;
 	cnfChannel->lbl1_CnfChnl->Text = this->ChnlCnf->ViewName;
+	cnfChannel->txtBx1_NewChnlName->Text = this->ChnlCnf->ViewName; // 02/09/24
 	cnfChannel->Group = this->ChnlCnf->Group;
 	cnfChannel->UseVoltageFormula = this->ChnlCnf->UseVoltageFormula;
 	cnfChannel->UseCurrentFormula = this->ChnlCnf->UseCurrentFormula;
 	// Changes on 05/12/22
 	cnfChannel->vSetPoint = this->ChnlCnf->VoltageSet;
 	cnfChannel->cSetPoint = this->ChnlCnf->CurrentSet;
+	//m_mainDataStruct.pMainCnfView
 	// Save the last formula and compare to new one, if different then clear chnlNamesFormList
 	String^ actualFormula = gcnew String(this->ChnlCnf->VoltageFormula);
 	if (this->ChnlCnf->ChnlType != 0) {
@@ -125,9 +128,9 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 		cnfChannel->nominalCurrent = this->ChnlCnf->LimitCurrent;
 	}
 
-	if (this->ChnlCnf->UseVoltageFormula) {
+	//if (this->ChnlCnf->UseVoltageFormula) { // Commented out 02/09/24
 		cnfChannel->formula = this->ChnlCnf->VoltageFormula;
-	}
+	//} // Commented out 02/09/24
 	if (this->ChnlCnf->UseCurrentFormula) {
 		cnfChannel->iformula = this->ChnlCnf->CurrentFormula;
 	}
@@ -141,7 +144,7 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 	if (cnfChannel->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
 		// Open the form that gets user inputs for voltage/current Ramp Set Points/formulas
 		if (((m_ptrMainCrateList->Count > 0) && (m_mainDataStruct->GetChnlConnectedStatus(this->ChnlCnf->ChannelName)) || this->ChnlCnf->ChnlType == 0)) {
-			this->txtBx1_VoltSPChnlView->Text = m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName);
+			if (this->ChnlCnf->ChnlType != 0) this->txtBx1_VoltSPChnlView->Text = m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName);
 			Double val;
 			Double::TryParse(this->txtBx1_VoltSPChnlView->Text, val);
 			this->vSetPoint = val;
@@ -175,7 +178,7 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 			this->txtBx1_VoltSPChnlView->Enabled = !this->ChnlCnf->UseVoltageFormula;
 
 			// For current formula
-			this->txtBx2_CurrtSPChnlView->Text = m_mainDataStruct->GetChnlCrrntSet(this->ChnlCnf->ChannelName);
+			if (this->ChnlCnf->ChnlType != 0) this->txtBx2_CurrtSPChnlView->Text = m_mainDataStruct->GetChnlCrrntSet(this->ChnlCnf->ChannelName);
 			Double::TryParse(this->txtBx2_CurrtSPChnlView->Text, val);
 			this->cSetPoint = val;
 			if (cnfChannel->chkBx2_UseCrrtFrm->Checked) {
@@ -205,28 +208,50 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 			this->txtBx2_CurrtSPChnlView->Enabled = !this->ChnlCnf->UseCurrentFormula;
 
 		}
+
+		// If Voltage Ramp Limit changed
+		if (cnfChannel->VoltRampLimit != this->ChnlCnf->VoltRampLimit) {
+			this->ChnlCnf->VoltRampLimit = cnfChannel->VoltRampLimit;
+			XML_Classes::Channel^ chnl = m_mainDataStruct->GetChnlInView(System::Convert::ToString(this->ChnlCnf->ChannelName), m_mainDataStruct->pMainCnfView);
+			if (chnl != nullptr) chnl->VoltRampLimit = cnfChannel->VoltRampLimit;
+		}
 		// If Channel name changed update view and NamesList
+		String^ formerName = cnfChannel->ChnlName;
 		if (!String::IsNullOrEmpty(cnfChannel->txtBx1_NewChnlName->Text)) {
-			// Search ChnlName in NamesList and change both (SetPoint name and currentValueName _U)
-			int index = m_pChnlViewNames->IndexOf(this->ChnlCnf->ViewName + "_");
-			if (index != -1) {
-				m_pChnlViewNames[index] = cnfChannel->txtBx1_NewChnlName->Text + "_";
-				m_pChnlViewNames[index + 1] = cnfChannel->txtBx1_NewChnlName->Text + "_U";
-			}
-			auto it = myPtrFreqCmds->find(this->ChnlCnf->ChannelName);
-			if (it != myPtrFreqCmds->end()) {
-				FreqCmdsMapTable_T::generic_value gcval = *it;
-				gcval->second->chnlViewName = cnfChannel->txtBx1_NewChnlName->Text;
-			}
-			this->ChnlCnf->ViewName = cnfChannel->txtBx1_NewChnlName->Text;
-			this->lbl2_NameChnlView->Text = cnfChannel->txtBx1_NewChnlName->Text;
-			// Set reload Comm Data for external comm
-			SemClass cmdsSem;
-			if ((this->ChnlCnf->ChnlType != 0) && cmdsSem.GetSem(CMDS_SEM)) {
-				m_cmdMsg->nameChanged = true;
-				cmdsSem.ReleaseSem();
+			String^ newName = gcnew String(cnfChannel->txtBx1_NewChnlName->Text);
+			if (!newName->Equals(ChnlCnf->ViewName)) {
+				this->myNameChanged = true;
+
+				// Search ChnlName in NamesList and change both (SetPoint name and currentValueName _U)
+				int index = m_pChnlViewNames->IndexOf(this->ChnlCnf->ViewName + "_");
+				if (index != -1) {
+					formerName = cnfChannel->ChnlName;
+					// Update Config Channel List for the modified channel so changes are avaliable for UserViewChanges // 30/09/2024
+					//this->UpdateCnfChnlList(formerName->TrimEnd('_'), cnfChannel->formula, cnfChannel->txtBx1_NewChnlName->Text, this->ChnlCnf->LimitVoltage, this->ChnlCnf->UseVoltageFormula, this->txtBx1_VoltSPChnlView->Text);
+					m_pChnlViewNames[index] = cnfChannel->txtBx1_NewChnlName->Text + "_";
+					m_pChnlViewNames[index + 1] = cnfChannel->txtBx1_NewChnlName->Text + "_U";
+				}
+				auto it = myPtrFreqCmds->find(this->ChnlCnf->ChannelName);
+				if (it != myPtrFreqCmds->end()) {
+					FreqCmdsMapTable_T::generic_value gcval = *it;
+					gcval->second->chnlViewName = cnfChannel->txtBx1_NewChnlName->Text;
+				}
+				this->ChnlCnf->ViewName = cnfChannel->txtBx1_NewChnlName->Text;
+				this->lbl2_NameChnlView->Text = cnfChannel->txtBx1_NewChnlName->Text;
+				
+				// Iterate through ChnlsViewList and clear all data struct for Form Eval
+				for each (ChnlViewForm^ chnl in ChnlsViewList) {
+					if (chnl->ChnlCnf->UseVoltageFormula) chnl->chnlNamePosInViewTable.clear();
+				}
+				// Set reload Comm Data for external comm
+				SemClass cmdsSem;
+				if ((this->ChnlCnf->ChnlType != 0) && cmdsSem.GetSem(CMDS_SEM)) {
+					m_cmdMsg->nameChanged = true;					
+					cmdsSem.ReleaseSem();
+				}
 			}
 		}
+		
 		Object^ selectedItem = cnfChannel->cmbBx1_SwtGrp->SelectedItem;
 		if (cnfChannel->cmbBx1_SwtGrp->SelectedItem != nullptr) {
 			this->ChnlCnf->Group = selectedItem->ToString();
@@ -243,7 +268,12 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 			XML_Classes::Channel^ chnl = m_mainDataStruct->GetChnlInView(System::Convert::ToString(this->ChnlCnf->ChannelName), m_mainDataStruct->pMainCnfView);
 			if (chnl != nullptr) chnl->LimitCurrent = cnfChannel->CrrntSP_Limit;
 		}
-	}
+
+		// Update Config Channel List for the modified channel so changes are avaliable for UserViewChanges
+		// 30/09/2024
+		// this->UpdateCnfChnlList(formerName, cnfChannel->formula, this->ChnlCnf->ViewName, this->ChnlCnf->LimitVoltage);
+		this->UpdateCnfChnlList(formerName->TrimEnd('_'), cnfChannel->formula, cnfChannel->txtBx1_NewChnlName->Text, this->ChnlCnf->LimitVoltage, this->ChnlCnf->UseVoltageFormula, this->txtBx1_VoltSPChnlView->Text);
+	} // Ok: end
 	if (m_cmdMsg->cmdExecuted && m_cmdMsg->HrwConntd && (this->ChnlCnf->ChnlType != 0)) {
 		this->txtBx1_VoltSPChnlView->Text = m_mainDataStruct->GetChnlVoltSet(this->ChnlCnf->ChannelName);
 		this->vSetPoint = System::Convert::ToDouble(this->txtBx1_VoltSPChnlView->Text);
@@ -277,7 +307,11 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 		this->ChnlCnf->CurrentFormula = cnfChannel->iformula;
 		this->txtBx2_CurrtSPChnlView->Enabled = false;
 	}
-}
+	this->txtBx1_VoltSPChnlView->ForeColor = System::Drawing::Color::White;
+
+	
+} // End of Btn2_CfgChnlView_Click
+
 //
 // Set ON/OFF channels individually
 	System::Void ListTest_CLI_Project::ChnlViewForm::Btn1_ChnlView_Click(System::Object^ sender, System::EventArgs^ e) {
@@ -302,14 +336,18 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 		}
 	}
 
+//
+// Formula evaluation
+//
 	Double ListTest_CLI_Project::ChnlViewForm::GetFormulaEvaluation(String^ formula, String^  target)
 {
 	String^ strReadOut = gcnew String("");
 	String^ strSP = gcnew String("");
 	int index = 0;
+	
 	if (chnlNamePosInViewTable.size() != 0) {
 		for each (NamePos_T::value_type pair in chnlNamePosInViewTable) {
-			if (formula->Contains(pair->first)) {
+			if (formula->IndexOf(pair->first) >= 0) {
 				if (target->Contains("Voltage")) {
 					strReadOut = System::Convert::ToString(this->ChnlsViewList[pair->second]->readoutsValues.voltg);
 					strSP = System::Convert::ToString(this->ChnlsViewList[pair->second]->ChnlCnf->VoltageSet);
@@ -325,7 +363,7 @@ System::Void ListTest_CLI_Project::ChnlViewForm::Btn2_CfgChnlView_Click(System::
 	}
 	else {
 		for each (String ^ chnlName in m_pChnlViewNames) {
-			if (formula->Contains(chnlName)) {
+			if (formula->IndexOf(chnlName) >= 0) {
 				if (target->Contains("Voltage")) {
 					strReadOut = System::Convert::ToString(this->ChnlsViewList[index / 2]->readoutsValues.voltg);
 					strSP = System::Convert::ToString(this->ChnlsViewList[index / 2]->ChnlCnf->VoltageSet);
@@ -368,3 +406,19 @@ System::Void ListTest_CLI_Project::ChnlViewForm::GetformEvalAtRamp(String^ formu
 //{
 //	return System::Void();
 //}
+
+// Update Config Channel List for the modified channel so changes are avaliable for UserViewChanges
+// 30/09/24 
+	System::Void ListTest_CLI_Project::ChnlViewForm::UpdateCnfChnlList(String^ chnlName, String^ formula,  String^ newChnlName, String^ voltLimit, bool useVoltForm, String^ voltSP) {
+		// Search channel pos in confList
+		int pos = m_mainDataStruct->GetChnlCnfListPos(chnlName, m_mainDataStruct->pMainCnfView);
+		
+		// If found change the attribute
+		if (pos >= 0) {
+			if (!System::String::IsNullOrEmpty(newChnlName)) m_mainDataStruct->pMainCnfView[pos]->ViewName = newChnlName;
+			if (!System::String::IsNullOrEmpty(formula)) m_mainDataStruct->pMainCnfView[pos]->VoltageFormula = formula;
+			if (!System::String::IsNullOrEmpty(voltLimit)) m_mainDataStruct->pMainCnfView[pos]->LimitVoltage = voltLimit;
+			m_mainDataStruct->pMainCnfView[pos]->UseVoltageFormula = useVoltForm;
+			if (!System::String::IsNullOrEmpty(voltSP)) m_mainDataStruct->pMainCnfView[pos]->VoltageSet = voltSP;
+		}
+	}

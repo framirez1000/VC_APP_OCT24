@@ -68,6 +68,7 @@ namespace XML_Classes {
 		property String^ Group;
 		property String^ ViewName;
 		property int units; // 0:kilo, 1:regular, 2:milli, 3:micro
+		property String^ VoltRampLimit;
 		
 	public:
 		Channel() {
@@ -103,6 +104,7 @@ namespace XML_Classes {
 			ChnlDir           = -1;
 			ChnlColor = System::Drawing::Color::AliceBlue;
 			ChnlType          = 1;
+			VoltRampLimit = gcnew String("100");
 		};
 		void cpyData(XML_Classes::Channel^ chnl){
 			ViewName          = chnl->ViewName;
@@ -139,6 +141,7 @@ namespace XML_Classes {
 			ChnlType          = chnl->ChnlType;
 			LimitVoltage      = (ChnlType == 0) ? "1000": chnl->LimitVoltage;
 			units			  = 1; // normal Amp OR Volts
+			VoltRampLimit     = chnl->VoltRampLimit;
 		}
 		String^ GetCrateName()
 		{

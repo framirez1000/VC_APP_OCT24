@@ -38,7 +38,7 @@ System::Void CppCLRWinformsProjekt::MainForm::drawChnlsView(int rows, int column
 			chnlFrame->Controls->Add(str);
 			this->panel1->Controls->Add(chnlFrame);
 			chnlFrame->Show();
-			// Draw channel Views
+			// Create and Draw channel Views
 			pChnlViewItem = gcnew ChnlViewForm(% m_mainDataStruct, %pChnlsViewList, pGroupNames, pChnlsNames4formulas, pFreqCmds);
 			pChnlViewItem->MdiParent = this;
 			pChnlViewItem->ChnlName = CHANNEL_VIEW_DEFAULT_NAME;
@@ -75,11 +75,16 @@ System::Void CppCLRWinformsProjekt::MainForm::drawChnlsView(int rows, int column
 					pChnlViewItem->btn1_ChnlView->Enabled = false;
 					m_cmdMsg->ViewActive = true;
 				}
-				pChnlViewItem->ChnlCnf->ViewName = M_ViewCnfList[i * columns + j]->ViewName;
+				if (pChnlViewItem->ChnlCnf->ViewName != M_ViewCnfList[i * columns + j]->ViewName)
+					M_ViewCnfList[i * columns + j]->ViewName = pChnlViewItem->ChnlCnf->ViewName;
 				pChnlViewItem->ChnlCnf->Row = i;
 				pChnlViewItem->ChnlCnf->Col = j;
 				pChnlViewItem->ModDir = pChnlViewItem->ChnlCnf->ModDir;
-				
+				INT nomVolt;
+				if (INT32::TryParse(pChnlViewItem->ChnlCnf->NomVoltage, nomVolt)) {
+					if (nomVolt < 0) pChnlViewItem->label1->Text = "-";
+					else pChnlViewItem->label1->Text = "+/-";
+				} else pChnlViewItem->label1->Text = "N/A";
 				// If the channel slot in View contains a channel to Monitor
 				// Add channel to channel available for data recording list
 				if (pChnlViewItem->ChnlCnf->Visible) {
@@ -321,6 +326,13 @@ System::Boolean CppCLRWinformsProjekt::MainForm::EvaluateChannelFormula(String^ 
 				this->pChnlsViewList[chnlViewIndex]->txtBx1_VoltSPChnlView->Modified = false;
 			}
 		}
+		if (isnan(newSP)) {
+			this->pChnlsViewList[chnlViewIndex]->txtBx1_VoltSPChnlView->ForeColor = System::Drawing::Color::Red;
+			this->pChnlsViewList[chnlViewIndex]->txtBx1_VoltSPChnlView->BackColor = System::Drawing::Color::Red;
+			return false;
+		}
+		this->pChnlsViewList[chnlViewIndex]->txtBx1_VoltSPChnlView->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(64)), static_cast<System::Int32>(static_cast<System::Byte>(64)),
+			static_cast<System::Int32>(static_cast<System::Byte>(64)));
 		return true;
 	}
 	catch (...)

@@ -288,7 +288,7 @@ using namespace System::Collections::Generic;
 		ca_get(DBR_STRING, crateListID, cCrateList);
 		statusComm = ca_pend_io(MAX_WAIT_CA_TIME);
 		auxCrateList = cCrateList;
-		if (statusComm == ECA_NORMAL) {
+		if (statusComm == ECA_NORMAL && auxCrateList!="") {
 			line = std::stoi(auxCrateList.substr(0, auxCrateList.find(".")));
 			crateNumber = std::stoi(auxCrateList.substr(1 + auxCrateList.find(".")));
 			ip = Marshal::StringToHGlobalAnsi(strCrateSN + ":" + line + ":" + crateNumber + ":PowerOn");  //cmd: ISEG:5230225:CrateNumber
@@ -302,7 +302,7 @@ using namespace System::Collections::Generic;
 		Marshal::FreeHGlobal(ip);
 		*pline = line;
 		*pCrateNumber = crateNumber;
-		return statusComm;
+		return ((statusComm == ECA_NORMAL) && (auxCrateList!=""));
 	}
 
 	bool CaInterface::test_Crate_Comm(String^ device)

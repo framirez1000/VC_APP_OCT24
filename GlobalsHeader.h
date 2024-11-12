@@ -105,6 +105,7 @@ public:
 	property String^ statusBarMsg2;
 	property int StatusBarMsgIndex;
 	property bool nameChanged;
+	property bool nameChangedView;
 public:
 	static property SingletonCmmdClass^ Instance { SingletonCmmdClass^ get() { return % m_instance; } }
 	static System::Void GlobalAddSendCmds(String^ cmd, String^ param, int destiny, int cmdType, bool send)

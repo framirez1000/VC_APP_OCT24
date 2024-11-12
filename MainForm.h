@@ -31,7 +31,7 @@
 #define TIME_2_CLEAN_STATUS_MSG2_SEC 2	// Aprox 2 sec
 #define COMM_PROC_VERBOSE 0				// Opens a shell window
 #define MAX_DIFF_vSP_READING 0.20		// Percentage
-#define TOL_BAND_FORMULA 0.05			// Percentage (Tolerance band in formula evaluation SP)
+#define TOL_BAND_FORMULA 0.000001			// Percentage (Tolerance band in formula evaluation SP)
 #define MIN_DIFF_vSP 0.5				// Min volt diff to make ChannelStatus blink +/- precentage
 
 namespace CppCLRWinformsProjekt {
@@ -1092,6 +1092,7 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 				found = false;
 				for (int index = 0; (index < Rows * Cols) && !found; ++index) {
 					if (pChnlsViewList[index]->Visible) {
+
 						if ((pChnlsViewList[index]->ChnlCnf->Row == elem->second->row) &&
 							(pChnlsViewList[index]->ChnlCnf->Col == elem->second->col)) {
 							this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text = elem->second->vValue.ToString("f5");
@@ -1102,6 +1103,8 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 							Double viewValue, spValue, vSP_ConfValue;
 							// Voltage SetPoint
 							//if (Double::TryParse(this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text, viewValue)) {
+							this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->ForeColor = System::Drawing::Color::White;
+							this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor = System::Drawing::Color::Black;
 							if (Double::TryParse(this->pChnlsViewList[index]->ChnlCnf->VoltageSet, vSP_ConfValue)) { // 03/03/24
 								if (Double::TryParse(elem->second->vSet, spValue))
 								if (vSP_ConfValue != spValue && !this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Modified) {
@@ -1116,7 +1119,7 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 								//this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text = elem->second->vSet.ToString("G3");
 								//this->pChnlsViewList[index]->ChnlCnf->CurrentSet = this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text;
 							//}
-							if (elem->second->onStateValue != nullptr) {
+							if (!(System::String::IsNullOrEmpty(elem->second->onStateValue))) {
 								elem->second->onStateValue = elem->second->onStateValue->Replace("Channel ", "");
 								this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = elem->second->onStateValue->ToUpper();
 								this->pChnlsViewList[index]->ChnlCnf->State = elem->second->onStateValue;
@@ -1170,13 +1173,21 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 								data2save += ", ";
 								data2save += elem->second->temperature.ToString("f6");
 							}
+							
+							
 							// Calculate/evaluate formulas for SP
 							if ((this->pChnlsViewList[index]->ChnlCnf->UseVoltageFormula) && !ConnectingOrLoading) {
 								EvaluateChannelFormula("Voltage", index);
 							}
+							else {
+								if (this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor == System::Drawing::Color::Red)
+									this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(64)), static_cast<System::Int32>(static_cast<System::Byte>(64)),
+										static_cast<System::Int32>(static_cast<System::Byte>(64)));
+							}
 							if ((this->pChnlsViewList[index]->ChnlCnf->UseCurrentFormula) && !ConnectingOrLoading) {
 								EvaluateChannelFormula("Current", index);
 							}
+							
 						}
 
 						if (Double::TryParse(this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text, val)) {
@@ -1195,7 +1206,7 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 
 							}
 						}
-
+						//this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->ForeColor = System::Drawing::Color::White;
 					}
 				}
 			}
@@ -1275,9 +1286,17 @@ private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
 		SetupByGroupDynamicMenu_Builder();
 		m_cmdMsg->HrwConntd = false;
 		this->toolStripStatusLabel1->Text = "System status: Not connected";
-		this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\unplugged2.png")));
+		// this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\unplugged2.png")));
+		try {
+			this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile(Directory::GetCurrentDirectory() + "\\unplugged2.png")));
+			this->toolStripButton1->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile(Directory::GetCurrentDirectory() + "\\switchOff.png")));
+		}
+		catch (Exception^ e) {
+			System::Windows::Forms::MessageBox::Show("Icons not in App Folder");
+		}
 		this->toolStripButton2->Text = "Disconnected";
-		this->toolStripButton1->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\switchOff.png")));
+		//this->toolStripButton1->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\switchOff.png")));
+		//this->toolStripButton1->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile(Directory::GetCurrentDirectory() + "\\switchOff.png")));
 		this->toolStripButton1->Text = "Switch all Channels OFF";
 	}
 
