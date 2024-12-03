@@ -96,6 +96,7 @@
     <LibraryPath>C:\EPICS\base-3.16.2\bin\windows-x64;C:\EPICS\base-3.16.2\lib;C:\EPICS\base-3.16.2\lib\windows-x64;$(LibraryPath)</LibraryPath>
     <SourcePath>C:\EPICS\base-3.16.2\src\ca\client;$(SourcePath)</SourcePath>
     <ReferencePath>C:\Epics_VC_exec;$(ReferencePath)</ReferencePath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -176,6 +177,10 @@
     <ClInclude Include="GroupNaming.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="HelpAbout.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="LogSltnForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -226,6 +231,8 @@
     <ClCompile Include="GlobalSettingsForm.cpp" />
     <ClCompile Include="GroupCnfSltn.cpp" />
     <ClCompile Include="GroupNaming.cpp" />
+    <ClCompile Include="HelpAbout.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="LogSltnForm.cpp" />
     <ClCompile Include="MainForm.cpp" />
     <ClCompile Include="Module.cpp" />
@@ -278,6 +285,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GroupNaming.resx">
       <DependentUpon>GroupNaming.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HelpAbout.resx">
+      <DependentUpon>HelpAbout.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LogSltnForm.resx">
       <DependentUpon>LogSltnForm.h</DependentUpon>

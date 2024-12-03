@@ -24,8 +24,10 @@
 #include "GlobalSettingsForm.h"
 #include "SetStateByGroup.h"
 #include "GroupNaming.h"
+#include "HelpAbout.h"
 #ifndef SEM_H
 #include "CommsShMemPipesClass.h"
+#include "Logger.h"
 #endif
 
 #define TIME_2_CLEAN_STATUS_MSG2_SEC 2	// Aprox 2 sec
@@ -69,11 +71,20 @@ namespace CppCLRWinformsProjekt {
 	/// </summary>
 	public ref class MainForm : public System::Windows::Forms::Form
 	{
-	private: property SetStateByGroup^ pSetStatesByGroup;
-			 property HANDLE Pipe_GuiAlive {
+		ref class App
+		{
+		public:
+			static void OnUnhandled(Object^ sender, ThreadExceptionEventArgs^ e)
+			{
+				MessageBox::Show(e->Exception->Message, "Global Exeception");
+				Application::ExitThread();
+			}
+		};
+		private: property SetStateByGroup^ pSetStatesByGroup;
+		property HANDLE Pipe_GuiAlive {
 				 HANDLE get() { return m_PipeServer; }
 				 void set(HANDLE pipe) { m_PipeServer = pipe; }
-			 }
+		}
 			 property HANDLE Pipe4Data2File {
 				 HANDLE get() { return m_ServerSaveData; }
 				 void set(HANDLE pipe) { m_ServerSaveData = pipe; }
@@ -86,6 +97,7 @@ namespace CppCLRWinformsProjekt {
 				 bool get() { return m_connectedPipeIO; };
 				 void set(bool connected) { m_connectedPipeIO = connected; }
 			 }
+			 property Logger^ pLogger;
 			 property int Rows;
 			 property int Cols;
 			 property CheckedList^ pHrwList;
@@ -171,8 +183,6 @@ namespace CppCLRWinformsProjekt {
 	private: System::Windows::Forms::ToolStripMenuItem^ aboutProgramToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^ onlineHelpToolStripMenuItem;
 
-
-
 	public: System::Windows::Forms::Panel^ panel1;
 
 	public:
@@ -183,8 +193,6 @@ namespace CppCLRWinformsProjekt {
 	private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel1;
 
 	private: System::Windows::Forms::ToolStripSplitButton^ toolStripSplitButton1;
-
-
 
 	private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel3;
 
@@ -208,14 +216,8 @@ private: System::Windows::Forms::ToolStripButton^ TG9;
 private: System::Windows::Forms::ToolStripButton^ TG10;
 private: System::Windows::Forms::ToolStripButton^ TG11;
 private: System::Windows::Forms::ToolStripButton^ TG12;
+private: System::Windows::Forms::ToolStripMenuItem^ helpDocsToolStripMenuItem;
 private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
-
-
-
-
-
-
-
 	
 	public:
 		MainForm(Crate^ crateValueObject)
@@ -309,7 +311,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 		void InitializeComponent(void)
 		{
 			this->components = (gcnew System::ComponentModel::Container());
-			System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(MainForm::typeid));
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->fileToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->configToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -357,6 +358,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->toolStripSeparator9 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->aboutProgramToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->onlineHelpToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->helpDocsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->contextMenuStrip1 = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
 			this->exitToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
@@ -420,6 +422,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->configToolStripMenuItem->Name = L"configToolStripMenuItem";
 			this->configToolStripMenuItem->Size = System::Drawing::Size(207, 22);
 			this->configToolStripMenuItem->Text = L"New Settings";
+			this->configToolStripMenuItem->Visible = false;
 			// 
 			// toolStripMenuItem2
 			// 
@@ -495,6 +498,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->mainSwitchToolStripMenuItem->Name = L"mainSwitchToolStripMenuItem";
 			this->mainSwitchToolStripMenuItem->Size = System::Drawing::Size(200, 22);
 			this->mainSwitchToolStripMenuItem->Text = L"Main switch";
+			this->mainSwitchToolStripMenuItem->Visible = false;
 			// 
 			// switchALLChannelsOffToolStripMenuItem
 			// 
@@ -532,6 +536,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->systemStateToolStripMenuItem->Name = L"systemStateToolStripMenuItem";
 			this->systemStateToolStripMenuItem->Size = System::Drawing::Size(200, 22);
 			this->systemStateToolStripMenuItem->Text = L"System state...";
+			this->systemStateToolStripMenuItem->Visible = false;
 			// 
 			// loggingToolStripMenuItem
 			// 
@@ -552,6 +557,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->automationToolStripMenuItem->Name = L"automationToolStripMenuItem";
 			this->automationToolStripMenuItem->Size = System::Drawing::Size(83, 20);
 			this->automationToolStripMenuItem->Text = L"Automation";
+			this->automationToolStripMenuItem->Visible = false;
 			// 
 			// editCustomScriptsToolStripMenuItem
 			// 
@@ -641,6 +647,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			this->configureToolbarToolStripMenuItem->Name = L"configureToolbarToolStripMenuItem";
 			this->configureToolbarToolStripMenuItem->Size = System::Drawing::Size(177, 22);
 			this->configureToolbarToolStripMenuItem->Text = L"Configure toolbar...";
+			this->configureToolbarToolStripMenuItem->Visible = false;
 			// 
 			// globalSettingsToolStripMenuItem
 			// 
@@ -689,37 +696,49 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			// helpToolStripMenuItem
 			// 
-			this->helpToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {
+			this->helpToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {
 				this->showDebugWindowToolStripMenuItem,
-					this->toolStripSeparator9, this->aboutProgramToolStripMenuItem, this->onlineHelpToolStripMenuItem
+					this->toolStripSeparator9, this->aboutProgramToolStripMenuItem, this->onlineHelpToolStripMenuItem, this->helpDocsToolStripMenuItem
 			});
-			this->helpToolStripMenuItem->Enabled = false;
 			this->helpToolStripMenuItem->Name = L"helpToolStripMenuItem";
 			this->helpToolStripMenuItem->Size = System::Drawing::Size(44, 20);
 			this->helpToolStripMenuItem->Text = L"Help";
 			// 
 			// showDebugWindowToolStripMenuItem
 			// 
+			this->showDebugWindowToolStripMenuItem->Enabled = false;
 			this->showDebugWindowToolStripMenuItem->Name = L"showDebugWindowToolStripMenuItem";
 			this->showDebugWindowToolStripMenuItem->Size = System::Drawing::Size(185, 22);
 			this->showDebugWindowToolStripMenuItem->Text = L"Show debug window";
+			this->showDebugWindowToolStripMenuItem->Visible = false;
 			// 
 			// toolStripSeparator9
 			// 
 			this->toolStripSeparator9->Name = L"toolStripSeparator9";
 			this->toolStripSeparator9->Size = System::Drawing::Size(182, 6);
+			this->toolStripSeparator9->Visible = false;
 			// 
 			// aboutProgramToolStripMenuItem
 			// 
 			this->aboutProgramToolStripMenuItem->Name = L"aboutProgramToolStripMenuItem";
 			this->aboutProgramToolStripMenuItem->Size = System::Drawing::Size(185, 22);
-			this->aboutProgramToolStripMenuItem->Text = L"About program";
+			this->aboutProgramToolStripMenuItem->Text = L"About";
+			this->aboutProgramToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::AboutProgramToolStripMenuItem_Click);
 			// 
 			// onlineHelpToolStripMenuItem
 			// 
+			this->onlineHelpToolStripMenuItem->Enabled = false;
 			this->onlineHelpToolStripMenuItem->Name = L"onlineHelpToolStripMenuItem";
 			this->onlineHelpToolStripMenuItem->Size = System::Drawing::Size(185, 22);
 			this->onlineHelpToolStripMenuItem->Text = L"Online help";
+			this->onlineHelpToolStripMenuItem->Visible = false;
+			// 
+			// helpDocsToolStripMenuItem
+			// 
+			this->helpDocsToolStripMenuItem->Name = L"helpDocsToolStripMenuItem";
+			this->helpDocsToolStripMenuItem->Size = System::Drawing::Size(185, 22);
+			this->helpDocsToolStripMenuItem->Text = L"Help Docs";
+			this->helpDocsToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::HelpDocsToolStripMenuItem_Click);
 			// 
 			// contextMenuStrip1
 			// 
@@ -800,7 +819,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG1->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG1->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG1->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG1.Image")));
 			this->TG1->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG1->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG1->Name = L"TG1";
@@ -814,7 +832,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG2->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG2->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG2->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG2.Image")));
 			this->TG2->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG2->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG2->Name = L"TG2";
@@ -828,7 +845,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG3->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG3->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG3->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG3.Image")));
 			this->TG3->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG3->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG3->Name = L"TG3";
@@ -842,7 +858,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG4->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG4->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG4->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG4.Image")));
 			this->TG4->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG4->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG4->Name = L"TG4";
@@ -856,7 +871,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG5->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG5->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG5->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG5.Image")));
 			this->TG5->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG5->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG5->Name = L"TG5";
@@ -870,7 +884,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG6->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG6->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG6->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG6.Image")));
 			this->TG6->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG6->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG6->Name = L"TG6";
@@ -884,7 +897,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG7->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG7->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG7->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG7.Image")));
 			this->TG7->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG7->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG7->Name = L"TG7";
@@ -898,7 +910,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG8->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG8->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG8->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG8.Image")));
 			this->TG8->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG8->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG8->Name = L"TG8";
@@ -912,7 +923,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG9->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG9->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG9->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG9.Image")));
 			this->TG9->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG9->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG9->Name = L"TG9";
@@ -926,7 +936,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG10->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG10->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG10->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG10.Image")));
 			this->TG10->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG10->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG10->Name = L"TG10";
@@ -940,7 +949,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG11->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG11->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG11->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG11.Image")));
 			this->TG11->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG11->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG11->Name = L"TG11";
@@ -954,7 +962,6 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			// 
 			this->TG12->BackColor = System::Drawing::Color::RosyBrown;
 			this->TG12->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			//this->TG12->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"TG12.Image")));
 			this->TG12->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->TG12->Margin = System::Windows::Forms::Padding(0, 1, 5, 2);
 			this->TG12->Name = L"TG12";
@@ -1095,99 +1102,105 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 
 						if ((pChnlsViewList[index]->ChnlCnf->Row == elem->second->row) &&
 							(pChnlsViewList[index]->ChnlCnf->Col == elem->second->col)) {
-							this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text = elem->second->vValue.ToString("f5");
-							this->pChnlsViewList[index]->vValue = elem->second->vValue;
-							this->pChnlsViewList[index]->readoutsValues.voltg = elem->second->vValue;
-							this->pChnlsViewList[index]->lbl6_NomCurrtChnlView->Text = elem->second->iValue.ToString("G3");
-							
-							Double viewValue, spValue, vSP_ConfValue;
-							// Voltage SetPoint
-							//if (Double::TryParse(this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text, viewValue)) {
-							this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->ForeColor = System::Drawing::Color::White;
-							this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor = System::Drawing::Color::Black;
-							if (Double::TryParse(this->pChnlsViewList[index]->ChnlCnf->VoltageSet, vSP_ConfValue)) { // 03/03/24
-								if (Double::TryParse(elem->second->vSet, spValue))
-								if (vSP_ConfValue != spValue && !this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Modified) {
-										// If vSP from Crate Not equal to SP in View then Update View and CnfChnl 16.01.23
-										this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text = elem->second->vSet;
-										this->pChnlsViewList[index]->ChnlCnf->VoltageSet = elem->second->vSet;
-								}
-							}
-							// Current SetPoint
-							//if (viewValue != spValue) {
-								// If vSP from Crate Not equal to SP in View then Update View and CnfChnl 16.01.23
-								//this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text = elem->second->vSet.ToString("G3");
-								//this->pChnlsViewList[index]->ChnlCnf->CurrentSet = this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text;
-							//}
-							if (!(System::String::IsNullOrEmpty(elem->second->onStateValue))) {
-								elem->second->onStateValue = elem->second->onStateValue->Replace("Channel ", "");
-								this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = elem->second->onStateValue->ToUpper();
-								this->pChnlsViewList[index]->ChnlCnf->State = elem->second->onStateValue;
-								// Set backgorund color for Channel State 
-								if (elem->second->onStateValue->Equals("on")) {
-									
-									//spValue *= 1.20; // Simulating a fail state
-									auto voltValue = abs(elem->second->vValue);
-									auto setPointValue = abs(spValue);
+							try
+							{
+								this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text = elem->second->vValue.ToString("f5");
+								this->pChnlsViewList[index]->vValue = elem->second->vValue;
+								this->pChnlsViewList[index]->readoutsValues.voltg = elem->second->vValue;
+								this->pChnlsViewList[index]->lbl6_NomCurrtChnlView->Text = elem->second->iValue.ToString("G3");
 
-									// BLINKING
-									if (!IN_LIMITS(voltValue, (setPointValue-setPointValue * MAX_DIFF_vSP_READING - MIN_DIFF_vSP), (setPointValue + setPointValue * MAX_DIFF_vSP_READING + MIN_DIFF_vSP)))
-									/*if ((voltValue > (setPointValue + setPointValue * MAX_DIFF_vSP_READING + MIN_DIFF_vSP)) ||
-										(voltValue < (setPointValue - setPointValue * MAX_DIFF_vSP_READING - MIN_DIFF_vSP)))*/
-									{
-										// Blink: red
-										if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::Red)
-											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
-										else
-											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::Red;
-									}
-									else if (((elem->second->isVoltageRamp == "ramping") || (elem->second->isEmergency == "active")
-										|| (elem->second->isTrip == "tripped") || (elem->second->isVoltageLimit == "exceeded"))
-										|| ((elem->second->isVoltageRamp != "ramping")
-											&& ValidateVoltgReading(elem->second->vValue.ToString(), this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text)))
-									{
-										// Blink: yellow
-										if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::GreenYellow)
-											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
-										else
-											this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
-									}
-									else this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
-									
-									found = true;
+								Double viewValue, spValue, vSP_ConfValue;
+								// Voltage SetPoint
+								//if (Double::TryParse(this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text, viewValue)) {
+								this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->ForeColor = System::Drawing::Color::White;
+								this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor = System::Drawing::Color::Black;
+								if (Double::TryParse(this->pChnlsViewList[index]->ChnlCnf->VoltageSet, vSP_ConfValue)) { // 03/03/24
+									if (Double::TryParse(elem->second->vSet, spValue))
+										if (vSP_ConfValue != spValue && !this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Modified) {
+											// If vSP from Crate Not equal to SP in View then Update View and CnfChnl 16.01.23
+											this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text = elem->second->vSet;
+											this->pChnlsViewList[index]->ChnlCnf->VoltageSet = elem->second->vSet;
+										}
 								}
-								else if (elem->second->onStateValue == "off")
-									this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::Gray;
+								// Current SetPoint
+								//if (viewValue != spValue) {
+									// If vSP from Crate Not equal to SP in View then Update View and CnfChnl 16.01.23
+									//this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text = elem->second->vSet.ToString("G3");
+									//this->pChnlsViewList[index]->ChnlCnf->CurrentSet = this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text;
+								//}
+								if (!(System::String::IsNullOrEmpty(elem->second->onStateValue))) {
+									elem->second->onStateValue = elem->second->onStateValue->Replace("Channel ", "");
+									this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = elem->second->onStateValue->ToUpper();
+									this->pChnlsViewList[index]->ChnlCnf->State = elem->second->onStateValue;
+									// Set backgorund color for Channel State 
+									if (elem->second->onStateValue->Equals("on")) {
+
+										//spValue *= 1.20; // Simulating a fail state
+										auto voltValue = abs(elem->second->vValue);
+										auto setPointValue = abs(spValue);
+
+										// BLINKING
+										if (!IN_LIMITS(voltValue, (setPointValue - setPointValue * MAX_DIFF_vSP_READING - MIN_DIFF_vSP), (setPointValue + setPointValue * MAX_DIFF_vSP_READING + MIN_DIFF_vSP)))
+											/*if ((voltValue > (setPointValue + setPointValue * MAX_DIFF_vSP_READING + MIN_DIFF_vSP)) ||
+												(voltValue < (setPointValue - setPointValue * MAX_DIFF_vSP_READING - MIN_DIFF_vSP)))*/
+										{
+											// Blink: red
+											if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::Red)
+												this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
+											else
+												this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::Red;
+										}
+										else if (((elem->second->isVoltageRamp == "ramping") || (elem->second->isEmergency == "active")
+											|| (elem->second->isTrip == "tripped") || (elem->second->isVoltageLimit == "exceeded"))
+											|| ((elem->second->isVoltageRamp != "ramping")
+												&& ValidateVoltgReading(elem->second->vValue.ToString(), this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text)))
+										{
+											// Blink: yellow
+											if (this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor == System::Drawing::Color::GreenYellow)
+												this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::White;
+											else
+												this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
+										}
+										else this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::GreenYellow;
+
+										found = true;
+									}
+									else if (elem->second->onStateValue == "off")
+										this->pChnlsViewList[index]->lbl1_StatusChnlView->BackColor = System::Drawing::Color::Gray;
+								}
+								else this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = "N/A";
+								// Logging channels
+								if (this->pChnlsViewList[index]->ChnlCnf->LoggingChnl) {
+									if (data2save != "") data2save += ", ";
+									data2save += this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text;
+									data2save += ", ";
+									data2save += this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text;
+									data2save += ", ";
+									data2save += this->pChnlsViewList[index]->lbl6_NomCurrtChnlView->Text;
+									data2save += ", ";
+									data2save += this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text;
+									data2save += ", ";
+									data2save += elem->second->temperature.ToString("f6");
+								}
+
+
+								// Calculate/evaluate formulas for SP
+								if ((this->pChnlsViewList[index]->ChnlCnf->UseVoltageFormula) && !ConnectingOrLoading) {
+									EvaluateChannelFormula("Voltage", index);
+								}
+								else {
+									if (this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor == System::Drawing::Color::Red)
+										this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(64)), static_cast<System::Int32>(static_cast<System::Byte>(64)),
+											static_cast<System::Int32>(static_cast<System::Byte>(64)));
+								}
+								if ((this->pChnlsViewList[index]->ChnlCnf->UseCurrentFormula) && !ConnectingOrLoading) {
+									EvaluateChannelFormula("Current", index);
+								}
 							}
-							else this->pChnlsViewList[index]->lbl1_StatusChnlView->Text = "N/A";
-							// Logging channels
-							if (this->pChnlsViewList[index]->ChnlCnf->LoggingChnl) {
-								if (data2save != "") data2save += ", ";
-								data2save += this->pChnlsViewList[index]->lbl4_NomVoltChnlView->Text;
-								data2save += ", ";
-								data2save += this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text;
-								data2save += ", ";
-								data2save += this->pChnlsViewList[index]->lbl6_NomCurrtChnlView->Text;
-								data2save += ", ";
-								data2save += this->pChnlsViewList[index]->txtBx2_CurrtSPChnlView->Text;
-								data2save += ", ";
-								data2save += elem->second->temperature.ToString("f6");
+							catch (const std::exception&)
+							{
+								MessageBox::Show("Error Updating Channel: " + this->pChnlsViewList[index]->ChnlCnf->ChannelName);
 							}
-							
-							
-							// Calculate/evaluate formulas for SP
-							if ((this->pChnlsViewList[index]->ChnlCnf->UseVoltageFormula) && !ConnectingOrLoading) {
-								EvaluateChannelFormula("Voltage", index);
-							}
-							else {
-								if (this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor == System::Drawing::Color::Red)
-									this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(64)), static_cast<System::Int32>(static_cast<System::Byte>(64)),
-										static_cast<System::Int32>(static_cast<System::Byte>(64)));
-							}
-							if ((this->pChnlsViewList[index]->ChnlCnf->UseCurrentFormula) && !ConnectingOrLoading) {
-								EvaluateChannelFormula("Current", index);
-							}
-							
 						}
 
 						if (Double::TryParse(this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->Text, val)) {
@@ -1203,7 +1216,7 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 								this->pChnlsViewList[index]->vValue = System::Convert::ToDouble(m_mainDataStruct.GetChnlVoltMeas(this->pChnlsViewList[index]->ChnlCnf->ChannelName));
 							}
 							catch (Exception^ e) {
-
+								
 							}
 						}
 						//this->pChnlsViewList[index]->txtBx1_VoltSPChnlView->ForeColor = System::Drawing::Color::White;
@@ -1251,20 +1264,33 @@ public: System::Void drawChnlsView(int rows, int columns, System::Object^ Sender
 	// Load Form event callback
 private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
 
-		//int rc = Win32::AllocConsole();
+	/*DISPLAY_DEVICE device;
+	device.cb = sizeof(DISPLAY_DEVICE);
+	bool dev = EnumDisplayDevices(NULL, 0, &device, 0);*/
+
+	//int rc = Win32::AllocConsole();
 		//Console::SetWindowPosition(1, 1);
 		//HWND console = GetConsoleWindow();
 		//RECT r;
 		//GetWindowRect(console, &r); //stores the console's current dimensions
-		//MoveWindow(console, 1305, 1, 500, 1000, TRUE); // 500 width, 1000 height
+		////MoveWindow(console, 1305, 1, 500, 1000, TRUE);
+		//MoveWindow(console, 1, 1, 20, 61, TRUE); // 500 width, 1000 height
 		//Console::WriteLine("Main GUI Thread created");
-		
-		// COMM process creation
+	Application::ThreadException += gcnew
+		ThreadExceptionEventHandler(App::OnUnhandled);
+	// COMM process creation
 	SearchAndKillProc("VC_COMM.exe");
-
 	CommProcessHandler();
-		System::Threading::Thread::Sleep(2 * SAMPLE_TIME_mSEC);
+	
+	System::Threading::Thread::Sleep(2 * SAMPLE_TIME_mSEC);
 		
+		/* Creates Logger delegate  thread  */
+	    pLogger = gcnew Logger(0, 2, 2);
+		ThreadStart^ threadDelegate0 = gcnew ThreadStart(pLogger, &Logger::EntryPoint);
+		Thread^ newThread0 = gcnew Thread(threadDelegate0);
+		newThread0->Start();
+	
+		System::Threading::Thread::Sleep(SAMPLE_TIME_mSEC);
 		/* Creates thread managing comm IO */
 		ThreadStart^ threadDelegate = gcnew ThreadStart(m_ptrMainThreadCA, &ThreadCAClass::ThreadCaEntryPoint);
 		Thread^ newThread = gcnew Thread(threadDelegate);
@@ -1375,7 +1401,7 @@ private: System::Void CrateTableSetupToolStripMenuItem_Click(System::Object^ sen
 //
 // Set selection channels View menu option
 private: System::Void SetupSelectionViewToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
-		 SetSltnViewForm^ vForm = gcnew SetSltnViewForm(% m_mainDataStruct);
+		SetSltnViewForm^ vForm = gcnew SetSltnViewForm(% m_mainDataStruct);
 
 		if (vForm->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
 			m_mainDataStruct.nbrRows = vForm->m_nrRows;
@@ -2011,7 +2037,9 @@ private: System::Void ToolStripMenuItem3_Click(System::Object^ sender, System::E
 		}
 		connectionState = true;
 		this->toolStripStatusLabel1->Text = "System status: Connected";
-		this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\plugged.png")));
+		this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile(Directory::GetCurrentDirectory() + "\\plugged.png")));
+		//this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\plugged.png")));
+		this->toolStripButton2->Text = "Connected";
 		m_cmdMsg->doCaSearch = false;
 		if (SwitchAllChnlsOffAtStart) {
 			m_cmdMsg->statusBarMsg2 = "Switching all channels OFF at start";
@@ -2050,8 +2078,9 @@ private: System::Void ToolStripMenuItem3_Click(System::Object^ sender, System::E
 		if (connectionState) m_cmdMsg->StatusBarMsgIndex = 10; 
 		connectionState = false;
 		this->toolStripStatusLabel1->Text = "System status: Not connected";
-		this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\unplugged2.png")));
-
+		this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile(Directory::GetCurrentDirectory() + "\\unplugged2.png")));
+		//this->toolStripButton2->Image = (cli::safe_cast<System::Drawing::Image^>(Image::FromFile("C:\\GECA_VC_icons\\unplugged2.png")));
+		this->toolStripButton2->Text = "Disconnected";
 	}
 	ConnectingOrLoading = false;
 	newViewCnf = true; //Force to create New Data Structure in COMM
@@ -2361,7 +2390,26 @@ private: System::Void ToggleGroup_Click(System::Object^ sender, System::EventArg
 			 }
 	  System::Void SearchAndKillProc(String^ commProcName);
 
+private: System::Void AboutProgramToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
+	HelpAbout^ about = gcnew HelpAbout();
+
+	about-> ShowDialog();
+	about->Close();
+	
+}
+private: System::Void HelpDocsToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
+	try
+	{
+		System::Diagnostics::Process::Start(Directory::GetCurrentDirectory() + "\\Docs\\VC_Design.pdf");
+	}
+	catch (Exception^ e)
+	{
+		System::Windows::Forms::MessageBox::Show("Could not open the file: " + Directory::GetCurrentDirectory() + "\\Docs\\VC_Design.pdf");
+	}
+	
+}
 };
+	
 }
 
 

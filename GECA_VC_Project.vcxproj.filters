@@ -122,6 +122,12 @@
     <ClInclude Include="CommsShMemPipesClass.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="HelpAbout.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -198,6 +204,12 @@
     </ClCompile>
     <ClCompile Include="ProgressDialogTask.cpp">
       <Filter>Quelldateien\GUI_Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="HelpAbout.cpp">
+      <Filter>Headerdateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

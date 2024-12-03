@@ -48,7 +48,8 @@
 	is not ECA_NORMAL, you MUST check ca_state() of all
 	involved channels before trusting any value.
 	*/
-
+#pragma once
+#undef __CLR_VER
 #include "pch.h"
 
 #include "GlobalsHeader.h"
@@ -134,8 +135,9 @@ using namespace System::Collections::Generic;
 	{
 		short line, crateNbr;
 		
-		ca_task_initialize();
-		if (getCrateLine(device, &line, &crateNbr) == ECA_NORMAL)	
+		//ca_task_initialize();
+		//if (getCrateLine(device, &line, &crateNbr) == ECA_NORMAL)	
+		if (getCrateLine(device, &line, &crateNbr))
 			return true;
 		return false;
 	}
@@ -682,7 +684,7 @@ using namespace System::Collections::Generic;
 		char strCmd[40] = { "" };
 		dbr_time_double chnlStatus;
 		chtype channelsDT[MAX_CONF_CMDS_NMBR];
-		double voltageMeasurement;
+		//double voltageMeasurement;
 				
 		//throw gcnew System::NotImplementedException();
 		Console::ForegroundColor = ConsoleColor::White;
@@ -716,10 +718,10 @@ using namespace System::Collections::Generic;
 			strcat(strCmd, ModConfCmds[12].strCmd);
 			status &= ca_search(strCmd, &ChnlConfCmds[CHNLS_CMDS_NMBR-1].channelID);
 			status &= ca_pend_io(MAX_WAIT_CA_TIME);
-			if (mod == 1 && chnl == 0) {
+			/*if (mod == 1 && chnl == 0) {
 				chnlValues2 = chnlValues;
 				voltageMeasurement = chnlValues.voltMeasure;
-			}
+			}*/
 			Console::Write("Searched: {0} ", status);
 			// End Special
 			baseCmd = (Commands->deviceCmd + ":" + line + ":" + mod + ":" + chnl);   //cmd: ISEG:5230225:$crateLine$:$mod$:$chnl$:Cmd
@@ -774,10 +776,10 @@ using namespace System::Collections::Generic;
 		}
 		
 		status = ca_pend_io(MAX_WAIT_CA_TIME);
-		if (mod == 1 && chnl == 0) {
+		/*if (mod == 1 && chnl == 0) {
 			chnlValues2 = chnlValues;
 			voltageMeasurement = chnlValues.voltMeasure;
-		}
+		}*/
 		baseCmd = (Commands->deviceCmd + ":" + line + ":" + mod);
 		ip = Marshal::StringToHGlobalAnsi(baseCmd);
 		channel = static_cast<const char*>(ip.ToPointer());
@@ -804,8 +806,8 @@ using namespace System::Collections::Generic;
 		status = ca_pend_io(MAX_WAIT_CA_TIME);
 		Console::Write(" Conf: {0} ", status);
 		
-		if (mod == 1 && chnl == 0)
-			chnlValues2 = chnlValues;
+		/*if (mod == 1 && chnl == 0)
+			chnlValues2 = chnlValues;*/
 		// End for testing purposes
 		setAllChnlMmbrs(ptrChnl, doubMembersValues, mod, chnl);
 		Marshal::FreeHGlobal(ip);

@@ -8,7 +8,7 @@
 #define SIMULATE_DATA 1
 #define TIME_SENDING_NEW_CONF_SEC ((2 * 1000) / SAMPLE_TIME_mSEC) // Consider scan rate at 100 msec
 #define NBR_TEST_DATA 3
-#define TIME2WRITE_DATA_SEC 0.5
+#define TIME2WRITE_DATA_SEC 5 //0.5
 #define COUNTER2WRITE_SH_MEM_DATA ((TIME2WRITE_DATA_SEC * 1000) / SAMPLE_TIME_mSEC)
 
 /* Thread entry point fuction */
@@ -23,7 +23,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	double iSP[MAX_VIEW_CHANNELS];
 	//char vSP[MAX_VIEW_CHANNELS][40];
 	//char iSP[MAX_VIEW_CHANNELS][40];
-	
+
 	double chnlsTemperatures[MAX_VIEW_CHANNELS];
 	char isOnStatus[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
 	char isVoltageRamp[MAX_VIEW_CHANNELS][LONG_CA_ARRAYS_RESP];
@@ -44,16 +44,20 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	// time variables
 	int time2TestGUIlife = 0, GUI_timeDown = 0, checkCommTime = 0, check1sec = SAMPLE_TIME_mSEC;
 	double f;
-	bool stop_accessIO = false, GUIPipeConnected = false, hardwareConnected = false;
+	bool stop_accessIO = false, 
+		GUIPipeConnected = false, 
+		hardwareConnected = false,
+		vcCommPipeConnected = false,
+		loggerPipeConnected = false;
 	ini_Map();
-	// PIPES
-	GUIPipeConnected = CreateNamedPipeClient();
-	HANDLE myPipe, commPipe;
-	GUIPipeConnected = PipesFunc::GetPipe(PIPE_SERVER_T, PIPE_THREAD, &myPipe);
-	bool commPipeConnected = PipesFunc::GetPipe(PIPE_CLIENT_T, PIPE_COMM, &commPipe);
+	// PIPES Creation
+	GUIPipeConnected = CreateNamedPipeClient(); // To check if GUI is Up and running ???
+	HANDLE myPipe, loggerPipe;
+	vcCommPipeConnected = PipesFunc::GetPipe(PIPE_SERVER_T, PIPE_THREAD, &myPipe, 16);
+	//loggerPipeConnected = PipesFunc::GetPipe(PIPE_CLIENT_T, PIPE_LOGGER, &loggerPipe, 2);
 	String^ msgIn = gcnew String("");
 	// end PIPES
-	
+
 	//Commands->deviceCmd = "ISEG:5230225";
 	//String^ str = gcnew String("");
 	Globals::globalVar = L"From Thread: started .... and sleeping for 20 sec ..";
@@ -69,21 +73,41 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	//Commands->deviceCmd = "ISEG:5230225";
 	// End test adding crate at startup
 	checkCommTime = (60 * 1000 / sleepScanTime) * CHECK_COMM_IO_TIME_MIN - 10;
+	LogEventMsg("Logger \n");
 	System::Threading::Thread::Sleep(sleepScanTime);
-	
-	// Sh Mem: write data to Comm Proc
+	LogEventMsg("Logger IO start");
+	System::Threading::Thread::Sleep(sleepScanTime);
+	// ***** SM Mem: write data to Comm Proc **
 	TCHAR szName[] = TEXT("Global\MyIOChannelsDataObject");
 	TCHAR szMsg[] = TEXT("Message from VC_IO thread."); // TESTING
 	TCHAR semName[] = SH_MEM_SEM;
-	HANDLE hMapFileServer = NULL, hMapFileClient = NULL; 
+	HANDLE hMapFileServer = NULL, hMapFileClient = NULL;
 	LPCTSTR pBuf;
 	SemClass shMemDataSem, cmdsSem, freqCmdsSem;
 	String^ strDataToComm = gcnew String("");
-	Create_SharedMem_Object(1, szName, &hMapFileServer, &pBuf);
-	OnShMem(WRITE_SH_MEM, pBuf, szMsg, _tcslen(szMsg));
+	bool smOk = false;
+	bool resp;
+	
+
+	{
+		int i;
+		for (i = BUFFER_COUNT_MAX; (i >= BUFFER_COUNT_MIN) && !smOk; i--) {
+			smOk = Create_SharedMem_Object(1, szName, &hMapFileServer, &pBuf, i);
+		}
+		// bool smOk = Create_SharedMem_Object(1, szName, &hMapFileServer, &pBuf);
+		if (smOk) {
+			OnShMem(WRITE_SH_MEM, pBuf, szMsg, _tcslen(szMsg));
+			Commands->statusBarMsg2 = " Shared Mem: " + i + "*" + BUF_SIZE;
+			LogEventMsg("\n Logger INFO:" + Commands->statusBarMsg2);				// Opens logger pipe and writes MSG on it.
+			//resp = PipesFunc::OnPipe(WRITEPIPE, loggerPipe, "Logger " + Commands->statusBarMsg2);
+			
+		}
+		else { Commands->StatusBarMsgIndex = 30; }// SM error}
+	}
 	int time2sendNewConfData = TIME_SENDING_NEW_CONF_SEC;
 	bool writeDataSemCond = false;
 	int time2writeData = COUNTER2WRITE_SH_MEM_DATA;
+	// ****** End Shared Mem SM
 
 	while (!stop_accessIO)
 	{
@@ -92,20 +116,25 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 		// keeping Channels open
 		if (checkCommTime++ >= (60 * 1000 / sleepScanTime) * CHECK_COMM_IO_TIME_MIN) {
 			// For now just check the working crate but must be every crate in MainCrateList
-			DateTime cpCurrentDateTime = DateTime::Now;
+			/*DateTime cpCurrentDateTime = DateTime::Now;
 			String^ strTemp = cpCurrentDateTime.ToShortDateString();
 			strTemp = String::Concat(strTemp, " ");
-			strTemp = String::Concat(strTemp, cpCurrentDateTime.ToLongTimeString());
-			Console::ForegroundColor = ConsoleColor::White;
-			Console::Write(strTemp + " ");
+			strTemp = String::Concat(strTemp, cpCurrentDateTime.ToLongTimeString());*/
+			/*Console::ForegroundColor = ConsoleColor::White;
+			Console::Write(strTemp + " ");*/
 			checkCommTime = 0;
 			if (!hardwareConnected) {
+				/*LogEventMsg("Logger INFO: Comm IO - No Hardware connected");
 				Console::ForegroundColor = ConsoleColor::DarkYellow;
-				Console::WriteLine("Not Comm IO ->.... ISEG:5230225");
+				Console::WriteLine("Not Comm IO ->.... ISEG:5230225");*/
+				;
 			}
+			else; // LogEventMsg("Logger INFO: Comm IO - Connected");
+			
 		}
 
-		// PIPES: Check myPipe for EPICS commands to Crates
+		// PIPES: Check myPipe for EPICS external commands to Crates
+		// Checks msgs from VC_COMM
 		if (PipesFunc::OnPipe(READPIPE, myPipe, msgIn)) {
 			Commands->statusBarMsg2 = "ThreadIO Cmds: " + msgIn;
 			if (cmdsSem.GetSem(CMDS_SEM)) {
@@ -137,7 +166,8 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				}
 				cmdsSem.ReleaseSem();
 			}
-		} // end PIPES
+			LogEventMsg("Logger INFO: Command from VC_COMM " + msgIn);
+		} // end Ext Comm PIPE myPipe
 
 		// Check for new commands from USER (later implementation: namedPipes)
 		if (((Commands != nullptr) && (Commands->execRequest) && (!commFailure)) || (Commands->cmdType == DISCONNECT)) {
@@ -177,8 +207,8 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				break;
 			case SET_CONF_VALUE: {
 				// Go through cmmdsToExc list and send them
-				String^ cmd;
-				String^ cmd2;
+				String^ cmd; String^ cmdLogger = gcnew String("");
+				//String^ cmd2;
 				bool result;
 				int i = 0;
 				static char strCharCmd[_MAX_PATH];
@@ -194,6 +224,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 							Console::WriteLine("All cmds sent successfully ");
 						}
 					}
+					cmdLogger = String::Concat(cmdLogger," " +  cmd);
 					i++;
 				}
 				UpdateLists();
@@ -202,6 +233,8 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				UpdateLists();
 				Commands->execRequest = false;
 				Commands->cmdExecuted = true;
+				//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, "Logger" + cmd);
+				LogEventMsg("Logger INFO: CMDs " + cmdLogger);
 				break;
 			}
 			case CHANNELS_TO_ON_OFF:{
@@ -229,9 +262,11 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 					UpdateLists();
 				Marshal::FreeHGlobal(ip);
 				Commands->cmdExecuted = true;
+				//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd);
+				LogEventMsg("Logger INFO: " + " CMD all channels On/Off");
 				break;
 			}
-			case DISCONNECT:
+			case DISCONNECT: {
 				commFailure = false;
 				commFailTime = 0;
 				sleepScanTime = SAMPLE_TIME_mSEC;
@@ -239,7 +274,11 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				Commands->cmdExecuted = true;
 				cmmFailCrates->Clear();
 				Commands->CleanCmdsLists();
+				String^ cmd = gcnew String("Logger, Disconnect");
+				//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd );
+				LogEventMsg("Logger INFO: Disconnect");
 				break;
+			}
 			case STOP:
 				// Stop iterating, close all channels IO access (epics)
 				stop_accessIO = true;
@@ -271,7 +310,8 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 					Commands->StatusBarMsgIndex = 1;
 					System::Threading::Thread::Sleep(50);
 					for each (CheckedList::value_type crate in pMainHrwList) {
-						if (CA_Interf->DetectHrw(crate->first) == ECA_NORMAL) {
+						//if (CA_Interf->DetectHrw(crate->first) == ECA_NORMAL) {
+						if (CA_Interf->DetectHrw(crate->first)) {
 							CheckedList::const_iterator it = m_HrdwFailingList->find(crate->first);
 							if (it != m_HrdwFailingList->end()) {
 								CheckedList::const_reference cref = *it;
@@ -292,6 +332,13 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 					Commands->statusBarMsg = " - Fail(s): " + m_HrdwFailingList->size()
 						+ " Total crates(s): " + pMainHrwList->size();
 					Commands->StatusBarMsgIndex = 0;
+					String^ cmd = gcnew String("ERROR: Comm IO Failed,");
+					for each (CheckedList::value_type crate in m_HrdwFailingList)
+					{
+						cmd = String::Concat(cmd, " " + crate->first);
+					}
+					//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd);
+					LogEventMsg(MSG_LOGGER_HEADER + cmd);
 				}
 				bool send = false;
 				if (freqCmdsSem.GetSem(FREQ_CMDS_SEM)) {
@@ -319,7 +366,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				if (send && (CA_Interf->FreqCmdsMgr(nullptr, nullptr, nullptr, "", -1, true) != ECA_NORMAL)) {
 					if (commFailTime >= COMM_FAILURE_TIME_SEC * (1000/sleepScanTime)) {
 						
-						sleepScanTime += 1000; // Slow down time scan by 1 sec till 10 sec
+						sleepScanTime += 500; // Slow down time scan by 1 sec till 10 sec
 						if (sleepScanTime > MAX_SAMPLE_TIME_mSEC_AT_FAILURE)
 							sleepScanTime = MAX_SAMPLE_TIME_mSEC_AT_FAILURE;
 						commFailure = true;
@@ -412,36 +459,45 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 					}
 					freqCmdsSem.ReleaseSem();
 				}
-
+				// Write data in SM for CommProc
 				if (time2writeData <= 0) {
 					// Write data to Sh_Mem 
-					strDataToComm = "FRESH";
-					if (cmdsSem.GetSem(CMDS_SEM)) {
-						if (Commands->nameChanged) {
-							strDataToComm = "NEW_CONF";
-							if (--time2sendNewConfData <= 0) {
-								Commands->nameChanged = false;
-								time2sendNewConfData = TIME_SENDING_NEW_CONF_SEC;
+					/*try
+					{*/
+						strDataToComm = "FRESH";
+						if (cmdsSem.GetSem(CMDS_SEM)) {
+							if (Commands->nameChanged) {
+								strDataToComm = "NEW_CONF";
+								if (--time2sendNewConfData <= 0) {
+									Commands->nameChanged = false;
+									time2sendNewConfData = TIME_SENDING_NEW_CONF_SEC;
+								}
 							}
+							writeDataSemCond = true;
+							cmdsSem.ReleaseSem();
 						}
-						writeDataSemCond = true;
-						cmdsSem.ReleaseSem();
-					}
-					if (writeDataSemCond && shMemDataSem.GetSem(semName)) {
-						strDataToComm += ("&" + GetDateAndTime() + "&" + index.ToString() + ";" + (dataToCommProc));
-						wchar_t strArray[1024 * 2]{}, * str = strArray;
-						str = (wchar_t*)Marshal::StringToHGlobalUni(strDataToComm).ToPointer();
-						OnShMem(2, pBuf, str, sizeof(strArray));
-						Marshal::FreeHGlobal(IntPtr(str));
-						shMemDataSem.ReleaseSem();
-						writeDataSemCond = false;
-						time2writeData = COUNTER2WRITE_SH_MEM_DATA;
-						//Commands->statusBarMsg2 = "DataToComm Written";
+						if (writeDataSemCond && smOk && shMemDataSem.GetSem(semName)) {
+							strDataToComm += ("&" + GetDateAndTime() + "&" + index.ToString() + ";" + (dataToCommProc));
+							wchar_t strArray[1024 * 4]{}, * str = strArray;
+							str = (wchar_t*)Marshal::StringToHGlobalUni(strDataToComm).ToPointer();
+							//OnShMem(2, pBuf, str, sizeof(strArray));
+							OnShMem(2, pBuf, str, strDataToComm->Length);
+							Marshal::FreeHGlobal(IntPtr(str));
+							shMemDataSem.ReleaseSem();
+							writeDataSemCond = false;
+							time2writeData = COUNTER2WRITE_SH_MEM_DATA;
+							//Commands->statusBarMsg2 = "DataToComm Written";
 
-					}
-					else {
-						Commands->statusBarMsg2 = "SH_MEM Sem occupaid";
-					}
+						}
+						else {
+							Commands->statusBarMsg2 = "SH_MEM Sem occupaid";
+						}
+					/*}
+					catch (Exception^ e)
+					{
+
+					}*/
+					
 
 				}
 				else time2writeData--;
@@ -461,6 +517,8 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 		System::Threading::Monitor::Exit(crateObject);  // LeaveCriticalSection()
 		
 		Globals::globalVar = System::Convert::ToString(crateObject->voltageMeasurements.at(0)) + " vector legth: " + crateObject->voltageMeasurements.size();
+		
+		// Test Comm Pipe with GUI
 		if (time2TestGUIlife++ >= (1000 / SAMPLE_TIME_mSEC) * TIME_2_TEST_GUI_LIFE_SEC) {
 			if (check1sec++ >= (1000 / SAMPLE_TIME_mSEC)) {
 				Commands->statusBarMsg2 = "Checking Comm IO -> Main GUI... ";
@@ -486,44 +544,54 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 		}
 		// Just for testing ShMem  ////////////////////
 		// Write data to Sh_Mem    ///////////////////
-		if ( !Commands->ViewActive) {
-			if (time2writeData <= 0) {
-				// Write data to Sh_Mem 
-				strDataToComm = "FRESH";
-				if (cmdsSem.GetSem(CMDS_SEM)) {
-					if (Commands->nameChanged) {
-						strDataToComm = "NEW_CONF";
-						if (--time2sendNewConfData <= 0) {
-							Commands->nameChanged = false;
-							time2sendNewConfData = TIME_SENDING_NEW_CONF_SEC;
-						}
-					}
-					writeDataSemCond = true;
-					cmdsSem.ReleaseSem();
-				}
-				else { Commands->statusBarMsg2 = "CMD Sem occupaid 2nd"; }
-				if (writeDataSemCond && shMemDataSem.GetSem(semName)) {
-					strDataToComm += ("&" + GetDateAndTime() + "&" + NBR_TEST_DATA + ";" + GetChannelsData(NBR_TEST_DATA));
-					wchar_t strArray[1024 * 2]{}, * str = strArray;
-					str = (wchar_t*)Marshal::StringToHGlobalUni(strDataToComm).ToPointer();
-					OnShMem(2, pBuf, str, sizeof(strArray));
-					Marshal::FreeHGlobal(IntPtr(str));
-					shMemDataSem.ReleaseSem();
-					writeDataSemCond = false;
-					time2writeData = COUNTER2WRITE_SH_MEM_DATA;
-					//Commands->statusBarMsg2 = "DataToComm Written";
+		//if ( !Commands->ViewActive) {
+		//	if (time2writeData <= 0) {
+		//		// Write data to Sh_Mem 
+		//		strDataToComm = "FRESH";
+		//		if (cmdsSem.GetSem(CMDS_SEM)) {
+		//			if (Commands->nameChanged) {
+		//				strDataToComm = "NEW_CONF";
+		//				if (--time2sendNewConfData <= 0) {
+		//					Commands->nameChanged = false;
+		//					time2sendNewConfData = TIME_SENDING_NEW_CONF_SEC;
+		//				}
+		//			}
+		//			writeDataSemCond = true;
+		//			cmdsSem.ReleaseSem();
+		//		}
+		//		else { Commands->statusBarMsg2 = "CMD Sem occupaid 2nd"; }
+		//		if (writeDataSemCond && shMemDataSem.GetSem(semName)) {
+		//			try
+		//			{
+		//				strDataToComm += ("&" + GetDateAndTime() + "&" + NBR_TEST_DATA + ";" + GetChannelsData(NBR_TEST_DATA));
+		//				wchar_t strArray[1024 * 4]{}, * str = strArray;
+		//				str = (wchar_t*)Marshal::StringToHGlobalUni(strDataToComm).ToPointer();
+		//				//OnShMem(2, pBuf, str, sizeof(strArray));
+		//				OnShMem(2, pBuf, str, strDataToComm->Length);
+		//				Marshal::FreeHGlobal(IntPtr(str));
+		//				shMemDataSem.ReleaseSem();
+		//				writeDataSemCond = false;
+		//				time2writeData = COUNTER2WRITE_SH_MEM_DATA;
+		//				//Commands->statusBarMsg2 = "DataToComm Written";
+		//			}
+		//			catch (const std::exception&)
+		//			{
 
-				}
-				else {
-					Commands->statusBarMsg2 = "SH MEM Sem occupaid 2nd";
-				}
-			}
-			else time2writeData--;
-			// End Sh Mem testing
-		}
+		//			}
+		//			
+
+		//		}
+		//		else {
+		//			Commands->statusBarMsg2 = "SH MEM Sem occupaid 2nd";
+		//		}
+		//	}
+		//	else time2writeData--;
+		//	// End Sh Mem testing
+		//}
 	}
 }
 
+// Create GUI blocking Pipe to Comm with GUI ***Not used yet
 System::Boolean Thread_CA::ThreadCAClass::CreateNamedPipeClient()
 {
 	System::Threading::Thread::Sleep(SAMPLE_TIME_mSEC);
@@ -543,6 +611,7 @@ System::Boolean Thread_CA::ThreadCAClass::CreateNamedPipeClient()
 	return true;
 }
 
+// Test GUI Comm through Pipes
 System::Boolean Thread_CA::ThreadCAClass::TestPipeConn()
 {
 	String^ msg = gcnew String("TEST");
@@ -598,5 +667,38 @@ System::Boolean Thread_CA::ThreadCAClass::chnlHrwConnected(FreqCmdsMapTable_T::v
 			return true;
 	}
 	return false;
+}
+
+System::Void Thread_CA::ThreadCAClass::LogEventMsg(String^ msg)
+{
+	// Opens the Logger Pipe as a Client
+	HANDLE loggerPipe = NULL;
+	if (PipesFunc::GetPipe(PIPE_CLIENT_T, PIPE_LOGGER, &loggerPipe, 2)) {
+		try {
+			DWORD numWritten;
+			IntPtr ip = Marshal::StringToHGlobalAnsi(msg);
+			const char* stream = static_cast<const char*>(ip.ToPointer());
+			if (WriteFile(loggerPipe, stream, msg->Length + 1, &numWritten, FILE_FLAG_NO_BUFFERING & FILE_FLAG_WRITE_THROUGH)) {
+				//Console::WriteLine("Sent Msg, length: {0} {1}" + numWritten.ToString(), msg);
+				;
+			}
+			else {
+				;
+				//Console::WriteLine("Sent unsuccessful: " + numWritten.ToString());
+			}
+			Marshal::FreeHGlobal(ip);
+			
+		}
+		catch (Exception^ e) {
+			//Console::ForegroundColor = ConsoleColor::Red;
+			//Console::WriteLine("Error trying to Write on Comm Pipe");
+			;
+		}
+		CloseHandle(loggerPipe);
+	}
+
+	// Writes MSG on LoggerPipe
+	
+	return System::Void();
 }
 

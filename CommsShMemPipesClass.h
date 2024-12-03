@@ -15,7 +15,9 @@
 #define SERVER_T 1
 #define CLIENT_T 2
 #define MAX_SEM_COUNT 1
-#define BUF_SIZE 1024*9
+#define BUFFER_COUNT_MAX 15
+#define BUFFER_COUNT_MIN 12
+#define BUF_SIZE 1024
 
 //#define PIPE_COMM TEXT("\\\\.\\pipe\\CommPipe")
 #define PIPE_COMM TEXT("\\\\.\\pipe\\CommPipe")
@@ -99,15 +101,17 @@ public:
 	
 	};
 
-inline bool Create_SharedMem_Object(int type, TCHAR* shareMemName, HANDLE* hMapFileOut, LPCTSTR* pBuf) {
+inline bool Create_SharedMem_Object(int type, TCHAR* shareMemName, HANDLE* hMapFileOut, LPCTSTR* pBuf, int i) {
 	HANDLE hMapFile;
+	unsigned buffTotalSize = (BUF_SIZE * i < BUF_SIZE * BUFFER_COUNT_MAX)? BUF_SIZE * i: BUF_SIZE * BUFFER_COUNT_MAX;
+
 	if (type == 1) { // Server mode
 		hMapFile = CreateFileMapping(
 			INVALID_HANDLE_VALUE,    // use paging file
 			NULL,                    // default security
 			PAGE_READWRITE,          // read/write access
 			0,                       // maximum object size (high-order DWORD)
-			BUF_SIZE,                // maximum object size (low-order DWORD)
+			buffTotalSize,                // maximum object size (low-order DWORD)
 			shareMemName);           // name of mapping object
 
 		*hMapFileOut = hMapFile;
@@ -120,7 +124,7 @@ inline bool Create_SharedMem_Object(int type, TCHAR* shareMemName, HANDLE* hMapF
 			FILE_MAP_ALL_ACCESS,                 // read/write permission
 			0,
 			0,
-			BUF_SIZE);
+			buffTotalSize);
 
 		if (*pBuf == NULL)
 		{
@@ -143,6 +147,8 @@ inline bool Create_SharedMem_Object(int type, TCHAR* shareMemName, HANDLE* hMapF
 			{
 				_tprintf(TEXT("Could not open file mapping object (%d).\n"),
 					GetLastError());
+				System::Windows::Forms::MessageBox::Show("Could not open file mapping object");
+				
 				return false;
 			}
 
@@ -150,12 +156,14 @@ inline bool Create_SharedMem_Object(int type, TCHAR* shareMemName, HANDLE* hMapF
 				FILE_MAP_ALL_ACCESS,  // read/write permission
 				0,
 				0,
-				BUF_SIZE);
+				buffTotalSize);
 
 			if (*pBuf == NULL)
 			{
 				_tprintf(TEXT("Could not map view of file (%d).\n"), GetLastError());
 				CloseHandle(hMapFile);
+				System::Windows::Forms::MessageBox::Show("Could not open file mapping object");
+				
 				*hMapFileOut = NULL;
 				return false;
 			}
@@ -170,37 +178,53 @@ inline void DisconnectShMem(HANDLE* hMapFile, LPCTSTR pBuf) {
 }
 
 inline bool OnShMem(int action, LPCTSTR pBuf, TCHAR* pSzMsg, int sizeMsg) {
-	try {
+	
 		if (action == 1) { // READ
 			//MessageBox(NULL, *pBuf, TEXT("Process2"), MB_OK);
 			//Console::WriteLine("MsgFromIO: "); Console::WriteLine(*pBuf);
 			//String^ str(pBuf);
 			String^ str = gcnew String(pBuf);
 			//Console::WriteLine(str);
-			CopyMemory((PVOID)pSzMsg, (TCHAR*)pBuf, str->Length * sizeof(TCHAR));
-			//memcpy(pSzMsg, (TCHAR*)pBuf, sizeMsg );
-			return true;
+			/*try
+			{*/
+				CopyMemory((PVOID)pSzMsg, (TCHAR*)pBuf, str->Length * sizeof(TCHAR));
+				//memcpy(pSzMsg, (TCHAR*)pBuf, sizeMsg );
+				return true;
+			/*}
+			catch (const std::exception&)
+			{
+				System::Windows::Forms::MessageBox::Show("Could not read mapping object");
+				return false;
+			}*/
+
+
 		}
 		else {
 			if (action == 2) { // WRITE
+				//int x = (_tcslen(pSzMsg) * sizeof(TCHAR));
 				int x = (_tcslen(pSzMsg) * sizeof(TCHAR));
 				int y = sizeMsg * sizeof(TCHAR);
-				CopyMemory((PVOID)pBuf, pSzMsg, x);
-				//_getch();
+				__try
+				{
+					CopyMemory((PVOID)pBuf, pSzMsg, sizeMsg);
+				}
+				__except (EXCEPTION_EXECUTE_HANDLER) {
+					System::Windows::Forms::MessageBox::Show("Could not write mapping object");
+					return false;
+				}
 				return true;
 			}
+			return false;
 		}
-	}
-	catch (Exception^ e) {
-		return false;
-	}
-	return false;
+	
+	
+	
 }
 
 namespace PipesFunc {
 	//-- Create PIPE 26/01/23
 
-	inline bool GetPipe(int type, LPCWSTR pipe, HANDLE* outPipe)
+	inline bool GetPipe(int type, LPCWSTR pipe, HANDLE* outPipe, short sizeTimes)
 	{
 		HANDLE hPipe = NULL;
 
@@ -213,8 +237,8 @@ namespace PipesFunc {
 				PIPE_ACCESS_DUPLEX, // FILE_FLAG_FIRST_PIPE_INSTANCE is not needed but forces CreateNamedPipe(..) to fail if the pipe already exists...
 				PIPE_TYPE_MESSAGE | PIPE_ACCESS_INBOUND | PIPE_NOWAIT,
 				PIPE_UNLIMITED_INSTANCES,
-				1024 * 16,
-				1024 * 16,
+				1024 * sizeTimes,
+				1024 * sizeTimes,
 				0,
 				NULL);
 		}
@@ -289,7 +313,8 @@ namespace PipesFunc {
 					IntPtr ip = Marshal::StringToHGlobalAnsi(msg);
 					const char* stream = static_cast<const char*>(ip.ToPointer());
 					if (WriteFile(pipe, stream, msg->Length + 1, &numWritten, FILE_FLAG_NO_BUFFERING & FILE_FLAG_WRITE_THROUGH)) {
-						Console::WriteLine("Sent Msg, length: {0} {1}" + numWritten.ToString(), msg);
+						//Console::WriteLine("Sent Msg, length: {0} {1}" + numWritten.ToString(), msg);
+						;
 					}
 					else {
 						return false;

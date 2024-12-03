@@ -2,6 +2,7 @@
 #include "SlctChnlClass.h"
 #include "Crate.h"
 #include "MainHeader.h"
+#define NBR_VIRTUAL_CHANNELS 32
 
 namespace ListTest_CLI_Project {
 
@@ -215,10 +216,10 @@ private: System::Void Panel1_Paint(System::Object^ sender, System::Windows::Form
 // Chnl in selectable according to enable status from load Crate/Mod/ChnlList proceudre
 private: System::Void SltnChnlForm_Load(System::Object^ sender, System::EventArgs^ e) {
 	
-	cli::array<Windows::Forms::RadioButton^,1>^ radioButtonsChnls = gcnew cli::array<Windows::Forms::RadioButton^>(32);
-	cli::array<Windows::Forms::TableLayoutPanel^, 1> ^ lyoutPanelsChnls = gcnew cli::array<Windows::Forms::TableLayoutPanel^>(32);
+	cli::array<Windows::Forms::RadioButton^,1>^ radioButtonsChnls = gcnew cli::array<Windows::Forms::RadioButton^>(NBR_VIRTUAL_CHANNELS);
+	cli::array<Windows::Forms::TableLayoutPanel^, 1> ^ lyoutPanelsChnls = gcnew cli::array<Windows::Forms::TableLayoutPanel^>(NBR_VIRTUAL_CHANNELS);
 	int posX = 19, posY = 20, panelSizeW = 125, panelSizeH = 40;
-	for (int i = 0; i < 32; i++) {
+	for (int i = 0; i < NBR_VIRTUAL_CHANNELS; i++) {
 		// Plot Virtual channels
 		lyoutPanelsChnls[i] = gcnew Windows::Forms::TableLayoutPanel;
 		lyoutPanelsChnls[i]->ColumnCount = 1;

@@ -171,9 +171,9 @@ System::Boolean CppCLRWinformsProjekt::MainForm::CreateServerPipes()
 	Pipe_GuiAlive = hPipe;
 	
 	HANDLE hPipe2 = CreateNamedPipe(PIPE_DATA_FILE,
-		PIPE_ACCESS_DUPLEX,
+		PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 		PIPE_TYPE_MESSAGE | PIPE_ACCESS_OUTBOUND | PIPE_NOWAIT,
-		PIPE_UNLIMITED_INSTANCES,
+		5, //PIPE_UNLIMITED_INSTANCES,
 		1024 * 16,
 		1024 * 16,
 		0,
@@ -222,7 +222,7 @@ System::Boolean CppCLRWinformsProjekt::MainForm::checkPipe(HANDLE pipe)
 
 System::Void CppCLRWinformsProjekt::MainForm::SendData2Pipe(HANDLE Pipe, String^ Data)
 {
-	char buffer[1024*16];
+	//char buffer[1024*16];
 	DWORD dwWritten=0;
 	m_cmdMsg->statusBarMsg2 = "Sending data to record";
 	Console::WriteLine(m_cmdMsg->statusBarMsg2);

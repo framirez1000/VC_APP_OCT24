@@ -14,9 +14,9 @@
 
 #define MAX_CMD_LENGTH 50
 #define MAX_No_CHANNELS_x_MOD 16
-#define MAX_No_MODULES_x_CRATE 8
+#define MAX_No_MODULES_x_CRATE 10
 
-#define MAX_WAIT_CA_TIME 0.05
+#define MAX_WAIT_CA_TIME 0.099//0.075 // 0.05
 #define MAX_CONN_ITER_NMBR 3
 #define READ 0
 #define WRITE 1
@@ -111,25 +111,25 @@ static CmdsT ChnlConfCmds[MAX_CONF_CMDS_NMBR] = {
 /*15: Channel isVoltageRamp*/								{":isVoltageRamp",		NULL, DBR_ENUM,	  &(chnlValues.aux15),		 0, 0},
 /*16: Channel isEmergency*/									{":isEmergency",		NULL, DBR_ENUM,	  &(chnlValues.aux16),		 0, 0},
 /*17: Channel isCC*/										{":isCC",				NULL, DBR_ENUM,	  &(chnlValues.aux17),		 0, 0},
-	{":isCV", NULL, DBR_ENUM, &(chnlValues.aux18), 0, 0},
-	{":isCurrentBound", NULL, DBR_ENUM, &(chnlValues.aux19), 0, 0},
-	{":isVoltageBound", NULL, DBR_ENUM, &(chnlValues.aux20), 0, 0},
-	{":isExternalInhibit", NULL, DBR_ENUM, &(chnlValues.aux21), 0, 0},
-	{":isTrip", NULL, DBR_ENUM, &(chnlValues.aux22), 0, 0},
-	{":isCurrentLimit", NULL, DBR_ENUM, &(chnlValues.aux23), 0, 0},
-	{":isVoltageLimit", NULL, DBR_ENUM, &(chnlValues.aux24), 0, 0},
-	{":EventInputError", NULL, DBR_ENUM, &(chnlValues.aux25), 0, 0},
-	{":EOn2Off", NULL, DBR_ENUM, &(chnlValues.aux26), 0, 0},
-	{":EventEndOfRamp", NULL, DBR_ENUM, &(chnlValues.aux27), 0, 0},
-	{":EventEmergency", NULL, DBR_ENUM, &(chnlValues.aux28), 0, 0},
-	{":ECC", NULL, DBR_ENUM, &(chnlValues.aux29), 0, 0},
-	{":ECV", NULL, DBR_ENUM, &(chnlValues.aux30), 0, 0},
-	{":ECurrentBounds", NULL, DBR_ENUM, &(chnlValues.aux31), 0, 0},
-	{":EVVoltageBounds", NULL, DBR_ENUM, &(chnlValues.aux32), 0, 0},
-	{":EventExternalInhibit", NULL, DBR_ENUM, &(chnlValues.aux33), 0, 0},
-	{":EventTrip", NULL, DBR_ENUM, &(chnlValues.aux34), 0, 0},
-	{":EventCurrentLimit", NULL, DBR_ENUM, &(chnlValues.aux35), 0, 0},
-	{":EventVoltageLimit", NULL, DBR_ENUM, &(chnlValues.aux36), 0, 0},
+/*18*/	{":isCV", NULL, DBR_ENUM, &(chnlValues.aux18), 0, 0},
+/*19*/	{":isCurrentBound", NULL, DBR_ENUM, &(chnlValues.aux19), 0, 0},
+/*20*/	{":isVoltageBound", NULL, DBR_ENUM, &(chnlValues.aux20), 0, 0},
+/*21*/	{":isExternalInhibit", NULL, DBR_ENUM, &(chnlValues.aux21), 0, 0},
+/*22*/	{":isTrip", NULL, DBR_ENUM, &(chnlValues.aux22), 0, 0},
+/*23*/	{":isCurrentLimit", NULL, DBR_ENUM, &(chnlValues.aux23), 0, 0},
+/*24*/	{":isVoltageLimit", NULL, DBR_ENUM, &(chnlValues.aux24), 0, 0},
+/*25*/	{":EventInputError", NULL, DBR_ENUM, &(chnlValues.aux25), 0, 0},
+/*26*/	{":EOn2Off", NULL, DBR_ENUM, &(chnlValues.aux26), 0, 0},
+/*27*/	{":EventEndOfRamp", NULL, DBR_ENUM, &(chnlValues.aux27), 0, 0},
+/*28*/	{":EventEmergency", NULL, DBR_ENUM, &(chnlValues.aux28), 0, 0},
+/*29*/	{":ECC", NULL, DBR_ENUM, &(chnlValues.aux29), 0, 0},
+/*30*/	{":ECV", NULL, DBR_ENUM, &(chnlValues.aux30), 0, 0},
+/*31*/	{":ECurrentBounds", NULL, DBR_ENUM, &(chnlValues.aux31), 0, 0},
+/*34*/	{":EVVoltageBounds", NULL, DBR_ENUM, &(chnlValues.aux32), 0, 0},
+/*33*/	{":EventExternalInhibit", NULL, DBR_ENUM, &(chnlValues.aux33), 0, 0},
+/*34*/	{":EventTrip", NULL, DBR_ENUM, &(chnlValues.aux34), 0, 0},
+/*35*/	{":EventCurrentLimit", NULL, DBR_ENUM, &(chnlValues.aux35), 0, 0},
+/*36*/	{":EventVoltageLimit", NULL, DBR_ENUM, &(chnlValues.aux36), 0, 0},
 /*37: Watch Out-> Module cmd*/	{":VoltageRampSpeed", NULL, DBR_DOUBLE, &(chnlValues.aux37), 0, 0},
 /*38: Watch Out-> Module cmd*/	{":CurrentRampSpeed", NULL, DBR_DOUBLE, &(chnlValues.aux38), 0, 0}
 };

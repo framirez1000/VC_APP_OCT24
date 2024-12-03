@@ -24,15 +24,17 @@
 #define TIME_2_TEST_GUI_LIFE_SEC 30
 #define DEFAULT_DATA_FILE_PATH "C:\\ProgramData\\GECA_VC_Data\\LOG\\"
 #define DEFAULT_DATA_FILE_NAME "dataFile.csv"
-#define MSG_DATA_HEADER "DATA "
-#define MSG_FILE_NAME_HEADER "NAME "
-#define MSG_CHNLS_NAMES_HEADER "CHNM "
-#define MAX_NMBR_STATUSBAR_MSGS 30
+#define MSG_DATA_HEADER "DATA "                 // Data to Log Header
+#define MSG_FILE_NAME_HEADER "NAME "			// Data to log to change File Name - header3
+#define MSG_CHNLS_NAMES_HEADER "CHNM "			// Data to log header2
+#define MSG_LOGGER_HEADER "Logger "				// Logger header to log systems events
+#define MAX_NMBR_STATUSBAR_MSGS 31
 #define COMM_FAILURE_MSG "COMM FAILURE"
 #define COMM_TRY_MSG "TRYING TO COMMUNICATE"
 #define COMM_BACK_MSG "COMMUNICATION RE-STABLISHED"
 #define PIPE_TESTING_GUI_LIFE TEXT("\\\\.\\pipe\\PipeLifeGUI")
 #define PIPE_DATA_FILE TEXT("\\\\.\\pipe\\PipeDataFile")
+#define PIPE_LOGGER TEXT("\\\\.\\pipe\\loggerPipe")
 //#define PIPE_COMM TEXT("\\\\.\\pipe\\CommPipe")
 //#define PIPE_THREAD TEXT("\\\\.\\pipe\\ThreadPipe")
 //#define SH_MEM_SEM TEXT("Global\MyShMemChannelsDataSem")
@@ -144,8 +146,7 @@ public:
 };
 
 static bool GlobalFuncValidateSP(String^ spValue, String^ nomVltg, double lowLimitFactor, double highLimitFactor) {
-	int i;
-	
+		
 	Double val;
 	if (!Double::TryParse(spValue, val)) {
 		return false;// return false to make undo on textBox
@@ -247,7 +248,7 @@ static cli::array<StatusBarMsgT^>^ GetArrayMsg() {
 		local[27] = gcnew StatusBarMsgT("Not executed, not connection", System::Drawing::Color::Gray, System::Drawing::Color::White, 4);
 		local[28] = gcnew StatusBarMsgT("Setting(s) sent", System::Drawing::Color::Gray, System::Drawing::Color::White, 4);
 		local[29] = gcnew StatusBarMsgT("Not executed, not connection", System::Drawing::Color::Gray, System::Drawing::Color::White, 4);
-		//local[26] = gcnew StatusBarMsgT("Not executed, not connection", System::Drawing::Color::Gray, System::Drawing::Color::White, 5);
+		local[30] = gcnew StatusBarMsgT("Shared Data Comm no active. Close other Apps", System::Drawing::Color::Red, System::Drawing::Color::White, 5);
 	return local;
 }
 
@@ -302,3 +303,4 @@ bool inline ProcessSPvalStrUserInput(String^% strSP, int* pUnitsOut, bool voltag
 	return false;
 	
 }
+

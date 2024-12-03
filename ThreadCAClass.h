@@ -13,11 +13,11 @@
 //#include "GlobalsHeader.h"
 //#include "C:\Epics\base-3.16.2\include\cadef.h"
 
-#define SAMPLE_TIME_mSEC 100
-#define MAX_SAMPLE_TIME_mSEC_AT_FAILURE 10000
+#define SAMPLE_TIME_mSEC 150
+#define MAX_SAMPLE_TIME_mSEC_AT_FAILURE 5000
 #define MAX_GUI_TIME_DOWN_SEC 9
 #define CHECK_COMM_IO_TIME_MIN 6
-#define COMM_FAILURE_TIME_SEC 1 
+#define COMM_FAILURE_TIME_SEC 5
 
 //ref struct RegCmdStruct_T {
 //	int row;
@@ -92,5 +92,8 @@ namespace Thread_CA {
 		System::Boolean TestPipeConn();
 		System::Void UpdateLists();
 		System::Boolean chnlHrwConnected(FreqCmdsMapTable_T::value_type cmd, CheckedList^ cmmFailCrates);
+	    System::Void LogEventMsg(String^ msg);
+		
 	};
+	
 }

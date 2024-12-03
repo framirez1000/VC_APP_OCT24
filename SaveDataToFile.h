@@ -12,11 +12,11 @@ ref class SaveDataToFile
 		HANDLE get() { return m_ClientPipe; }
 		void set(HANDLE pipe) { m_ClientPipe = pipe; }
 	}
-public:	
-	SaveDataToFile() {
-		CrateClientPipe();
-	}
-	System::Void EntryPoint();
-	System::Void CrateClientPipe();
+	public:	
+		SaveDataToFile() {
+			CrateClientPipe();
+		}
+		System::Void EntryPoint();
+		System::Void CrateClientPipe();
 };
 
