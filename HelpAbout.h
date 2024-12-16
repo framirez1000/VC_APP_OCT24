@@ -50,6 +50,7 @@ namespace ListTest_CLI_Project {
 	private: System::Windows::Forms::Label^ label7;
 	private: System::Windows::Forms::Label^ label8;
 	private: System::Windows::Forms::Label^ label9;
+	private: System::Windows::Forms::Label^ label10;
 
 	private: System::Windows::Forms::Label^ label1;
 	
@@ -72,12 +73,13 @@ namespace ListTest_CLI_Project {
 			this->label7 = (gcnew System::Windows::Forms::Label());
 			this->label8 = (gcnew System::Windows::Forms::Label());
 			this->label9 = (gcnew System::Windows::Forms::Label());
+			this->label10 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(44, 69);
+			this->label1->Location = System::Drawing::Point(35, 60);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(197, 13);
 			this->label1->TabIndex = 0;
@@ -86,7 +88,7 @@ namespace ListTest_CLI_Project {
 			// label2
 			// 
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(44, 92);
+			this->label2->Location = System::Drawing::Point(35, 83);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(103, 13);
 			this->label2->TabIndex = 1;
@@ -95,7 +97,7 @@ namespace ListTest_CLI_Project {
 			// label3
 			// 
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(44, 115);
+			this->label3->Location = System::Drawing::Point(35, 106);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(86, 13);
 			this->label3->TabIndex = 2;
@@ -105,7 +107,7 @@ namespace ListTest_CLI_Project {
 			// 
 			this->button1->AccessibleRole = System::Windows::Forms::AccessibleRole::None;
 			this->button1->DialogResult = System::Windows::Forms::DialogResult::OK;
-			this->button1->Location = System::Drawing::Point(95, 282);
+			this->button1->Location = System::Drawing::Point(91, 301);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(75, 23);
 			this->button1->TabIndex = 3;
@@ -130,7 +132,7 @@ namespace ListTest_CLI_Project {
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(44, 138);
+			this->label4->Location = System::Drawing::Point(35, 129);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(109, 13);
 			this->label4->TabIndex = 5;
@@ -139,16 +141,16 @@ namespace ListTest_CLI_Project {
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(44, 161);
+			this->label5->Location = System::Drawing::Point(35, 152);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(153, 13);
 			this->label5->TabIndex = 6;
-			this->label5->Text = L"EPICS Delay Response: 75 ms";
+			this->label5->Text = L"EPICS Delay Response: 99 ms";
 			// 
 			// label6
 			// 
 			this->label6->AutoSize = true;
-			this->label6->Location = System::Drawing::Point(44, 184);
+			this->label6->Location = System::Drawing::Point(35, 175);
 			this->label6->Name = L"label6";
 			this->label6->Size = System::Drawing::Size(47, 13);
 			this->label6->TabIndex = 7;
@@ -157,7 +159,7 @@ namespace ListTest_CLI_Project {
 			// label7
 			// 
 			this->label7->AutoSize = true;
-			this->label7->Location = System::Drawing::Point(44, 207);
+			this->label7->Location = System::Drawing::Point(35, 198);
 			this->label7->Name = L"label7";
 			this->label7->Size = System::Drawing::Size(220, 13);
 			this->label7->TabIndex = 8;
@@ -187,12 +189,23 @@ namespace ListTest_CLI_Project {
 			this->label9->Text = L"---------------------------------------------------------------------------------"
 				L"---------";
 			// 
+			// label10
+			// 
+			this->label10->AutoSize = true;
+			this->label10->Location = System::Drawing::Point(35, 221);
+			this->label10->Name = L"label10";
+			this->label10->Size = System::Drawing::Size(231, 52);
+			this->label10->TabIndex = 11;
+			this->label10->Text = L"Directories/Files:\r\n  Log: WorkingDir/Log/Logs.csv\r\n  Data: C:/ProgramData/Voltag"
+				L"eControllerNew/\r\n                 LOG/textfile.csv";
+			// 
 			// HelpAbout
 			// 
 			this->AcceptButton = this->button1;
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(284, 373);
+			this->Controls->Add(this->label10);
 			this->Controls->Add(this->label9);
 			this->Controls->Add(this->label8);
 			this->Controls->Add(this->label7);

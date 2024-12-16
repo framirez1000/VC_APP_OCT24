@@ -22,18 +22,18 @@
 #define WRITE 1
 
 // Enum defintions for using string values in case statement
-static enum EnumStringValue {
-	evNotDefined,
-	evVoltageRamp,
-	evCurrentRamp,
-	evVoltageSet,
-	evCurrentSet
-};
+//static enum EnumStringValue {
+//	evNotDefined,
+//	evVoltageRamp,
+//	evCurrentRamp,
+//	evVoltageSet,
+//	evCurrentSet
+//};
 using namespace System;
 //using namespace std;
 
 // Map to associate the strings with the enum values
-static std::map<std::string, EnumStringValue> m_SwitchCmdMap;
+//static std::map<std::string, EnumStringValue> m_SwitchCmdMap;
 
 
 typedef struct CmdsT {
@@ -177,8 +177,8 @@ using namespace std;
 
 #endif // !_EPICS_INTERFACE_H
 	static void ini_Map() {
-		m_SwitchCmdMap[(std::string)":VoltageRampSpeed"] = evVoltageRamp;
+		/*m_SwitchCmdMap[(std::string)":VoltageRampSpeed"] = evVoltageRamp;
 		m_SwitchCmdMap[":CurrentRampSpeed"] = evCurrentRamp;
 		m_SwitchCmdMap[":VoltageSet"] = evVoltageSet;
-		m_SwitchCmdMap[":CurrentSet"] = evCurrentSet;
+		m_SwitchCmdMap[":CurrentSet"] = evCurrentSet;*/
 	}

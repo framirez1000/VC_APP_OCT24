@@ -14,8 +14,10 @@
 /* Thread entry point fuction */
 void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 {
-	Console::ForegroundColor = ConsoleColor::White;
-	Console::WriteLine("Thread Comm IO created");
+	if (Globals::consoleVerbose != 0) {
+		Console::ForegroundColor = ConsoleColor::White;
+		Console::WriteLine("Thread Comm IO created");
+	}
 	//throw gcnew System::NotImplementedException();
 	double doubArray1[MAX_VIEW_CHANNELS];
 	double doubArray2[MAX_VIEW_CHANNELS];
@@ -73,9 +75,9 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 	//Commands->deviceCmd = "ISEG:5230225";
 	// End test adding crate at startup
 	checkCommTime = (60 * 1000 / sleepScanTime) * CHECK_COMM_IO_TIME_MIN - 10;
-	LogEventMsg("Logger \n");
+	//LogEventMsg(MSG_LOGGER_HEADER + "\n");
 	System::Threading::Thread::Sleep(sleepScanTime);
-	LogEventMsg("Logger IO start");
+	LogEventMsg(MSG_LOGGER_HEADER + "IO start");
 	System::Threading::Thread::Sleep(sleepScanTime);
 	// ***** SM Mem: write data to Comm Proc **
 	TCHAR szName[] = TEXT("Global\MyIOChannelsDataObject");
@@ -97,8 +99,8 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 		// bool smOk = Create_SharedMem_Object(1, szName, &hMapFileServer, &pBuf);
 		if (smOk) {
 			OnShMem(WRITE_SH_MEM, pBuf, szMsg, _tcslen(szMsg));
-			Commands->statusBarMsg2 = " Shared Mem: " + i + "*" + BUF_SIZE;
-			LogEventMsg("\n Logger INFO:" + Commands->statusBarMsg2);				// Opens logger pipe and writes MSG on it.
+			Commands->statusBarMsg2 = " IO Shared Mem: " + i + "*" + BUF_SIZE;
+			LogEventMsg(MSG_LOGGER_HEADER + "INFO:" + Commands->statusBarMsg2);				// Opens logger pipe and writes MSG on it.
 			//resp = PipesFunc::OnPipe(WRITEPIPE, loggerPipe, "Logger " + Commands->statusBarMsg2);
 			
 		}
@@ -173,119 +175,140 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 		if (((Commands != nullptr) && (Commands->execRequest) && (!commFailure)) || (Commands->cmdType == DISCONNECT)) {
 			// Call function according to command type
 			Commands->progressRate = (Commands->strCmdsToExcList->Count > 0) ? Commands->strCmdsToExcList->Count : 1;
-			switch (Commands->cmdType)
-			{
-			case DETECT_HRW:
-				for each (String ^ device in Commands->strCmdsToExcList) {
-					if (Commands->cmdResult = CA_Interf->DetectHrw(device)) {
-						// Add it to Hrw List (Map(crate, connState))
-						pMainHrwList->insert(CheckedList::make_value(device, false));
-					}
-				}
-				Commands->cmdExecuted = true;
-				break;
-			case CHECK_CRATE:
-				// Call check existance and base parameters
-				CA_Interf->test_Crate_Comm(Commands->deviceCmd);
-				Commands->cmdExecuted = true;
-				break;
-			case ADD_CRATE:
-				for each (String ^ crate in Commands->strCmdsToExcList) {
-					if (CA_Interf->Add_Crate(crate)) {
-						// Set its connected state
-						CheckedList::const_iterator it = pMainHrwList->find(crate);
-						CheckedList::const_reference cref = *it;
-						cref->second = true;
-					}
-				}
-				if (m_pCrateList->Count > 0) {
-					hardwareConnected = true;
-					Commands->HrwConntd = true;
-				}
-				else Commands->statusBarMsg = "Not hardware found";
-				Commands->cmdExecuted = true;
-				break;
-			case SET_CONF_VALUE: {
-				// Go through cmmdsToExc list and send them
-				String^ cmd; String^ cmdLogger = gcnew String("");
-				//String^ cmd2;
-				bool result;
-				int i = 0;
-				static char strCharCmd[_MAX_PATH];
-				IntPtr ip;
-				for each (cmd in Commands->strCmdsToExcList) {
-					ip = Marshal::StringToHGlobalAnsi(cmd);
-					if (i != (Commands->strCmdsToExcList->Count) - 1)
-						m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], false);
-					else {
-						result = m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], true);
-						if (result == E_OK) {
-							Commands->cmdResult = true;
-							Console::WriteLine("All cmds sent successfully ");
+			if (Commands->strCmdsToExcList->Count > 0) {
+				switch (Commands->cmdType)
+				{
+				case DETECT_HRW:
+					for each (String ^ device in Commands->strCmdsToExcList) {
+						if (Commands->cmdResult = CA_Interf->DetectHrw(device)) {
+							// Add it to Hrw List (Map(crate, connState))
+							pMainHrwList->insert(CheckedList::make_value(device, false));
 						}
 					}
-					cmdLogger = String::Concat(cmdLogger," " +  cmd);
-					i++;
-				}
-				UpdateLists();
-				
-				Marshal::FreeHGlobal(ip);
-				UpdateLists();
-				Commands->execRequest = false;
-				Commands->cmdExecuted = true;
-				//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, "Logger" + cmd);
-				LogEventMsg("Logger INFO: CMDs " + cmdLogger);
-				break;
-			}
-			case CHANNELS_TO_ON_OFF:{
-				// iterate through all cmd list, send camds 0ne by one and with 
-				// final cmd set sendOrder to true for sending all cmds on hold
-				String^ cmd;
-				IntPtr ip;
-				int i = 0, result;
-				bool update = true;
-				for each (cmd in Commands->strCmdsToExcList) {
-					ip = Marshal::StringToHGlobalAnsi(cmd);
-					if (i != (Commands->strCmdsToExcList->Count) - 1)
-						m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], false);
-					else {
-						result = m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], true);
-						if (result == E_OK) {
-							//Console::WriteLine("All cmds sent successfully ");
+					Commands->cmdExecuted = true;
+					break;
+				case CHECK_CRATE:
+					// Call check existance and base parameters
+					CA_Interf->test_Crate_Comm(Commands->deviceCmd);
+					Commands->cmdExecuted = true;
+					break;
+				case ADD_CRATE:
+					for each (String ^ crate in Commands->strCmdsToExcList) {
+						if (CA_Interf->Add_Crate(crate)) {
+							// Set its connected state
+							CheckedList::const_iterator it = pMainHrwList->find(crate);
+							CheckedList::const_reference cref = *it;
+							cref->second = true;
 						}
 					}
-					i++;
-					if (cmd->Contains(":Control:setOn"))
-						update = false;
-				}
-				if (update) 
+					if (m_pCrateList->Count > 0) {
+						hardwareConnected = true;
+						Commands->HrwConntd = true;
+					}
+					else Commands->statusBarMsg = "Not hardware found";
+					Commands->cmdExecuted = true;
+					break;
+				case SET_CONF_VALUE: {
+					// Go through cmmdsToExc list and send them
+					String^ cmd; String^ cmdLogger = gcnew String("");
+					//String^ cmd2;
+					bool result;
+					int i = 0;
+					static char strCharCmd[_MAX_PATH];
+					IntPtr ip;
+					for each (cmd in Commands->strCmdsToExcList) {
+						ip = Marshal::StringToHGlobalAnsi(cmd);
+						if (i != (Commands->strCmdsToExcList->Count) - 1)
+							m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], false);
+						else {
+							result = m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], true);
+							if (result == E_OK) {
+								Commands->cmdResult = true;
+								Commands->StatusBarMsgIndex = 28;
+								if (Globals::consoleVerbose != 0) Console::WriteLine("All cmds sent successfully ");
+							}
+						}
+						if (Commands->strCmdsToExcList->Count == 1 && i == 0) {
+							cmdLogger = String::Concat(cmdLogger, " " + cmd + " " + Commands->strParamsList[i]);
+						}
+						i++;
+					}
 					UpdateLists();
-				Marshal::FreeHGlobal(ip);
-				Commands->cmdExecuted = true;
-				//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd);
-				LogEventMsg("Logger INFO: " + " CMD all channels On/Off");
-				break;
-			}
-			case DISCONNECT: {
-				commFailure = false;
-				commFailTime = 0;
-				sleepScanTime = SAMPLE_TIME_mSEC;
-				Commands->execRequest = false;
-				Commands->cmdExecuted = true;
-				cmmFailCrates->Clear();
-				Commands->CleanCmdsLists();
-				String^ cmd = gcnew String("Logger, Disconnect");
-				//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd );
-				LogEventMsg("Logger INFO: Disconnect");
-				break;
-			}
-			case STOP:
-				// Stop iterating, close all channels IO access (epics)
-				stop_accessIO = true;
-				break;
-			default:
-				Commands->execRequest = false;
-				break;
+					Marshal::FreeHGlobal(ip);
+					UpdateLists();
+					Commands->execRequest = false;
+					Commands->cmdExecuted = true;
+					//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, "Logger" + cmd);
+					// Log the setting event 
+					//Console::WriteLine("Full MSG: " + cmdLogger);
+					if (i == 1) { // Just one setting cmd
+						cmdLogger = String::Concat(MSG_LOGGER_HEADER + "INFO: Settings sent CMD(s): " + i + "\n" + cmdLogger);
+					}
+					else {
+						String^ crateDetail = gcnew String(MSG_LOGGER_HEADER + "Connecting...");
+						System::Threading::Thread::Sleep(sleepScanTime);
+						for each (Crate^ crate in m_pCrateList) {
+							String::Concat(crateDetail + "\nConnnnected->: " + crate->Name + " Modules= " + crate->Modules + " Channels: " + crate->Channels + " connected= " + crate->VoltChnlsEnable);
+							//Console::WriteLine("Connnnnected->: {0}, Modules= {1}, Channels: {2}, connected= {3} ", crate->Name, crate->Modules, crate->Channels, crate->VoltChnlsEnable);
+						}
+						//Console::WriteLine("Temp logMsg: " + crateDetail);
+						cmdLogger = crateDetail;
+						;
+					}
+					if (Globals::consoleVerbose != 0) Console::WriteLine(cmdLogger->Length + " " + cmdLogger);
+					LogEventMsg(cmdLogger);
+					break;
+				}
+				case CHANNELS_TO_ON_OFF: {
+					// iterate through all cmd list, send camds 0ne by one and with 
+					// final cmd set sendOrder to true for sending all cmds on hold
+					String^ cmd;
+					IntPtr ip;
+					int i = 0, result;
+					bool update = true;
+					for each (cmd in Commands->strCmdsToExcList) {
+						ip = Marshal::StringToHGlobalAnsi(cmd);
+						if (i != (Commands->strCmdsToExcList->Count) - 1)
+							m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], false);
+						else {
+							result = m_ptrCA_Interface->setCAValue(cmd, Commands->strParamsList[i], true);
+							if (result == E_OK) {
+								;//Console::WriteLine("All cmds sent successfully ");
+							}
+						}
+						i++;
+						if (cmd->Contains(":Control:setOn"))
+							update = false;
+					}
+					if (update)
+						UpdateLists();
+					Marshal::FreeHGlobal(ip);
+					Commands->cmdExecuted = true;
+					//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd);
+					LogEventMsg(MSG_LOGGER_HEADER + "INFO: " + "Channel(s) cmd to On/Off");
+					break;
+				}
+				case DISCONNECT: {
+					commFailure = false;
+					commFailTime = 0;
+					sleepScanTime = SAMPLE_TIME_mSEC;
+					Commands->execRequest = false;
+					Commands->cmdExecuted = true;
+					cmmFailCrates->Clear();
+					Commands->CleanCmdsLists();
+					String^ cmd = gcnew String("Logger, Disconnect");
+					//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd );
+					LogEventMsg(MSG_LOGGER_HEADER + "INFO: Disconnect");
+					break;
+				}
+				case STOP:
+					// Stop iterating, close all channels IO access (epics)
+					stop_accessIO = true;
+					break;
+				default:
+					Commands->execRequest = false;
+					break;
+				}
 			}
 			Commands->barProgressValue = 100;
 			Commands->execRequest = false;
@@ -332,13 +355,26 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 					Commands->statusBarMsg = " - Fail(s): " + m_HrdwFailingList->size()
 						+ " Total crates(s): " + pMainHrwList->size();
 					Commands->StatusBarMsgIndex = 0;
-					String^ cmd = gcnew String("ERROR: Comm IO Failed,");
-					for each (CheckedList::value_type crate in m_HrdwFailingList)
-					{
-						cmd = String::Concat(cmd, " " + crate->first);
+					if (m_HrdwFailingList->size() > 0) {
+						bool swapUpList = false;
+						String^ cmd = gcnew String("ERROR: Comm IO Failed, ");
+						CheckedList m_newHrdwFailingList;
+						for each (CheckedList::value_type crate in m_HrdwFailingList)
+						{
+							String^ crateName = gcnew String(crate->first);
+							m_newHrdwFailingList.insert(CheckedList::make_value(crateName, false));
+							if (crate->second) {
+								cmd = String::Concat(cmd, " " + crate->first);
+								swapUpList = true;
+							}
+						}
+						if (swapUpList)
+						{
+							m_HrdwFailingList->swap(m_newHrdwFailingList);
+							//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd);
+							LogEventMsg(MSG_LOGGER_HEADER + cmd);
+						}
 					}
-					//PipesFunc::OnPipe(WRITEPIPE, loggerPipe, cmd);
-					LogEventMsg(MSG_LOGGER_HEADER + cmd);
 				}
 				bool send = false;
 				if (freqCmdsSem.GetSem(FREQ_CMDS_SEM)) {
@@ -366,7 +402,7 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 				if (send && (CA_Interf->FreqCmdsMgr(nullptr, nullptr, nullptr, "", -1, true) != ECA_NORMAL)) {
 					if (commFailTime >= COMM_FAILURE_TIME_SEC * (1000/sleepScanTime)) {
 						
-						sleepScanTime += 500; // Slow down time scan by 1 sec till 10 sec
+						sleepScanTime += 500; // Slow down time scan by .5 sec till 5 sec
 						if (sleepScanTime > MAX_SAMPLE_TIME_mSEC_AT_FAILURE)
 							sleepScanTime = MAX_SAMPLE_TIME_mSEC_AT_FAILURE;
 						commFailure = true;
@@ -486,6 +522,8 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 							shMemDataSem.ReleaseSem();
 							writeDataSemCond = false;
 							time2writeData = COUNTER2WRITE_SH_MEM_DATA;
+							if (Globals::consoleVerbose != 0) Console::WriteLine("Msg2CommProcSize {0}", strDataToComm->Length);
+						
 							//Commands->statusBarMsg2 = "DataToComm Written";
 
 						}
@@ -522,24 +560,32 @@ void Thread_CA::ThreadCAClass::ThreadCaEntryPoint()
 		if (time2TestGUIlife++ >= (1000 / SAMPLE_TIME_mSEC) * TIME_2_TEST_GUI_LIFE_SEC) {
 			if (check1sec++ >= (1000 / SAMPLE_TIME_mSEC)) {
 				Commands->statusBarMsg2 = "Checking Comm IO -> Main GUI... ";
-				Console::ForegroundColor = ConsoleColor::White;
-				Console::Write(Commands->statusBarMsg2);
+				if (Globals::consoleVerbose != 0) {
+					Console::ForegroundColor = ConsoleColor::White;
+					Console::Write(Commands->statusBarMsg2);
+				}
 				if (!TestPipeConn() && (GUIPipeConnected)) {
 					Commands->statusBarMsg2 = "\n Not Comm with IO -> Main GUI";
-					Console::ForegroundColor = ConsoleColor::DarkRed;
-					Console::WriteLine(Commands->statusBarMsg2);
+					if (Globals::consoleVerbose != 0) {
+						Console::ForegroundColor = ConsoleColor::DarkRed;
+						Console::WriteLine(Commands->statusBarMsg2);
+					}
 					if (GUI_timeDown++ >= MAX_GUI_TIME_DOWN_SEC) {
 						stop_accessIO = true;
-						Console::ForegroundColor = ConsoleColor::Red;
-						Console::WriteLine("\n Stopping Thread IO => Not Comm with Main GUI");
+						if (Globals::consoleVerbose != 0) {
+							Console::ForegroundColor = ConsoleColor::Red;
+							Console::WriteLine("\n Stopping Thread IO => Not Comm with Main GUI");
+						}
 					}
+					
 				}
 				else {
 					GUI_timeDown = 0;
 					time2TestGUIlife = 0;
-					Console::WriteLine("Ok");
+					if (Globals::consoleVerbose != 0) Console::WriteLine("Ok");
 				}
 				check1sec = 0;
+				//LogEventMsg("Logger TEST: Com IO-GUI Ok");
 			}
 		}
 		// Just for testing ShMem  ////////////////////
@@ -629,8 +675,10 @@ System::Boolean Thread_CA::ThreadCAClass::TestPipeConn()
 			Marshal::FreeHGlobal(ip);
 		}
 		catch (Exception^ e) {
-			Console::ForegroundColor = ConsoleColor::Red;
-			Console::WriteLine("Error trying to Write on Main GUI Pipe");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::Red;
+				Console::WriteLine("Error trying to Write on Main GUI Pipe");
+			}
 			return false;
 		}
 		return (result);
@@ -669,32 +717,46 @@ System::Boolean Thread_CA::ThreadCAClass::chnlHrwConnected(FreqCmdsMapTable_T::v
 	return false;
 }
 
-System::Void Thread_CA::ThreadCAClass::LogEventMsg(String^ msg)
+System::Void Thread_CA::ThreadCAClass::LoggingEventMsg(String^ msg)
 {
 	// Opens the Logger Pipe as a Client
 	HANDLE loggerPipe = NULL;
-	if (PipesFunc::GetPipe(PIPE_CLIENT_T, PIPE_LOGGER, &loggerPipe, 2)) {
+	short sizeBuffLoggerPipe = 1;
+	//if (Globals::consoleVerbose != 0) Console::WriteLine("Msg to Log1: {0}", msg);
+	if (PipesFunc::GetPipe(PIPE_CLIENT_T, PIPE_LOGGER, &loggerPipe, sizeBuffLoggerPipe)) {
 		try {
 			DWORD numWritten;
+			if (msg->Length > 1024 * sizeBuffLoggerPipe) msg = msg->Remove(1024 * sizeBuffLoggerPipe-2);
+			//if (Globals::consoleVerbose != 0) Console::WriteLine("Msg to Log2: {0}", msg);
 			IntPtr ip = Marshal::StringToHGlobalAnsi(msg);
 			const char* stream = static_cast<const char*>(ip.ToPointer());
+			String^ stream2Write = gcnew String(stream);
 			if (WriteFile(loggerPipe, stream, msg->Length + 1, &numWritten, FILE_FLAG_NO_BUFFERING & FILE_FLAG_WRITE_THROUGH)) {
-				//Console::WriteLine("Sent Msg, length: {0} {1}" + numWritten.ToString(), msg);
+				if (Globals::consoleVerbose != 0) {
+					Console::WriteLine("Logger Sent Msg, length: {0} {1} {2}", numWritten.ToString(), msg, stream2Write);
+				}
 				;
 			}
 			else {
 				;
-				//Console::WriteLine("Sent unsuccessful: " + numWritten.ToString());
+				if (Globals::consoleVerbose != 0) Console::WriteLine("Sent unsuccessful-LoggerPipeError: " + GetLastError());
 			}
 			Marshal::FreeHGlobal(ip);
 			
 		}
 		catch (Exception^ e) {
-			//Console::ForegroundColor = ConsoleColor::Red;
-			//Console::WriteLine("Error trying to Write on Comm Pipe");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::Red;
+				Console::WriteLine("Exception Error Logger trying to Write on logger Pipe: {0} Message: {1}", GetLastError(), e->Message);
+				//Console::WriteLine("LoggerPipe: {0}", loggerPipe);
+				Console::ForegroundColor = ConsoleColor::White;
+			}
 			;
 		}
 		CloseHandle(loggerPipe);
+	}else { 
+		if (Globals::consoleVerbose != 0) Console::WriteLine("No LoggerPipe-Error {0}", GetLastError()); 
+		if (loggerPipe != INVALID_HANDLE_VALUE && loggerPipe != NULL) CloseHandle(loggerPipe);
 	}
 
 	// Writes MSG on LoggerPipe

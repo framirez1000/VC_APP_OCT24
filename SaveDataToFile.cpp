@@ -16,7 +16,7 @@ System::Void SaveDataToFile::EntryPoint()
 	BOOL result;
 	int erroNbr;
 	
-	Console::WriteLine("Thread DataSaving created");
+	if (Globals::consoleVerbose != 0) Console::WriteLine("Thread DataSaving created");
 	while (true) {
 		System::Threading::Thread::Sleep(SAMPLE_TIME_mSEC);
 		
@@ -42,15 +42,15 @@ System::Void SaveDataToFile::EntryPoint()
 				try {
 					StreamWriter^ sw = gcnew StreamWriter(fileName, TRUE);
 					strcat(buffer, "\n");
-					Console::ForegroundColor = ConsoleColor::Blue;
-					Console::Write(strTemp + " Saving data...");
+					if (Globals::consoleVerbose != 0) Console::ForegroundColor = ConsoleColor::Blue;
+					if (Globals::consoleVerbose != 0) Console::Write(strTemp + " Saving data...");
 					sw->WriteLine(substr);
-					Console::WriteLine("Ok");
+					if (Globals::consoleVerbose != 0) Console::WriteLine("Ok");
 					sw->Close();
 				}
 				catch (Exception^ e) {
-					Console::ForegroundColor = ConsoleColor::Yellow;
-					Console::WriteLine(strTemp + "Saving data... FAILED: file not found/Busy");
+					if (Globals::consoleVerbose != 0) Console::ForegroundColor = ConsoleColor::Yellow;
+					if (Globals::consoleVerbose != 0) Console::WriteLine(strTemp + "Saving data... FAILED: file not found/Busy");
 				}
 			}
 			else

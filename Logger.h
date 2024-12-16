@@ -34,6 +34,6 @@ public:
 	System::Void EntryPoint();
 	System::Boolean ConnectMyPipe();          
 	System::Boolean ReadFromPipe(String^% msg);
-	System::Void Write2File(String^ msg);
+	System::Void Write2File(String^ msg, bool includeDate);
 };
 

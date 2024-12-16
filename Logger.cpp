@@ -5,15 +5,16 @@ System::Void Logger::EntryPoint()
 {
 	String^ msg = gcnew String("");
 	String^ fileName = "\\LOG\\Logs.csv";
+	this->Write2File(MSG_LOGGER_HEADER + "\n\n", false);
 
 	while (true) {
 		System::Threading::Thread::Sleep(LOOP_TIME_mSEC);
 		if (!connected) connected = this->ConnectMyPipe();    // Wait until client connects
 		if (connected) {
 			if (this->ReadFromPipe(msg)) {
-				this->Write2File(msg);
-				this->connected = false;
+				this->Write2File(msg, true);			
 			}
+			this->connected = false;
 		}
 	}
 	return System::Void();
@@ -39,11 +40,15 @@ System::Boolean Logger::ConnectMyPipe()
 	}
 	if (mPipe != INVALID_HANDLE_VALUE) {
 		BOOL   fConnected = false;
-		if (GetLastError() == ERROR_NO_DATA) 
+		if (GetLastError() == ERROR_NO_DATA) {
 			DisconnectNamedPipe(mPipe);
+			if (Globals::consoleVerbose != 0) 
+				Console::WriteLine("Server Logger Pipe disconnected");
+		}
 		fConnected = ConnectNamedPipe(mPipe, NULL) ?
 			TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 		int i = GetLastError();
+		if (Globals::consoleVerbose != 0) Console::WriteLine("Server Logger Connected: {0} {1}", i,fConnected);
 		return fConnected;
 	}
 	return false;
@@ -53,10 +58,10 @@ System::Boolean Logger::ReadFromPipe(String^% msg)
 {
 	try {
 		DWORD dwRead;
-		char buffer[BUFF_SIZE*2];
+		char buffer[BUFF_SIZE * 1];
 		bool result = ReadFile(mPipe, buffer, sizeof(buffer) - 1, &dwRead, NULL);
 		String^ str = gcnew String(buffer);
-		
+		if (Globals::consoleVerbose != 0) Console::WriteLine("Reading from Server Logger Connected: {0} {1}", result, str);
 		if (result && dwRead > 0) {
 			if (str->Contains(MSG_LOGGER_HEADER)) {
 				msg = str;
@@ -76,7 +81,7 @@ System::Boolean Logger::ReadFromPipe(String^% msg)
 	return System::Boolean();
 }
 
-System::Void Logger::Write2File(String^ msg)
+System::Void Logger::Write2File(String^ msg, bool includeDate)
 {
 	String^ fileName = "\\LOG\\Logs.csv";
 	String^ substr = msg->Substring(6);
@@ -91,7 +96,8 @@ System::Void Logger::Write2File(String^ msg)
 		//wchar_t strArray[1024 * 2]{}, * str = strArray;
 		//str = (wchar_t*)Marshal::StringToHGlobalUni(strTemp+substr).ToPointer();
 		//strcat(buffer, "\n");
-		sw->WriteLine(strTemp + substr);
+		if (includeDate) sw->WriteLine(strTemp + substr);
+		else sw->WriteLine(substr);
 		sw->Close();
 	}
 	catch (Exception^ e) {

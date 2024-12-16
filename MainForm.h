@@ -27,8 +27,8 @@
 #include "HelpAbout.h"
 #ifndef SEM_H
 #include "CommsShMemPipesClass.h"
-#include "Logger.h"
 #endif
+#include "Logger.h"
 
 #define TIME_2_CLEAN_STATUS_MSG2_SEC 2	// Aprox 2 sec
 #define COMM_PROC_VERBOSE 0				// Opens a shell window
@@ -85,35 +85,36 @@ namespace CppCLRWinformsProjekt {
 				 HANDLE get() { return m_PipeServer; }
 				 void set(HANDLE pipe) { m_PipeServer = pipe; }
 		}
-			 property HANDLE Pipe4Data2File {
-				 HANDLE get() { return m_ServerSaveData; }
-				 void set(HANDLE pipe) { m_ServerSaveData = pipe; }
-			 }
-			 property SaveDataToFile^ pSaveData {
-				 SaveDataToFile^ get() { return m_pDataSave; }
-				 void set(SaveDataToFile^ pDataSaveThread) { m_pDataSave = pDataSaveThread; }
-			 }
-			 property bool PipeConnectionIO {
-				 bool get() { return m_connectedPipeIO; };
-				 void set(bool connected) { m_connectedPipeIO = connected; }
-			 }
-			 property Logger^ pLogger;
-			 property int Rows;
-			 property int Cols;
-			 property CheckedList^ pHrwList;
-			 property bool Connected;
-			 property Double PercentageDeviationAllow;
-			 property Double VoltgDeviationAllow;
-			 property String^ FilesPath;
-			 property int TimeDataRecording;
-			 property List<String^>^ pGroupNames;
-			 property List<String^>^ pChnlsNames4formulas;  // Channels names for formula purposes in each ChnlViewForm
-			 property int Time2ClearStatusMsg;
-			 property int Time2ClearStatusMsg2;
-			 property bool ConnectingOrLoading;
-			 property bool SwitchAllChnlsOffAtStart;
-			 property bool SwitchAllChnlsOffAtEnd;
-			 property bool newViewCnf;
+		property HANDLE Pipe4Data2File {
+			HANDLE get() { return m_ServerSaveData; }
+			void set(HANDLE pipe) { m_ServerSaveData = pipe; }
+		}
+		property SaveDataToFile^ pSaveData {
+			SaveDataToFile^ get() { return m_pDataSave; }
+			void set(SaveDataToFile^ pDataSaveThread) { m_pDataSave = pDataSaveThread; }
+		}
+		property bool PipeConnectionIO {
+			bool get() { return m_connectedPipeIO; };
+			void set(bool connected) { m_connectedPipeIO = connected; }
+		}
+		property Logger^ pLogger;
+		property int Rows;
+		property int Cols;
+		property CheckedList^ pHrwList;
+		property bool Connected;
+		property Double PercentageDeviationAllow;
+		property Double VoltgDeviationAllow;
+		property String^ FilesPath;
+		property int TimeDataRecording;
+		property List<String^>^ pGroupNames;
+		property List<String^>^ pChnlsNames4formulas;  // Channels names for formula purposes in each ChnlViewForm
+		property int Time2ClearStatusMsg;
+		property int Time2ClearStatusMsg2;
+		property bool ConnectingOrLoading;
+		property bool SwitchAllChnlsOffAtStart;
+		property bool SwitchAllChnlsOffAtEnd;
+		property bool newViewCnf;
+			 
 	private:
 		Crate^ crateInMainForm;
 		SingletonCmmdClass^ m_cmdMsg;
@@ -259,8 +260,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^ toolStripStatusLabel4;
 			SwitchAllChnlsOffAtStart = false;
 			SwitchAllChnlsOffAtEnd = false;
 			FilesPath = "C:\\ProgramData\\VoltageControllerNew\\LOG";
-			newViewCnf = true;
-			
+			newViewCnf = true;			
 		}
 		void mainFormEntryPoint() {
 			//InitializeComponent();
@@ -1267,15 +1267,25 @@ private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
 	/*DISPLAY_DEVICE device;
 	device.cb = sizeof(DISPLAY_DEVICE);
 	bool dev = EnumDisplayDevices(NULL, 0, &device, 0);*/
+	
+	Globals::consoleVerbose = FALSE;
+	// If debugging by consola uncomment next lines
+	/*Globals::consoleVerbose = TRUE;
+	int rc = Win32::AllocConsole();
+	String^ args = gcnew String(GetCommandLine());*/
+	if (Globals::consoleVerbose != 0) Console::WriteLine("Main GUI Thread created");
+	// End debugging by console
+	
+	// This part depends upon the monitor used, so no need them
+	//Console::SetWindowPosition(50, 10);
+	/*HWND console = GetConsoleWindow();
+	RECT r;
+	GetWindowRect(console, &r);*/ //stores the console's current dimensions
+	//int h = console->BufferHeight;
+	//MoveWindow(console, 1305, 1, 500, 1000, TRUE);
+	//MoveWindow(console, 1, 1, 20, 61, TRUE); // 500 width, 1000 height
+	
 
-	//int rc = Win32::AllocConsole();
-		//Console::SetWindowPosition(1, 1);
-		//HWND console = GetConsoleWindow();
-		//RECT r;
-		//GetWindowRect(console, &r); //stores the console's current dimensions
-		////MoveWindow(console, 1305, 1, 500, 1000, TRUE);
-		//MoveWindow(console, 1, 1, 20, 61, TRUE); // 500 width, 1000 height
-		//Console::WriteLine("Main GUI Thread created");
 	Application::ThreadException += gcnew
 		ThreadExceptionEventHandler(App::OnUnhandled);
 	// COMM process creation
@@ -1285,10 +1295,14 @@ private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
 	System::Threading::Thread::Sleep(2 * SAMPLE_TIME_mSEC);
 		
 		/* Creates Logger delegate  thread  */
-	    pLogger = gcnew Logger(0, 2, 2);
+	    pLogger = gcnew Logger(0, 1, 2);
 		ThreadStart^ threadDelegate0 = gcnew ThreadStart(pLogger, &Logger::EntryPoint);
 		Thread^ newThread0 = gcnew Thread(threadDelegate0);
 		newThread0->Start();
+		System::Threading::Thread::Sleep(SAMPLE_TIME_mSEC);
+		LogEventMsg(MSG_LOGGER_HEADER + "System Started");
+		System::Threading::Thread::Sleep(SAMPLE_TIME_mSEC);
+		LogEventMsg(MSG_LOGGER_HEADER + "GUI: Logger thread started");
 	
 		System::Threading::Thread::Sleep(SAMPLE_TIME_mSEC);
 		/* Creates thread managing comm IO */
@@ -1296,12 +1310,14 @@ private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
 		Thread^ newThread = gcnew Thread(threadDelegate);
 		newThread->Start();
 		drawChnlsView(Rows, Cols, this, e);
+		LogEventMsg(MSG_LOGGER_HEADER + "GUI: IO thread started");
 		
 		/* Creates thread managing data saving (voltage) */
 		pSaveData = gcnew SaveDataToFile();
 		ThreadStart^ threadDelegate2 = gcnew ThreadStart(pSaveData, &SaveDataToFile::EntryPoint);
 		Thread^ newThread2 = gcnew Thread(threadDelegate2);
 		newThread2->Start();
+		LogEventMsg(MSG_LOGGER_HEADER + "GUI: DataLog thread started");
 		
 		// Load Group names to GroupNames List
 		for (int i = 0; i < NBR_GROUP_NAMES; i++) {
@@ -1352,11 +1368,11 @@ private: System::Void SetupByGroupDynamicMenu_Builder() {
 		toolStripSeparator = (gcnew System::Windows::Forms::ToolStripSeparator());
 		this->setupByGorupsToolStripMenuItem->DropDownItems->Add(toolStripSeparator);
 		try {
-			//Console::WriteLine(this->toolStrip1->Items->Find("ToggleGroup1", true)[0]->Text);
+			//if (Globals::consoleVerbose != 0) Console::WriteLine(this->toolStrip1->Items->Find("ToggleGroup1", true)[0]->Text);
 			this->toolStrip1->Items->Find("TG" + i, false)[0]->ToolTipText = SubItemToAdd->Text;
 		}
 		catch (Exception^ e) {
-			Console::WriteLine(e->ToString());
+			if (Globals::consoleVerbose != 0) Console::WriteLine(e->ToString());
 		}
 		i++;
 	}
@@ -1482,7 +1498,7 @@ private: System::Void LoggingToolStripMenuItem_Click(System::Object^ sender, Sys
 		logFileForm->checkedListBox1->Items->Add(elmnt->first, elmnt->second);
 	}
 	if (logFileForm->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
-		Console::WriteLine("Returned to Main Gui from LogFileForm");
+		if (Globals::consoleVerbose != 0) Console::WriteLine("Returned to Main Gui from LogFileForm");
 		
 		DataFile.monitoredChnls.clear();
 		for (int i = 0; i < logFileForm->checkedListBox1->Items->Count; i++) {
@@ -1524,7 +1540,7 @@ private: System::Void ToolStripMenuItem2_Click(System::Object^ sender, System::E
 	Stream^ myStream;
 	SaveFileDialog^ saveFileDialog1 = gcnew SaveFileDialog;
 
-	Console::WriteLine("Save View Settings file selection dialog created");
+	if (Globals::consoleVerbose != 0) Console::WriteLine("Save View Settings file selection dialog created");
 	saveFileDialog1->InitialDirectory = DEFAULT_DATA_FILE_PATH;
 	saveFileDialog1->Filter = "sel files (*.sel)|*.sel";
 	saveFileDialog1->FilterIndex = 2;
@@ -1593,7 +1609,7 @@ private: System::Void ToolStripMenuItem2_Click(System::Object^ sender, System::E
 						foundItem = confViewData->data->CrateList->Find(gcnew Predicate<XML_Classes::Crate^>(searchItem, &EntityPredicate::CrateMatched));
 						if (foundItem == nullptr) {
 							confViewData->data->CrateList->Add(crate);
-							Console::WriteLine("XML Crate added: {0}", crate->CrateName);
+							if (Globals::consoleVerbose != 0) Console::WriteLine("XML Crate added: {0}", crate->CrateName);
 						}
 					}
 				}
@@ -1603,10 +1619,12 @@ private: System::Void ToolStripMenuItem2_Click(System::Object^ sender, System::E
 			myStream->Close();
 		}
 		else {
-			Console::ForegroundColor = ConsoleColor::Yellow;
-			Console::WriteLine("No new file especified... in file explorer window");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::Yellow;
+				Console::WriteLine("No new file especified... in file explorer window");
+			}
 		}
-		Console::WriteLine("Return from File selection dialog created");
+		if (Globals::consoleVerbose != 0) Console::WriteLine("Return from File selection dialog created");
 	}
 }
 //
@@ -1623,7 +1641,7 @@ private: System::Void LoadCOnfViewFromFile_Click(System::Object^ sender, System:
 		Stream^ myStream;
 		OpenFileDialog^ openFileDialog1 = gcnew OpenFileDialog;
 
-		Console::WriteLine("Open View Settings file selection dialog created");
+		if (Globals::consoleVerbose != 0) Console::WriteLine("Open View Settings file selection dialog created");
 		openFileDialog1->InitialDirectory = DEFAULT_DATA_FILE_PATH;
 		openFileDialog1->Filter = "sel files (*.sel)|*.sel";
 		openFileDialog1->FilterIndex = 2;
@@ -1647,13 +1665,13 @@ private: System::Void LoadCOnfViewFromFile_Click(System::Object^ sender, System:
 						gcnew System::IO::FileStream(fileName,
 							System::IO::FileMode::Open);
 					confViewData = (XML_Classes::VC_XML^) ser->Deserialize(fs);
-					Console::WriteLine("View Settings XML file loaded");
+					if (Globals::consoleVerbose != 0) Console::WriteLine("View Settings XML file loaded");
 					m_cmdMsg->StatusBarMsgIndex = 18;
 					//m_cmdMsg->statusBarMsg = "View loaded from config file";
 					fs->Close();
 				}
 				catch (Exception^ e) {
-					Console::WriteLine("Error opening XML config file");
+					if (Globals::consoleVerbose != 0) Console::WriteLine("Error opening XML config file");
 					m_cmdMsg->StatusBarMsgIndex = 19;
 					//m_cmdMsg->statusBarMsg = "Error in loading View from config file";
 				}
@@ -1662,13 +1680,14 @@ private: System::Void LoadCOnfViewFromFile_Click(System::Object^ sender, System:
 			}
 			else {
 				myStream->Close();
-				Console::ForegroundColor = ConsoleColor::Yellow;
-				Console::WriteLine("No file especified... in file explorer window");
+				if (Globals::consoleVerbose != 0) {
+					Console::ForegroundColor = ConsoleColor::Yellow;
+					Console::WriteLine("No file especified... in file explorer window");
+				}
 				m_cmdMsg->StatusBarMsgIndex = 20;
 				//m_cmdMsg->statusBarMsg = "No config file especified";
 			}
-			Console::WriteLine("Return from Open selection dialog created");
-			
+			if (Globals::consoleVerbose != 0) Console::WriteLine("Return from Open selection dialog created");
 		}
 
 		if ((confViewData != nullptr) && (confViewData->data->CrateList->Count > 0)){
@@ -1710,9 +1729,9 @@ private: System::Void LoadCOnfViewFromFile_Click(System::Object^ sender, System:
 				}
 				m_cmdMsg->GlobalAddSendCmds("", "", -1, 0, true);
 				if (!m_cmdMsg->cmdExecuted) {
-					Console::WriteLine("Not answer in time from inserting new Crate");
+					if (Globals::consoleVerbose != 0) Console::WriteLine("Not answer in time from inserting new Crate");
 				}
-				else Console::WriteLine("New Crate created");
+				else if (Globals::consoleVerbose != 0) Console::WriteLine("New Crate created");
 				
 			}
 			// Fill conf channel ViewList with data from XML channel List
@@ -1835,7 +1854,7 @@ private: System::Void SwitchALLChannelsOffToolStripMenuItem_Click(System::Object
 		cmdList.Add(":Control:setOn");
 		paramList.Add("false");
 		if (!SetChannelsCnfParam("AllChannels", % cmdList, % paramList))
-			Console::Write("OFF cmds sent but not answer from Crate(s)");
+			if (Globals::consoleVerbose != 0) Console::Write("OFF cmds sent but not answer from Crate(s)");
 		else {
 			SetStateGroupToggleBtns(false);
 		}
@@ -1857,7 +1876,7 @@ private: System::Boolean SetChannelsCnfParam(String^ groupSet, List<String^>^ pC
 							m_cmdMsg->GlobalAddSendCmds(viewChnlItem->ChnlCnf->ChannelName + /*":" + viewChnlItem->ChnlCnf->CrateLine + ":" + viewChnlItem->ChnlCnf->ModDir
 															+ ":" + viewChnlItem->ChnlCnf->ChnlDir +*/ cmd,
 														pParamList[i], CHANNEL_CMD, 4, false);
-							Console::WriteLine("Channel {0} included to be {1} ", viewChnlItem->ChnlCnf->ViewName, cmd);
+							if (Globals::consoleVerbose != 0) Console::WriteLine("Channel {0} included to be {1} ", viewChnlItem->ChnlCnf->ViewName, cmd);
 						}
 					}
 				}
@@ -1868,7 +1887,7 @@ private: System::Boolean SetChannelsCnfParam(String^ groupSet, List<String^>^ pC
 				//m_cmdMsg->statusBarMsg = "Sending commands";
 			}
 			else {
-				Console::Write("No channels to turn OFF");
+				if (Globals::consoleVerbose != 0) Console::Write("No channels to turn OFF");
 				m_cmdMsg->StatusBarMsgIndex = 21;
 				//m_cmdMsg->statusBarMsg = "No commands to send";
 			}
@@ -1876,7 +1895,7 @@ private: System::Boolean SetChannelsCnfParam(String^ groupSet, List<String^>^ pC
 			if (m_cmdMsg->cmdExecuted) {
 				// Load channel config info: vRamp, iRamp, vSetPoint, iSetPoint, NominalVolt, NominalCurrent.
 				m_cmdMsg->CleanCmdsLists;
-				Console::Write("OFF cmds executed ");
+				if (Globals::consoleVerbose != 0) Console::Write("OFF cmds executed ");
 				m_cmdMsg->StatusBarMsgIndex = 6;
 				//m_cmdMsg->statusBarMsg = "Set channels state cmds executed";
 				return true;
@@ -1898,7 +1917,7 @@ private: System::Void GetCmdsFromGroupCnfForm(String^ group) {
 			pCnfGroup->pParamList = m_cmdMsg->strParamsList;
 			pCnfGroup->m_CmdMsg = m_cmdMsg;
 			if (pCnfGroup->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
-				Console::WriteLine("Group settings: {0}", pCnfGroup->Group);
+				if (Globals::consoleVerbose != 0) Console::WriteLine("Group settings: {0}", pCnfGroup->Group);
 				if (m_cmdMsg->cmdExecuted) {
 					m_cmdMsg->CleanCmdsLists();
 					m_cmdMsg->StatusBarMsgIndex = 7; //ShowMsgOnStatusBar("RAMP conf settings executed");
@@ -1907,7 +1926,7 @@ private: System::Void GetCmdsFromGroupCnfForm(String^ group) {
 
 			}
 			else {
-				Console::WriteLine("Cancel group settings");
+				if (Globals::consoleVerbose != 0) Console::WriteLine("Cancel group settings");
 				m_cmdMsg->CleanCmdsLists();
 			}
 		}
@@ -1941,16 +1960,18 @@ private: System::Void ToolStripMenuItem3_Click(System::Object^ sender, System::E
 			while (!m_cmdMsg->cmdExecuted && i++ < 200 * (m_cmdMsg->strCmdsToExcList->Count))
 				System::Threading::Thread::Sleep(100);
 			if (!m_cmdMsg->cmdExecuted) {
-				Console::WriteLine("Not answer in time from inserting new Crate(s)");
+				if (Globals::consoleVerbose != 0) Console::WriteLine("Not answer in time from inserting new Crate(s)");
 				newThread2->Abort();
 			}
 			else {
-				Console::WriteLine("New Crate(s) created");
+				if (Globals::consoleVerbose != 0) Console::WriteLine("New Crate(s) created");
 			}
 		}
 		else {
-			Console::ForegroundColor = ConsoleColor::White;
-			Console::WriteLine("Not hardware to add");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::White;
+				Console::WriteLine("Not hardware to add");
+			}
 			//this->toolStripStatusLabel5->Text = "Not hardware to add";
 			m_cmdMsg->StatusBarMsgIndex = 8;
 			//m_cmdMsg->statusBarMsg = "No hardware to connect";
@@ -1958,7 +1979,7 @@ private: System::Void ToolStripMenuItem3_Click(System::Object^ sender, System::E
 		// Wait for the hardware to connect, MAX 10 sec
 		
 		// If hardware connected -> iterate view to scan Enable/Disable channels
-		//Console::WriteLine(" i = {0}", i);
+		//if (Globals::consoleVerbose != 0) Console::WriteLine(" i = {0}", i);
 		int chnlsToScan = 0;
 		bool found;
 		String^ cmd;
@@ -2033,7 +2054,9 @@ private: System::Void ToolStripMenuItem3_Click(System::Object^ sender, System::E
 	if (m_mainDataStruct.ptrMainCrateList->Count > 0) {
 		m_cmdMsg->StatusBarMsgIndex = 9;
 		for each (Crate ^ crate in m_mainDataStruct.ptrMainCrateList) {
-			Console::WriteLine("Conected->: {0}, Modules= {1}, Channels: {2}, connected= {3} ", crate->Name, crate->Modules, crate->Channels, crate->VoltChnlsEnable);
+			if (Globals::consoleVerbose != 0) Console::WriteLine("Conected->: {0}, Modules= {1}, Channels: {2}, connected= {3} ", crate->Name, crate->Modules, crate->Channels, crate->VoltChnlsEnable);
+			LogEventMsg(MSG_LOGGER_HEADER + "\nGUI: Connnnected->: " + crate->Name + " Modules= " + crate->Modules + " Channels: " + crate->Channels + " connected= " + crate->VoltChnlsEnable);
+			System::Threading::Thread::Sleep(50);
 		}
 		connectionState = true;
 		this->toolStripStatusLabel1->Text = "System status: Connected";
@@ -2091,7 +2114,7 @@ private: System::Void SaveCrateSettingsToolStripMenuItem_Click(System::Object^ s
 	Stream^ myStream;
 	SaveFileDialog^ saveFileDialog1 = gcnew SaveFileDialog;
 
-	Console::WriteLine("Save Hardware Settings file selection dialog created");
+	if (Globals::consoleVerbose != 0) Console::WriteLine("Save Hardware Settings file selection dialog created");
 	saveFileDialog1->InitialDirectory = DEFAULT_DATA_FILE_PATH;
 	saveFileDialog1->Filter = "sel files (*.sel)|*.sel";
 	saveFileDialog1->FilterIndex = 2;
@@ -2119,10 +2142,12 @@ private: System::Void SaveCrateSettingsToolStripMenuItem_Click(System::Object^ s
 			myStream->Close();
 		}
 		else {
-			Console::ForegroundColor = ConsoleColor::Yellow;
-			Console::WriteLine("No new file especified... in file explorer window");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::Yellow;
+				Console::WriteLine("No new file especified... in file explorer window");
+			}
 		}
-		Console::WriteLine("Return from Crate File selection dialog created");
+		if (Globals::consoleVerbose != 0) Console::WriteLine("Return from Crate File selection dialog created");
 	}
 }
 //
@@ -2132,7 +2157,7 @@ private: System::Void LoadCrateSettingsToolStripMenuItem_Click(System::Object^ s
 	Stream^ myStream;
 	OpenFileDialog^ openFileDialog1 = gcnew OpenFileDialog;
 
-	Console::WriteLine("Opened Crate Load Settings file selection dialog");
+	if (Globals::consoleVerbose != 0) Console::WriteLine("Opened Crate Load Settings file selection dialog");
 	openFileDialog1->InitialDirectory = DEFAULT_DATA_FILE_PATH;
 	openFileDialog1->Filter = "sel files (*.sel)|*.sel";
 	openFileDialog1->FilterIndex = 2;
@@ -2153,22 +2178,24 @@ private: System::Void LoadCrateSettingsToolStripMenuItem_Click(System::Object^ s
 					gcnew System::IO::FileStream(fileName,
 						System::IO::FileMode::Open);
 				crateList = (XML_Classes::CratesList^) ser->Deserialize(fs);
-				Console::WriteLine("Crate Settings XML file loaded");
+				if (Globals::consoleVerbose != 0) Console::WriteLine("Crate Settings XML file loaded");
 				fs->Close();
 				//m_cmdMsg->statusBarMsg = ("Crate(s) file loaded: " + crateList->CrateList->Count + " crates to add");
 				m_cmdMsg->statusBarMsg += crateList->CrateList->Count + " crates to add ";
 				m_cmdMsg->StatusBarMsgIndex = 11;
 			}
 			catch (Exception^ e) {
-				Console::WriteLine("Error opening XML config file");
+				if (Globals::consoleVerbose != 0) Console::WriteLine("Error opening XML config file");
 			}
 			//			
 			myStream->Close();
 		}
 		else {
 			myStream->Close();
-			Console::ForegroundColor = ConsoleColor::Yellow;
-			Console::WriteLine("No file especified... in file explorer window");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::Yellow;
+				Console::WriteLine("No file especified... in file explorer window");
+			}
 		}
 		if (!m_cmdMsg->execRequest) {
 			// Add crates to cmd list to added to hardwareList (Not to connect)
@@ -2184,7 +2211,7 @@ private: System::Void LoadCrateSettingsToolStripMenuItem_Click(System::Object^ s
 		while (!m_cmdMsg->cmdExecuted && i++ < 10 * (m_cmdMsg->strCmdsToExcList->Count))
 			System::Threading::Thread::Sleep(100);
 		for each (CheckedList::value_type crate in pHrwList) {
-			Console::WriteLine("Crate added: {0} ", crate->first);
+			if (Globals::consoleVerbose != 0) Console::WriteLine("Crate added: {0} ", crate->first);
 		}
 		m_cmdMsg->statusBarMsg += (pHrwList->size() - nbrCratesAdded);
 		m_cmdMsg->StatusBarMsgIndex = 12;
@@ -2206,8 +2233,10 @@ private: System::Void GlobalSettingsToolStripMenuItem_Click(System::Object^ send
 
 	if (globSetForm->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
 		m_cmdMsg->statusBarMsg = "New global settings set";
-		Console::ForegroundColor = ConsoleColor::White;
-		Console::WriteLine(m_cmdMsg->statusBarMsg);
+		if (Globals::consoleVerbose != 0) {
+			Console::ForegroundColor = ConsoleColor::White;
+			Console::WriteLine(m_cmdMsg->statusBarMsg);
+		}
 		if (globSetForm->NewPercentage != this->PercentageDeviationAllow*100.0)
 			this->PercentageDeviationAllow = globSetForm->NewPercentage;
 		if (globSetForm->NewAdditionalVoltError != this->VoltgDeviationAllow)
@@ -2278,7 +2307,7 @@ private: System::Void GroupsToolStripMenuItem_Click(System::Object^ sender, Syst
 //
 private: System::Void ToolStripSplitButton1_ButtonClick(System::Object^ sender, System::EventArgs^ e) {
 	//cliext::vector< System::Windows::Forms::ToolStripItem^>^ itemsArray = gcnew cliext::vector< System::Windows::Forms::ToolStripItem^  >(m_ptrMainCrateList->Count);
-	Console::WriteLine("toolStripSplit");
+	if (Globals::consoleVerbose != 0) Console::WriteLine("toolStripSplit");
 	System::Windows::Forms::ToolStripMenuItem^ statusToolStripMenuItem;
 	this->toolStripSplitButton1->DropDownItems->Clear();
 	for each (Crate ^ crate in m_ptrMainCrateList) {
@@ -2348,7 +2377,7 @@ private: System::Void ToggleGroup_Click(System::Object^ sender, System::EventArg
 		if (SetChannelsCnfParam(btn->ToolTipText, % cmdList, % paramList)) {
 			m_cmdMsg->CleanCmdsLists;
 			m_cmdMsg->StatusBarMsgIndex = 6;
-			Console::Write("Group Channels cmds sent ");
+			if (Globals::consoleVerbose != 0) Console::Write("Group Channels cmds sent ");
 		}
 		else {
 			//btn->BackColor = color;

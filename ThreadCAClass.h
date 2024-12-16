@@ -92,7 +92,7 @@ namespace Thread_CA {
 		System::Boolean TestPipeConn();
 		System::Void UpdateLists();
 		System::Boolean chnlHrwConnected(FreqCmdsMapTable_T::value_type cmd, CheckedList^ cmmFailCrates);
-	    System::Void LogEventMsg(String^ msg);
+	    System::Void LoggingEventMsg(String^ msg);
 		
 	};
 	

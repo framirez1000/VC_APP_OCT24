@@ -181,8 +181,8 @@ using namespace System::Collections::Generic;
 				ca_get(DBR_STRING, it->chnlID, strChar);
 				status = ca_pend_io(MAX_WAIT_CA_TIME);
 				String^ str = gcnew String(strChar);
-				//Console::Write("Value written (type String): ");
-				//Console::WriteLine(str);
+				//if (Globals::consoleVerbose != 0) Console::Write("Value written (type String): ");
+				//if (Globals::consoleVerbose != 0) Console::WriteLine(str);
 				break;
 			}
 			case DBR_DOUBLE: {
@@ -192,7 +192,7 @@ using namespace System::Collections::Generic;
 				val = 0;
 				ca_get(DBR_DOUBLE, it->chnlID, &val);
 				status = ca_pend_io(MAX_WAIT_CA_TIME);
-				//Console::WriteLine("Value written (type Double): " + val);
+				//if (Globals::consoleVerbose != 0) Console::WriteLine("Value written (type Double): " + val);
 				break;
 			}
 			case DBR_ENUM:
@@ -317,8 +317,10 @@ using namespace System::Collections::Generic;
 		char cModList[40] = { "Off" };
 		SingletonCmmdClass^ Commands = SingletonCmmdClass::Instance;
 		
-		Console::ForegroundColor = ConsoleColor::DarkGreen;
-		Console::WriteLine("Checking Comm -> IO .... " + device);
+		if (Globals::consoleVerbose != 0) {
+			Console::ForegroundColor = ConsoleColor::DarkGreen;
+			Console::WriteLine("Checking Comm -> IO .... " + device);
+		}
 		if ((device != nullptr) && (device != "")) {
 			//ca_task_initialize();
 			channelsNumber = 0;
@@ -375,8 +377,8 @@ using namespace System::Collections::Generic;
 		
 		IntPtr ip = Marshal::StringToHGlobalAnsi(crateToAdd + ":Status");  //cmd: ISEG:5230225:Status
 		const char* mod = static_cast<const char*>(ip.ToPointer());
-		//Console::ForegroundColor = ConsoleColor::White;
-		//Console::WriteLine("Searching for crate: ... " + crateToAdd);
+		//if (Globals::consoleVerbose != 0) Console::ForegroundColor = ConsoleColor::White;
+		//if (Globals::consoleVerbose != 0) Console::WriteLine("Searching for crate: ... " + crateToAdd);
 		status = getCrateLine(crateToAdd, &line, &crateNumber);
 		char errorStatus[40];
 		chtype chnlDataType;
@@ -394,8 +396,10 @@ using namespace System::Collections::Generic;
 			
 			modNumber = totalChnls = 0;
 			//Commands->barProgressValue = 5;
-			Console::ForegroundColor = ConsoleColor::White;
-			Console::WriteLine("Detecting modules conf... ");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::White;
+				Console::WriteLine("Detecting modules conf... ");
+			}
 			for (int j = 0; j < MAX_No_MODULES_x_CRATE; j++) {
 				Commands->barProgressValue += (100 / MAX_No_MODULES_x_CRATE / Commands->progressRate);
 				chnlCount = channelsNumber = 0; 
@@ -414,8 +418,10 @@ using namespace System::Collections::Generic;
 				status = ca_pend_io(MAX_WAIT_CA_TIME);
 				if (status == ECA_NORMAL) {
 					// Module found => create modObject and search for its channels
-					Console::ForegroundColor = ConsoleColor::White;
-					Console::WriteLine("Module {0} ... found", j);
+					if (Globals::consoleVerbose != 0) {
+						Console::ForegroundColor = ConsoleColor::White;
+						Console::WriteLine("Module {0} ... found", j);
+					}
 					Module^ ptrMod;
 					ptrMod = gcnew Module();
 					CaInterface::getModCnf(ptrMod, line, j);
@@ -449,8 +455,10 @@ using namespace System::Collections::Generic;
 					ptrCrate->VoltChnlsEnable += chnlsEnable;
 					if (chnlsEnable > 0) 
 						ptrMod->Enable = true;
-					Console::ForegroundColor = ConsoleColor::White;
-					Console::WriteLine("\nChannels detected this Mod: {0} ", channelsNumber);
+					if (Globals::consoleVerbose != 0) {
+						Console::ForegroundColor = ConsoleColor::White;
+						Console::WriteLine("\nChannels detected this Mod: {0} ", channelsNumber);
+					}
 					totalChnls += channelsNumber;
 					ptrMod->Name = ptrCrate->Name + ":" + line + ":" + j;
 					ptrCrate->m_lstModules->Add(ptrMod);
@@ -461,21 +469,27 @@ using namespace System::Collections::Generic;
 			ptrCrate->Enable = true;
 			m_ptrCrateMainList->Add(ptrCrate);
 			returnValue = true;
-			Console::ForegroundColor = ConsoleColor::White;
-			Console::WriteLine("Channels detected this Crate: {0} ", totalChnls);
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::White;
+				Console::WriteLine("Channels detected this Crate: {0} ", totalChnls);
+			}
 			//Commands->execRequest = false;
 			//Commands->cmdType = 0;
 			//Commands->deviceCmd = "";
 			////Commands->barProgressValue = 0;
 			//Commands->cmdExecuted = true;
 			//Commands->cmdResult = COMM_OK;
-			Console::ForegroundColor = ConsoleColor::White;
-			Console::WriteLine("Crate " + crateToAdd + "... Ok");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::White;
+				Console::WriteLine("Crate " + crateToAdd + "... Ok");
+			}
 			break;
 		case ECA_TIMEOUT:
 			Commands->cmdResult = COMM_FAIL;
-			Console::ForegroundColor = ConsoleColor::DarkYellow;
-			Console::WriteLine("Crate " + crateToAdd + " not detected");
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::DarkYellow;
+				Console::WriteLine("Crate " + crateToAdd + " not detected");
+			}
 			break;
 		default:;
 			//	ca_message(status));
@@ -493,8 +507,8 @@ using namespace System::Collections::Generic;
 		chtype chnlDataType;
 
 		//throw gcnew System::NotImplementedException();
-		Console::ForegroundColor = ConsoleColor::White;
-		//Console::WriteLine("Trying adding a Module... ");
+		if (Globals::consoleVerbose != 0) Console::ForegroundColor = ConsoleColor::White;
+		//if (Globals::consoleVerbose != 0) Console::WriteLine("Trying adding a Module... ");
 		if (ptrMod == nullptr) return;
 		//ca_task_initialize();
 		String^ baseCmd(Commands->deviceCmd + ":" + line + ":" + modDir);   //cmd: ISEG:5230225:$line$:$modDir$
@@ -542,7 +556,7 @@ using namespace System::Collections::Generic;
 		mod = static_cast<const char*>(ip.ToPointer());
 		strcpy(membersValues[11], mod);
 		if (modDir == 1)
-			Console::WriteLine(" Voltage Ramp: {0}: ", System::Convert::ToString(membersValues[11]));
+			if (Globals::consoleVerbose != 0) Console::WriteLine(" Voltage Ramp: {0}: ", System::Convert::ToString(membersValues[11]));
 		switch (status)
 		{
 		case ECA_NORMAL:
@@ -687,8 +701,10 @@ using namespace System::Collections::Generic;
 		//double voltageMeasurement;
 				
 		//throw gcnew System::NotImplementedException();
-		Console::ForegroundColor = ConsoleColor::White;
-		Console::WriteLine("\nGetting channel {0} conf... Status: ", chnl);
+		if (Globals::consoleVerbose != 0) {
+			Console::ForegroundColor = ConsoleColor::White;
+			Console::WriteLine("\nGetting channel {0} conf... Status: ", chnl);
+		}
 		if (ptrChnl == nullptr) return 0;
 		ca_task_initialize();
 		String^ baseCmd(Commands->deviceCmd + ":" + line + ":" + mod + ":" + chnl);   //cmd: ISEG:5230225:$crateLine$:$mod$:$chnl$:Cmd
@@ -722,7 +738,7 @@ using namespace System::Collections::Generic;
 				chnlValues2 = chnlValues;
 				voltageMeasurement = chnlValues.voltMeasure;
 			}*/
-			Console::Write("Searched: {0} ", status);
+			if (Globals::consoleVerbose != 0) Console::Write("Searched: {0} ", status);
 			// End Special
 			baseCmd = (Commands->deviceCmd + ":" + line + ":" + mod + ":" + chnl);   //cmd: ISEG:5230225:$crateLine$:$mod$:$chnl$:Cmd
 			ip = Marshal::StringToHGlobalAnsi(baseCmd);
@@ -756,7 +772,7 @@ using namespace System::Collections::Generic;
 				ChnlConfCmds[k].channelDataType = ca_field_type(ChnlConfCmds[k].channelID);
 			}
 			status = ca_pend_io(MAX_WAIT_CA_TIME);
-			Console::Write(" Type: {0} ", status);
+			if (Globals::consoleVerbose != 0) Console::Write(" Type: {0} ", status);
 		}
 		baseCmd = (Commands->deviceCmd + ":" + line + ":" + mod + ":" + chnl);   //cmd: ISEG:5230225:$crateLine$:$mod$:$chnl$:Cmd
 		ip = Marshal::StringToHGlobalAnsi(baseCmd);
@@ -804,14 +820,14 @@ using namespace System::Collections::Generic;
 			status = ca_get(DBR_DOUBLE, ref->second->chnlID, &doubMembersValues[CHNLS_CMDS_NMBR - 1]);
 		}
 		status = ca_pend_io(MAX_WAIT_CA_TIME);
-		Console::Write(" Conf: {0} ", status);
+		if (Globals::consoleVerbose != 0) Console::Write(" Conf: {0} ", status);
 		
 		/*if (mod == 1 && chnl == 0)
 			chnlValues2 = chnlValues;*/
 		// End for testing purposes
 		setAllChnlMmbrs(ptrChnl, doubMembersValues, mod, chnl);
 		Marshal::FreeHGlobal(ip);
-		Console::Write(" Enable: {0} ", System::Convert::ToByte(ptrChnl->Enable));
+		if (Globals::consoleVerbose != 0) Console::Write(" Enable: {0} ", System::Convert::ToByte(ptrChnl->Enable));
 		if (ptrChnl->Enable) return 1;
 		return 0;
 	}
@@ -836,7 +852,7 @@ using namespace System::Collections::Generic;
 		chnlValues[8] = Math::Round(chnlValues[8], 8);
 		ptrchnl->CurrentSet = chnlValues[8].ToString("G3");
 		if (modDir == 1 && chnlDir == 0)
-			Console::Write(" Ramp values {0}  -  {1}", chnlValues[CHNLS_CMDS_NMBR-2], chnlValues[CHNLS_CMDS_NMBR-1]);
+			if (Globals::consoleVerbose != 0) Console::Write(" Ramp values {0}  -  {1}", chnlValues[CHNLS_CMDS_NMBR-2], chnlValues[CHNLS_CMDS_NMBR-1]);
 		double d = (chnlValues[3] * chnlValues[CHNLS_CMDS_NMBR-2] / 100);
 		ptrchnl->VltgRamp = d.ToString();
 		d = (chnlValues[4] * chnlValues[CHNLS_CMDS_NMBR-1] / 100);

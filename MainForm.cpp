@@ -201,14 +201,14 @@ System::Boolean CppCLRWinformsProjekt::MainForm::checkPipe(HANDLE pipe)
 		try {
 			result = ReadFile(pipe, buffer, sizeof(buffer) - 1, &dwRead, NULL);
 			String^ str = gcnew String(buffer);
-			Console::ForegroundColor = ConsoleColor::White;
+			if (Globals::consoleVerbose != 0) Console::ForegroundColor = ConsoleColor::White;
 			if (str->Contains("TEST")) {
 				m_cmdMsg->statusBarMsg2 = "Comm GUI -> IO... Ok ";
-				Console::WriteLine(m_cmdMsg->statusBarMsg2);
+				if (Globals::consoleVerbose != 0) Console::WriteLine(m_cmdMsg->statusBarMsg2);
 			}
 			else {
 				m_cmdMsg->statusBarMsg2 = "Server received from Pipe: " + str;
-				Console::WriteLine(m_cmdMsg->statusBarMsg2);
+				if (Globals::consoleVerbose != 0) Console::WriteLine(m_cmdMsg->statusBarMsg2);
 			}
 		}
 		catch (Exception^ e) {
@@ -225,7 +225,7 @@ System::Void CppCLRWinformsProjekt::MainForm::SendData2Pipe(HANDLE Pipe, String^
 	//char buffer[1024*16];
 	DWORD dwWritten=0;
 	m_cmdMsg->statusBarMsg2 = "Sending data to record";
-	Console::WriteLine(m_cmdMsg->statusBarMsg2);
+	if (Globals::consoleVerbose != 0) Console::WriteLine(m_cmdMsg->statusBarMsg2);
 	IntPtr ip = Marshal::StringToHGlobalAnsi(Data);
 	const char* stream = static_cast<const char*>(ip.ToPointer());
 	if ((Pipe != INVALID_HANDLE_VALUE)) {
@@ -353,11 +353,11 @@ if (pi.hProcess != NULL) {
 	const DWORD result = WaitForSingleObject(pi.hProcess, 500);
 	if (result == WAIT_OBJECT_0) {
 		// Success
-		Console::WriteLine();
+		if (Globals::consoleVerbose != 0) Console::WriteLine();
 	}
 	else {
 		// Timed out or an error occurred
-		Console::WriteLine();
+		if (Globals::consoleVerbose != 0) Console::WriteLine();
 	}
 	// Close process and thread handles. 
 	CloseHandle(pi.hProcess);
@@ -390,11 +390,11 @@ if (!CreateProcess(
 	)
 {
 	int x = GetLastError();
-	Console::WriteLine("CreateProcess failed (%d).\n", GetLastError());
+	if (Globals::consoleVerbose != 0) Console::WriteLine("CreateProcess failed (%d).\n", GetLastError());
 	//system(module);
 	return;
 }
-Console::WriteLine("CreateProcess Success! (%d).\n", GetLastError());
+if (Globals::consoleVerbose != 0) Console::WriteLine("CreateProcess Success! {0}.\n", GetLastError());
 
 // Wait until child process exits.
 //WaitForSingleObject(pi.hProcess, INFINITE);
@@ -417,7 +417,7 @@ System::Void CppCLRWinformsProjekt::MainForm::SearchAndKillProc(String^ commProc
 			for (DWORD i = 0; i < dwProcCount; i++)
 			{
 				if (!strncmp(stream, (const char*)pWPIs[i].pProcessName, commProcName->Length)) {
-					Console::WriteLine("OLD Comm process alive");
+					if (Globals::consoleVerbose != 0) Console::WriteLine("OLD Comm process alive");
 					HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pWPIs[i].ProcessId);
 					TerminateProcess(hProcess, 0);
 					CloseHandle(hProcess);

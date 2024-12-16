@@ -13,6 +13,7 @@
 #include "XML_ViewSettingsConf_Class.h"
 #include "C:\Epics\base-3.16.2\include\cadef.h"
 #include <fileapi.h>
+#include "CommsShMemPipesClass.h"
 
 //#include "Crate.h"
 //#include "MainHeader.h"
@@ -76,6 +77,7 @@ static bool lockCrateObject;
 ref struct Globals {
  public: 
 	 static String^ globalVar;
+	 static BOOL^ consoleVerbose;
  };
 
 ref class SingletonCmmdClass
@@ -127,7 +129,7 @@ public:
 			while (!Instance->cmdExecuted && (i++ < 10 * (Instance->strCmdsToExcList->Count)))
 				System::Threading::Thread::Sleep(100);
 			if (Instance->cmdExecuted) {
-				Console::WriteLine("Setting(s) sent");
+				if (Globals::consoleVerbose != 0) Console::WriteLine("Globals::CMD(s) sent");
 			}
 		}
 		else if (send) { 
@@ -216,6 +218,8 @@ ref class StatusBarMsgT {
 		MsgLifeTime = msgLifeTime;
 }
 };
+
+// MSGs on Status bar
 static cli::array<StatusBarMsgT^>^ GetArrayMsg() {
 	cli::array<StatusBarMsgT^>^ local = gcnew cli::array <StatusBarMsgT^>(MAX_NMBR_STATUSBAR_MSGS);
 		local[0] = gcnew StatusBarMsgT("COMM FAILURE", System::Drawing::Color::Red, System::Drawing::Color::White, 5);
@@ -303,4 +307,53 @@ bool inline ProcessSPvalStrUserInput(String^% strSP, int* pUnitsOut, bool voltag
 	return false;
 	
 }
+inline System::Void LogEventMsg(String^ msg)
+{
+	// Opens the Logger Pipe as a Client
+	HANDLE loggerPipe = NULL;
+	short sizeBuffLoggerPipe = 1;
+	//if (Globals::consoleVerbose != 0) Console::WriteLine("Msg to Log1: {0}", msg);
+	if (PipesFunc::GetPipe(PIPE_CLIENT_T, PIPE_LOGGER, &loggerPipe, sizeBuffLoggerPipe)) {
+		IntPtr ip;
+		DWORD numWritten;
+		try {
+			
+			if (msg->Length > 1024 * sizeBuffLoggerPipe) msg = msg->Remove(1024 * sizeBuffLoggerPipe - 2);
+			//if (Globals::consoleVerbose != 0) Console::WriteLine("Msg to Log2: {0}", msg);
+			ip = Marshal::StringToHGlobalAnsi(msg);
+			const char* stream = static_cast<const char*>(ip.ToPointer());
+			String^ stream2Write = gcnew String(stream);
+			if (WriteFile(loggerPipe, stream, msg->Length + 1, &numWritten, FILE_FLAG_NO_BUFFERING & FILE_FLAG_WRITE_THROUGH)) {
+				if (Globals::consoleVerbose != 0) {
+					Console::WriteLine("Logger Sent Msg, length: {0} {1} {2}", numWritten.ToString(), msg, stream2Write);
+				}
+				;
+			}
+			else {
+				;
+				if (Globals::consoleVerbose != 0) Console::WriteLine("Sent unsuccessful-LoggerPipeError: " + GetLastError());
+			}
+			Marshal::FreeHGlobal(ip);
 
+		}
+		catch (Exception^ e) {
+			if (Globals::consoleVerbose != 0) {
+				Console::ForegroundColor = ConsoleColor::Red;
+				Console::WriteLine("Exception Error Logger trying to Write on logger Pipe: {0} Message: {1}", GetLastError(), e->Message);
+				//Console::WriteLine("LoggerPipe: {0}", loggerPipe);
+				Console::ForegroundColor = ConsoleColor::White;
+			}
+			;
+		}
+		if (ip.Equals(NULL)) Marshal::FreeHGlobal(ip);
+		CloseHandle(loggerPipe);
+	}
+	else {
+		if (Globals::consoleVerbose != 0) Console::WriteLine("No LoggerPipe-Error {0}", GetLastError());
+		if (loggerPipe != INVALID_HANDLE_VALUE && loggerPipe != NULL) CloseHandle(loggerPipe);
+	}
+
+	// Writes MSG on LoggerPipe
+
+	return System::Void();
+}
